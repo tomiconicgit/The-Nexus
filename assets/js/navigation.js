@@ -14,15 +14,12 @@ export function initNavigation(container) {
       <div id="bottom-nav">
         <div class="nav-item active">
           <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5L2 12h3v8h6v-6h2v6h6v-8h3L12 2.5z"/></svg>
-          <span class="nav-label">Home</span>
         </div>
         <div class="nav-item">
           <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M21 18V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v13c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM5 19V5h14v14H5zM12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg>
-          <span class="nav-label">Wallet</span>
         </div>
         <div class="nav-item">
           <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1.01c-.52-.39-1.09-.72-1.71-.99l-.37-2.65c-.06-.24-.27-.42-.5-.42h-4c-.27 0-.48.18-.54.42l-.37 2.65c-.62.27-1.2.6-1.71.99l-2.49-1.01c-.22-.08-.49 0-.61.22l-2 3.46c-.12.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1.01c.52.39 1.09.72 1.71.99l.37 2.65c.06.24.27.42.5.42h4c.23 0 .44-.18.5-.42l.37-2.65c.62-.27 1.2-.6 1.71-.99l2.49 1.01c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg>
-          <span class="nav-label">Settings</span>
         </div>
       </div>
     `;
@@ -43,8 +40,17 @@ function setupNavigation(container) {
 
     navItems.forEach(item => {
       item.addEventListener('click', () => {
+        // First, handle the active state
         navItems.forEach(i => i.classList.remove('active'));
         item.classList.add('active');
+
+        // Then, handle the pulse effect
+        // Remove the class first to allow the animation to re-run on subsequent clicks
+        item.classList.remove('pulsing');
+        // A slight delay is needed to force a reflow and restart the animation
+        setTimeout(() => {
+          item.classList.add('pulsing');
+        }, 10);
       });
     });
   } catch (err) {
@@ -76,7 +82,7 @@ function injectNavigationCSS() {
       -webkit-backdrop-filter: blur(10px);
       box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.5);
       z-index: 1000;
-      height: 70px; /* Ensure a consistent height */
+      height: 70px;
     }
     .nav-item {
       display: flex;
@@ -90,16 +96,20 @@ function injectNavigationCSS() {
       flex: 1;
       padding: 10px 0;
       position: relative;
+      overflow: hidden;
     }
-    .nav-item:not(:last-child)::after {
+    .nav-item::after {
       content: '';
       position: absolute;
-      right: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      height: 60%;
-      width: 1px;
-      background: rgba(255, 255, 255, 0.1);
+      width: 150px;
+      height: 150px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      opacity: 0;
+      transform: scale(0);
+    }
+    .nav-item.pulsing::after {
+      animation: pulse-animation 0.5s ease-out forwards;
     }
     .nav-item.active {
       color: #f2f2f7;
@@ -119,11 +129,27 @@ function injectNavigationCSS() {
       height: 24px;
       transition: all 0.3s ease-in-out;
     }
-    .nav-label {
-      font-size: 0.7em;
-      opacity: 0.8;
-      margin-top: 5px;
-      transition: opacity 0.3s ease-in-out;
+    
+    .nav-item:not(:last-child)::before {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 60%;
+      width: 1px;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    @keyframes pulse-animation {
+      from {
+        transform: scale(0);
+        opacity: 0.5;
+      }
+      to {
+        transform: scale(1.5);
+        opacity: 0;
+      }
     }
   `;
   document.head.appendChild(styleTag);
