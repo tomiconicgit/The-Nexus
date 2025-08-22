@@ -33,7 +33,6 @@ export function initNavigation(container) {
     startButton.addEventListener('click', () => {
       trayMenu.style.display = trayMenu.style.display === 'none' ? 'block' : 'none';
     });
-
   } catch (err) {
     displayError(`Failed to initialize navigation: ${err.message}`, 'Navigation', 'ERR_NAVIGATION_INIT');
   }
@@ -47,44 +46,44 @@ function injectNavigationCSS() {
   styleTag.innerHTML = `
     #bottom-nav {
       position: fixed;
-      bottom: 20px;
+      bottom: 0;
       left: 0;
       width: 100%;
+      height: 70px;
       display: flex;
       justify-content: center;
+      align-items: flex-start;
+      padding-top: 20px;
       z-index: 1000;
+      background: linear-gradient(to bottom, rgba(26, 26, 26, 0.7) 0%, rgba(0, 0, 0, 1) 100%);
     }
     #taskbar {
       display: flex;
-      justify-content: center;
+      justify-content: flex-start;
       align-items: center;
-      width: 90%;
+      width: 100%;
       height: 50px;
-      max-width: 400px;
-      background: rgba(26, 26, 26, 0.7);
-      border-radius: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      max-width: none;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 0;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
       box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
       padding: 0 10px;
     }
     #start-button {
-      padding: 5px 15px;
-      border-radius: 8px;
-      background: rgba(100, 100, 100, 0.3);
+      height: 100%;
+      padding: 0 15px;
+      border-radius: 0;
+      background: rgba(0, 0, 0, 0.5); /* Darker shade */
       color: #fff;
       font-weight: bold;
       font-size: 14px;
       cursor: pointer;
-      margin-right: auto;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      backdrop-filter: blur(5px);
-      -webkit-backdrop-filter: blur(5px);
-      transition: background 0.2s ease-in-out;
-    }
-    #start-button:hover {
-      background: rgba(100, 100, 100, 0.5);
+      display: flex;
+      align-items: center;
+      border: none;
     }
     .taskbar-app {
       display: flex;
@@ -93,10 +92,9 @@ function injectNavigationCSS() {
       height: 40px;
       width: 40px;
       margin: 0 5px;
-      border-radius: 8px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
       cursor: pointer;
+      background: none; /* Remove background */
+      border: none; /* Remove border */
       transition: background 0.2s ease-in-out;
     }
     .taskbar-app:hover {
