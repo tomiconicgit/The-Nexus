@@ -4,7 +4,6 @@ import { displayError } from './errors.js';
 
 export function initMissionCards(container) {
   try {
-    // Inject mission cards HTML
     container.innerHTML = `
       <div id="mission-card-section">
         <div id="mission-bg-blur"></div>
@@ -49,7 +48,6 @@ export function initMissionCards(container) {
       </div>
     `;
 
-    // Inject mission cards CSS
     injectMissionCardsCSS();
 
     const cardsContainer = container.querySelector('#app-cards-container');
@@ -74,9 +72,6 @@ function setupMissionCardBackground(container, bgBlur) {
     }
 
     const updateBackground = () => {
-      let bestMatch = null;
-      let minDistance = Infinity;
-      
       const containerRect = container.getBoundingClientRect();
       const containerCenter = containerRect.left + containerRect.width / 2;
 
@@ -84,21 +79,22 @@ function setupMissionCardBackground(container, bgBlur) {
         const cardRect = card.getBoundingClientRect();
         const cardCenter = cardRect.left + cardRect.width / 2;
         const distance = Math.abs(containerCenter - cardCenter);
-
-        if (distance < minDistance) {
-          minDistance = distance;
-          bestMatch = card;
+        const maxDistance = containerRect.width / 2;
+        const opacity = 1 - (distance / maxDistance); // Linear fade based on distance
+        const cardBg = card.querySelector('.card-bg');
+        if (cardBg) {
+          cardBg.style.opacity = Math.max(0, Math.min(1, opacity));
         }
       });
-
-      if (bestMatch) {
-        const newImage = `url('${bestMatch.dataset.bgImage}')`;
-        if (bgBlur.style.backgroundImage !== newImage) {
-          bgBlur.style.backgroundImage = newImage;
-          bgBlur.style.opacity = 1;
-        }
-      }
     };
+
+    // Add background elements to each card
+    cards.forEach(card => {
+      const bg = document.createElement('div');
+      bg.className = 'card-bg';
+      bg.style.backgroundImage = `url('${card.dataset.bgImage}')`;
+      card.insertBefore(bg, card.firstChild);
+    });
 
     let scrollTimeout;
     container.addEventListener('scroll', () => {
@@ -115,13 +111,12 @@ function setupMissionCardBackground(container, bgBlur) {
 function setupCarousel(container) {
   try {
     container.addEventListener('scroll', () => {
-      const cards = container.querySelectorAll('.app-card');
       const containerWidth = container.offsetWidth;
       const scrollWidth = container.scrollWidth;
       const scrollLeft = container.scrollLeft;
 
       if (scrollLeft + containerWidth >= scrollWidth - 10) {
-        container.scrollLeft = 0; // Loop back to start
+        container.scrollLeft = 0;
       }
     });
   } catch (err) {
@@ -140,13 +135,13 @@ function setupCardAnimations(container) {
         const cardCenter = card.offsetLeft + card.offsetWidth / 2;
         const distance = cardCenter - containerCenter;
         const maxDistance = container.offsetWidth / 2 + card.offsetWidth / 2;
-        const rotation = (distance / maxDistance) * 15; // Max 15 degree rotation
+        const rotation = (distance / maxDistance) * 15;
         card.style.transform = `rotateY(${rotation}deg) scale(1)`;
       });
     };
 
     container.addEventListener('scroll', handleScroll);
-    handleScroll(); // Initial call
+    handleScroll();
   } catch (err) {
     displayError(`Card animations setup failed: ${err.message}`, 'MissionCards', 'ERR_CARD_ANIM');
   }
@@ -168,11 +163,8 @@ function injectMissionCardsCSS() {
       overflow: hidden;
       padding-top: 20px;
       width: 100%;
-      padding-left: 20px;
-      padding-right: 20px;
-      box-sizing: border-box;
-      margin-top: -30px; /* Overlap with map fade */
-      z-index: 2; /* Ensure cards are above map */
+      margin-top: -50px; /* Overlap with map fade */
+      z-index: 2;
     }
     #mission-bg-blur {
       position: absolute;
@@ -185,18 +177,16 @@ function injectMissionCardsCSS() {
       filter: blur(25px);
       transform: scale(1.1);
       z-index: -1;
-      transition: background-image 0.5s ease-in-out;
-      mask-image: linear-gradient(to bottom, transparent 0%, black 30%, black 100%); /* Fade to blend with map */
-      -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 30%, black 100%);
+      mask-image: linear-gradient(to bottom, #000 0%, black 30%, black 100%); /* Fade to black at top */
+      -webkit-mask-image: linear-gradient(to bottom, #000 0%, black 30%, black 100%);
     }
     #app-cards-container {
       display: flex;
       overflow-x: scroll;
       scroll-snap-type: x mandatory;
-      padding: 0 10px 20px 10px;
+      padding: 0;
       gap: 20px;
       -webkit-overflow-scrolling: touch;
-      margin: 0;
       width: 100%;
       box-sizing: border-box;
       perspective: 1000px;
@@ -212,16 +202,23 @@ function injectMissionCardsCSS() {
       position: relative;
       transition: transform 0.3s ease;
       cursor: pointer;
-      background-size: cover;
-      background-position: center;
       display: flex;
       align-items: flex-end;
+      background: transparent; /* Remove card background */
     }
     .app-card:hover {
       transform: scale(1.05);
     }
-    .app-card[data-bg-image] {
-      background-image: var(--bg-image);
+    .card-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      z-index: -1;
+      transition: opacity 0.5s ease-in-out;
     }
     .app-card-content {
       width: 100%;
