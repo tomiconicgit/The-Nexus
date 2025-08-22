@@ -81,7 +81,7 @@ function setupMissionCardBackground(container) {
           bg.style.backgroundImage = `url('${imageUrl}')`;
         } else {
           bg.style.backgroundImage = 'none';
-          bg.style.backgroundColor = 'black';
+          bg.style.backgroundColor = 'black'; // Fallback for cards with no image
         }
       }
     });
@@ -197,13 +197,13 @@ function injectMissionCardsCSS() {
       cursor: pointer;
       display: flex;
       align-items: flex-end;
-      background: rgba(0,0,0,0.5); /* Semi-transparent black fallback */
+      background: rgba(0,0,0,0.5);
     }
     .app-card:hover {
       transform: scale(1.05);
     }
     .card-bg {
-      position: absolute;
+      position: fixed; /* This is the key change for a fixed background */
       top: 0;
       left: 0;
       width: 100%;
