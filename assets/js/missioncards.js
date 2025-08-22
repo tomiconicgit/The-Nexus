@@ -1,12 +1,11 @@
 // assets/js/missioncards.js
 
-//... (rest of the file)
+import { displayError } from './errors.js';
 
 export function initMissionCards(container) {
   try {
     container.innerHTML = `
       <div id="mission-card-section">
-        <div id="mission-bg-blur"></div>
         <div id="app-cards-container">
           <div class="app-card" data-bg-image="assets/images/IMG_8857.jpeg">
             <div class="card-bg"></div>
@@ -55,66 +54,53 @@ export function initMissionCards(container) {
     injectMissionCardsCSS();
 
     const cardsContainer = container.querySelector('#app-cards-container');
-    const bgBlur = container.querySelector('#mission-bg-blur');
-    if (!cardsContainer || !bgBlur) {
-      throw new Error('Mission card container or background element not found.');
+    if (!cardsContainer) {
+      throw new Error('Mission card container not found.');
     }
 
-    setupMissionCardBackground(cardsContainer, bgBlur);
+    setupMissionCardBackground(cardsContainer);
     setupCarousel(cardsContainer);
     setupCardAnimations(cardsContainer);
   } catch (err) {
-    displayError(`Failed to initialize mission cards: ${err.message}`, 'MissionCards', 'ERR_MISSIONCARDS_INIT');
+    displayError(`Failed to initialize mission cards: ${err.message}`, 'MissionCards', 'ERR_MISSIONCARDS_INIT', true);
   }
 }
 
-function setupMissionCardBackground(container, bgBlur) {
+function setupMissionCardBackground(container) {
   try {
     const cards = container.querySelectorAll('.app-card');
     if (cards.length === 0) {
       throw new Error('No mission cards found.');
     }
 
-    // Set the initial background blur image
-    bgBlur.style.backgroundImage = `url('${cards[0].dataset.bgImage}')`;
+    cards.forEach(card => {
+      const bg = card.querySelector('.card-bg');
+      if (bg) {
+        bg.style.backgroundImage = `url('${card.dataset.bgImage}')`;
+      }
+    });
 
     const updateBackground = () => {
       const containerRect = container.getBoundingClientRect();
       const containerCenter = containerRect.left + containerRect.width / 2;
 
-      let closestCardImage = null;
-      let minDistance = Infinity;
-
       cards.forEach(card => {
         const cardRect = card.getBoundingClientRect();
         const cardCenter = cardRect.left + cardRect.width / 2;
         const distance = Math.abs(containerCenter - cardCenter);
-
-        if (distance < minDistance) {
-          minDistance = distance;
-          closestCardImage = card.dataset.bgImage;
-        }
-
-        // Apply opacity to the individual card background
+        const maxDistance = containerRect.width / 2;
+        const opacity = 1 - (distance / maxDistance);
         const cardBg = card.querySelector('.card-bg');
         if (cardBg) {
-          cardBg.style.backgroundImage = `url('${card.dataset.bgImage}')`;
-          const maxDistance = containerRect.width;
-          const opacity = 1 - Math.min(distance, maxDistance) / maxDistance;
-          cardBg.style.opacity = Math.max(0, Math.min(1, opacity * 2)); // Fade in and out
+          cardBg.style.opacity = Math.max(0, Math.min(1, opacity));
         }
       });
-
-      // Update the main background blur with the closest card's image
-      if (closestCardImage) {
-        bgBlur.style.backgroundImage = `url('${closestCardImage}')`;
-      }
     };
 
     let scrollTimeout;
     container.addEventListener('scroll', () => {
       clearTimeout(scrollTimeout);
-      scrollTimeout = setTimeout(updateBackground, 100);
+      scrollTimeout = setTimeout(updateBackground, 50);
     });
     
     updateBackground();
@@ -123,7 +109,44 @@ function setupMissionCardBackground(container, bgBlur) {
   }
 }
 
-//... (rest of the file)
+function setupCarousel(container) {
+  try {
+    container.addEventListener('scroll', () => {
+      const containerWidth = container.offsetWidth;
+      const scrollWidth = container.scrollWidth;
+      const scrollLeft = container.scrollLeft;
+
+      if (scrollLeft + containerWidth >= scrollWidth - 10) {
+        container.scrollLeft = 0;
+      }
+    });
+  } catch (err) {
+    displayError(`Carousel setup failed: ${err.message}`, 'MissionCards', 'ERR_CAROUSEL');
+  }
+}
+
+function setupCardAnimations(container) {
+  try {
+    const cards = container.querySelectorAll('.app-card');
+    if (cards.length === 0) throw new Error('No mission cards found for animation.');
+
+    const handleScroll = () => {
+      const containerCenter = container.scrollLeft + container.offsetWidth / 2;
+      cards.forEach(card => {
+        const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+        const distance = cardCenter - containerCenter;
+        const maxDistance = container.offsetWidth / 2 + card.offsetWidth / 2;
+        const rotation = (distance / maxDistance) * 15;
+        card.style.transform = `rotateY(${rotation}deg) scale(1)`;
+      });
+    };
+
+    container.addEventListener('scroll', handleScroll);
+    handleScroll();
+  } catch (err) {
+    displayError(`Card animations setup failed: ${err.message}`, 'MissionCards', 'ERR_CARD_ANIM');
+  }
+}
 
 function injectMissionCardsCSS() {
   const styleId = 'missioncards-styles';
@@ -139,32 +162,16 @@ function injectMissionCardsCSS() {
       align-items: center;
       justify-content: center;
       overflow: hidden;
-      padding-top: 20px;
       width: 100%;
-      margin-top: -100px; /* Increased overlap for a smooth transition */
+      margin-top: -50px; /* Overlap with map fade */
       z-index: 2;
-    }
-    #mission-bg-blur {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-size: cover;
-      background-position: center;
-      filter: blur(25px);
-      transform: scale(1.1);
-      z-index: -1;
-      /* Adjusted mask for better fade to black */
-      mask-image: linear-gradient(to top, transparent 0%, black 30%, black 100%);
-      -webkit-mask-image: linear-gradient(to top, transparent 0%, black 30%, black 100%);
     }
     #app-cards-container {
       display: flex;
       overflow-x: scroll;
       scroll-snap-type: x mandatory;
-      padding: 0 40px; /* Increased padding */
-      gap: 20px;
+      padding: 0;
+      gap: 15px;
       -webkit-overflow-scrolling: touch;
       width: 100%;
       box-sizing: border-box;
@@ -183,7 +190,7 @@ function injectMissionCardsCSS() {
       cursor: pointer;
       display: flex;
       align-items: flex-end;
-      background: transparent;
+      background: transparent; /* Remove card background */
     }
     .app-card:hover {
       transform: scale(1.05);
