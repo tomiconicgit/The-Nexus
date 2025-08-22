@@ -12,7 +12,8 @@ export function initNavigation(container) {
   try {
     container.innerHTML = `
       <div id="bottom-nav">
-        <div class="nav-item active">
+        <div id="active-pill"></div>
+        <div class="nav-item">
           <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5L2 12h3v8h6v-6h2v6h6v-8h3L12 2.5z"/></svg>
         </div>
         <div class="nav-item">
@@ -33,25 +34,41 @@ export function initNavigation(container) {
 function setupNavigation(container) {
   try {
     const navItems = container.querySelectorAll('.nav-item');
-    if (!navItems.length) {
-      throw new Error('No navigation items found.');
+    const activePill = container.querySelector('#active-pill');
+    if (!navItems.length || !activePill) {
+      throw new Error('Navigation items or active pill not found.');
     }
+
+    // Set initial active item
+    const initialActive = navItems[1]; // Set the middle button as active by default
+    initialActive.classList.add('active');
+    updatePillPosition(initialActive, activePill);
+
     navItems.forEach(item => {
       item.addEventListener('click', () => {
-        // First, handle the active state
         navItems.forEach(i => i.classList.remove('active'));
         item.classList.add('active');
-        // Then, handle the pulse effect
-        item.classList.remove('pulsing');
-        // A slight delay is needed to force a reflow and restart the animation
-        setTimeout(() => {
-          item.classList.add('pulsing');
-        }, 10);
+        updatePillPosition(item, activePill);
       });
     });
   } catch (err) {
     displayError(`Navigation setup failed: ${err.message}`, 'Navigation', 'ERR_NAVIGATION_SETUP');
   }
+}
+
+function updatePillPosition(activeItem, activePill) {
+  const itemRect = activeItem.getBoundingClientRect();
+  const navRect = activeItem.parentElement.getBoundingClientRect();
+  
+  const pillWidth = itemRect.width * 0.9;
+  const pillHeight = itemRect.height * 0.9;
+
+  const leftPosition = itemRect.left - navRect.left + (itemRect.width - pillWidth) / 2;
+  const topPosition = (navRect.height - pillHeight) / 2;
+
+  activePill.style.width = `${pillWidth}px`;
+  activePill.style.height = `${pillHeight}px`;
+  activePill.style.transform = `translate(${leftPosition}px, ${topPosition}px)`;
 }
 
 function injectNavigationCSS() {
@@ -78,6 +95,18 @@ function injectNavigationCSS() {
       box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.5);
       z-index: 1000;
       height: 70px;
+      position: relative;
+    }
+    #active-pill {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border-radius: 50px;
+      box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.1), 0 5px 20px rgba(0, 0, 0, 0.5);
+      z-index: 1001;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .nav-item {
       display: flex;
@@ -89,32 +118,11 @@ function injectNavigationCSS() {
       flex: 1;
       padding: 10px 0;
       position: relative;
-      overflow: hidden;
-      transition: transform 0.3s ease, filter 0.3s ease, box-shadow 0.3s ease;
-      z-index: 1000;
-      will-change: transform, filter;
-    }
-    .nav-item::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 0;
-      height: 0;
-      background: rgba(255, 255, 255, 0.4);
-      border-radius: 50%;
-      opacity: 0;
-      transform: translate(-50%, -50%);
-    }
-    .nav-item.pulsing::after {
-      animation: pulse-animation 0.6s cubic-bezier(0, 0, 0.2, 1) forwards;
+      z-index: 1002;
+      transition: color 0.3s ease;
     }
     .nav-item.active {
       color: #f2f2f7;
-      transform: translateY(-5px) scaleY(1.3);
-      filter: brightness(0.85);
-      z-index: 1001;
-      box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.3);
     }
     .nav-item:hover {
       color: #f2f2f7;
@@ -123,30 +131,6 @@ function injectNavigationCSS() {
       width: 24px;
       height: 24px;
       transition: all 0.3s ease-in-out;
-    }
-    .nav-item:not(:last-child)::before {
-      content: '';
-      position: absolute;
-      right: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      height: 60%;
-      width: 1px;
-      background: rgba(255, 255, 255, 0.1);
-    }
-    @keyframes pulse-animation {
-      from {
-        width: 0;
-        height: 0;
-        opacity: 0.5;
-        transform: translate(-50%, -50%);
-      }
-      to {
-        width: 150%;
-        height: 150%;
-        opacity: 0;
-        transform: translate(-50%, -50%);
-      }
     }
   `;
   document.head.appendChild(styleTag);
