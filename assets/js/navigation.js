@@ -23,7 +23,6 @@ export function initNavigation(container) {
         </div>
       </div>
     `;
-
     injectNavigationCSS();
     setupNavigation(container);
   } catch (err) {
@@ -37,15 +36,12 @@ function setupNavigation(container) {
     if (!navItems.length) {
       throw new Error('No navigation items found.');
     }
-
     navItems.forEach(item => {
       item.addEventListener('click', () => {
         // First, handle the active state
         navItems.forEach(i => i.classList.remove('active'));
         item.classList.add('active');
-
         // Then, handle the pulse effect
-        // Remove the class first to allow the animation to re-run on subsequent clicks
         item.classList.remove('pulsing');
         // A slight delay is needed to force a reflow and restart the animation
         setTimeout(() => {
@@ -61,7 +57,6 @@ function setupNavigation(container) {
 function injectNavigationCSS() {
   const styleId = 'navigation-styles';
   if (document.getElementById(styleId)) return;
-
   const styleTag = document.createElement('style');
   styleTag.id = styleId;
   styleTag.innerHTML = `
@@ -96,17 +91,19 @@ function injectNavigationCSS() {
       flex: 1;
       padding: 10px 0;
       position: relative;
-      overflow: hidden;
+      overflow: hidden; /* Crucial for containing the pulse effect */
     }
     .nav-item::after {
       content: '';
       position: absolute;
-      width: 150px;
-      height: 150px;
-      background: rgba(255, 255, 255, 0.3);
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(255, 255, 255, 0.4);
       border-radius: 50%;
       opacity: 0;
-      transform: scale(0);
+      transform: translate(-50%, -50%);
     }
     .nav-item.pulsing::after {
       animation: pulse-animation 0.5s ease-out forwards;
@@ -143,11 +140,13 @@ function injectNavigationCSS() {
     
     @keyframes pulse-animation {
       from {
-        transform: scale(0);
+        width: 0;
+        height: 0;
         opacity: 0.5;
       }
       to {
-        transform: scale(1.5);
+        width: 150%;
+        height: 150%;
         opacity: 0;
       }
     }
