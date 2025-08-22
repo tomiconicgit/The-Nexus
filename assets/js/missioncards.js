@@ -10,7 +10,6 @@ export function initMissionCards(container) {
           <div class="app-card" data-bg-image="assets/images/IMG_8857.jpeg">
             <div class="card-bg"></div>
             <div class="app-card-content">
-              <div class="fade-overlay"></div>
               <div class="card-text">
                 <div class="card-title-badge">INTEL</div>
                 <div class="card-subtitle">Locate Stolen Nuke Codes</div>
@@ -20,7 +19,6 @@ export function initMissionCards(container) {
           <div class="app-card" data-bg-image="assets/images/IMG_8858.jpeg">
             <div class="card-bg"></div>
             <div class="app-card-content">
-              <div class="fade-overlay"></div>
               <div class="card-text">
                 <div class="card-title-badge">OP</div>
                 <div class="card-subtitle">Rogue Asset Extraction</div>
@@ -30,7 +28,6 @@ export function initMissionCards(container) {
           <div class="app-card" data-bg-image="https://images.unsplash.com/photo-1603145731082-2e16b6d4a3f2?auto=format&fit=crop&w=400&q=80">
             <div class="card-bg"></div>
             <div class="app-card-content">
-              <div class="fade-overlay"></div>
               <div class="card-text">
                 <div class="card-title-badge">DATA</div>
                 <div class="card-subtitle">Decrypt Encrypted Data</div>
@@ -40,7 +37,6 @@ export function initMissionCards(container) {
           <div class="app-card" data-bg-image="https://images.unsplash.com/photo-1603570322020-0b16eaf89335?auto=format&fit=crop&w=400&q=80">
             <div class="card-bg"></div>
             <div class="app-card-content">
-              <div class="fade-overlay"></div>
               <div class="card-text">
                 <div class="card-title-badge">INTEL</div>
                 <div class="card-subtitle">Cyber Warfare Defense</div>
@@ -135,9 +131,15 @@ function setupCardAnimations(container) {
       cards.forEach(card => {
         const cardCenter = card.offsetLeft + card.offsetWidth / 2;
         const distance = cardCenter - containerCenter;
-        const maxDistance = container.offsetWidth / 2 + card.offsetWidth / 2;
-        const rotation = (distance / maxDistance) * 15;
-        card.style.transform = `rotateY(${rotation}deg) scale(1)`;
+        const maxDistance = container.offsetWidth / 2;
+        const rotationY = (distance / maxDistance) * 15;
+        const scale = 1 - (Math.abs(distance) / maxDistance) * 0.15;
+        
+        // Add a blur effect for cards that are further away from the center
+        const blurAmount = (Math.abs(distance) / maxDistance) * 5;
+
+        card.style.transform = `scale(${scale}) rotateY(${rotationY}deg)`;
+        card.style.filter = `blur(${blurAmount}px)`;
       });
     };
 
@@ -163,7 +165,7 @@ function injectMissionCardsCSS() {
       justify-content: center;
       overflow: hidden;
       width: 100%;
-      margin-top: -50px; /* Overlap with map fade */
+      margin-top: -50px;
       z-index: 2;
     }
     #app-cards-container {
@@ -180,20 +182,23 @@ function injectMissionCardsCSS() {
     .app-card {
       flex-shrink: 0;
       width: 280px;
-      height: calc(280px / 5 * 4);
+      height: 224px; /* Maintain 5:4 aspect ratio (280 / 5 * 4) */
       scroll-snap-align: center;
       border-radius: 20px;
-      overflow: hidden;
       box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
       position: relative;
-      transition: transform 0.3s ease;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
       cursor: pointer;
       display: flex;
       align-items: flex-end;
-      background: transparent; /* Remove card background */
+      background: rgba(255, 255, 255, 0.05); /* Lighter, more transparent background */
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
     .app-card:hover {
       transform: scale(1.05);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
     }
     .card-bg {
       position: absolute;
@@ -205,6 +210,7 @@ function injectMissionCardsCSS() {
       background-position: center;
       z-index: -1;
       transition: opacity 0.5s ease-in-out;
+      border-radius: 20px;
     }
     .app-card-content {
       width: 100%;
@@ -236,12 +242,15 @@ function injectMissionCardsCSS() {
     .card-title-badge {
       font-size: 0.8em;
       font-weight: bold;
-      background: #f0a040;
+      background: rgba(240, 160, 64, 0.7);
       color: #000;
       padding: 6px 12px;
       border-radius: 6px;
       display: inline-block;
       margin-bottom: 8px;
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
     }
     .card-subtitle {
       font-size: 1.5em;
