@@ -2,29 +2,35 @@
 
 function displayError(message, component, code) {
   console.error(`[${component} - ${code}]: ${message}`);
-  const errorElement = document.createElement('div');
-  errorElement.className = 'error-message';
-  errorElement.textContent = `Error: ${message}`;
-  document.body.appendChild(errorElement);
 }
 
 export function initNavigation(container) {
   try {
     container.innerHTML = `
       <div id="bottom-nav">
-        <div id="nav-dock">
-          <div class="nav-item active" data-nav-id="home">
-            <svg class="nav-icon home-icon" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        <div class="nav-item active" data-nav-id="home">
+          <div class="app-icon-container">
+            <img src="assets/images/home-icon.png" alt="Home" class="nav-icon">
           </div>
-          <div class="nav-item" data-nav-id="mail">
-            <svg class="nav-icon mail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+          <span class="nav-label">Home</span>
+        </div>
+        <div class="nav-item" data-nav-id="tools">
+          <div class="app-icon-container">
+            <img src="assets/images/tools-icon.png" alt="Tools" class="nav-icon">
           </div>
-          <div class="nav-item" data-nav-id="settings">
-            <svg class="nav-icon settings-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l1.2 1.2a.9.9 0 0 1 0 1.27l-2.9 2.9a.9.9 0 0 1-1.27 0l-1.2-1.2a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1.51-1H2a.9.9 0 0 1-.9-.9v-4a.9.9 0 0 1 .9-.9h2.07a1.65 1.65 0 0 0 .15-1 1.65 1.65 0 0 0 .33-1.82l-1.2-1.2a.9.9 0 0 1 0-1.27l2.9-2.9a.9.9 0 0 1 1.27 0l1.2 1.2a1.65 1.65 0 0 0 1.82-.33 1.65 1.65 0 0 0 1.51-1V2a.9.9 0 0 1 .9-.9h4a.9.9 0 0 1 .9.9v2.07a1.65 1.65 0 0 0 1 .15c.24.03.48.09.72.18a1.65 1.65 0 0 0 .6.39l1.2-1.2a.9.9 0 0 1 1.27 0l2.9 2.9a.9.9 0 0 1 0 1.27l-1.2 1.2a1.65 1.65 0 0 0 .33 1.82 1.65 1.65 0 0 0 1.51 1H22a.9.9 0 0 1 .9.9v4a.9.9 0 0 1-.9.9z"></path></svg>
+          <span class="nav-label">Tools</span>
+        </div>
+        <div class="nav-item" data-nav-id="mail">
+          <div class="app-icon-container">
+            <img src="assets/images/mail-icon.png" alt="Mail" class="nav-icon">
           </div>
-          <div class="nav-item" data-nav-id="tools">
-            <svg class="nav-icon tools-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-5.31 5.31a1.25 1.25 0 0 1-1.85-.018l-2.9-2.9a1.25 1.25 0 0 1-.018-1.85l5.31-5.31a6 6 0 0 1 7.94-7.94l-3.77 3.77z"></path></svg>
+          <span class="nav-label">Mail</span>
+        </div>
+        <div class="nav-item" data-nav-id="settings">
+          <div class="app-icon-container">
+            <img src="assets/images/settings-icon.png" alt="Settings" class="nav-icon">
           </div>
+          <span class="nav-label">Settings</span>
         </div>
       </div>
     `;
@@ -58,63 +64,55 @@ function injectNavigationCSS() {
       bottom: 0;
       left: 0;
       width: 100%;
-      display: flex;
-      justify-content: center;
-      padding: 0;
-      z-index: 1000;
-      height: 90px;
-    }
-    #nav-dock {
+      height: 60px;
       display: flex;
       justify-content: space-around;
       align-items: center;
-      width: 95%;
-      height: 100%;
-      max-width: 450px;
-      padding: 10px 0;
-      background: rgba(40, 40, 40, 0.4);
-      border-radius: 40px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      backdrop-filter: blur(25px);
-      -webkit-backdrop-filter: blur(25px);
-      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+      padding: 0;
+      background: rgba(26, 26, 26, 0.8);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.5);
+      z-index: 1000;
     }
     .nav-item {
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      gap: 4px;
       cursor: pointer;
-      flex: 1;
-      position: relative;
-      transition: transform 0.3s ease;
-      height: 100%;
+      color: #f2f2f7;
+      text-decoration: none;
+      transition: transform 0.2s ease-in-out;
     }
-    .nav-item.active {
-      transform: translateY(-15px) scale(1.1);
-      z-index: 1001;
+    .nav-item:hover {
+      transform: scale(1.05);
     }
-    .nav-item.active::after {
-      content: '';
-      position: absolute;
-      bottom: -15px;
-      width: 60px;
-      height: 60px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 50%;
-      transition: all 0.3s ease;
+    .app-icon-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 45px;
+      height: 45px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05); /* Very light, almost transparent background */
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
     }
     .nav-icon {
-      width: 35px;
-      height: 35px;
-      transition: all 0.3s ease-in-out;
+      width: 28px;
+      height: 28px;
+    }
+    .nav-label {
+      font-size: 0.8em;
+      font-weight: 500;
+      color: #8e8e93;
+    }
+    .nav-item.active .nav-label {
       color: #f2f2f7;
-    }
-    .nav-item[data-nav-id="home"] .nav-icon {
-        color: #f0a040;
-    }
-    .nav-item.active .nav-icon {
-        color: #f2f2f7;
     }
   `;
   document.head.appendChild(styleTag);
