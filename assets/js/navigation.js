@@ -25,17 +25,17 @@ function injectNavigationCSS() {
   styleTag.innerHTML = `
     #taskbar {
       position: fixed;
-      top: 20%; /* Moved down 20% from the top */
+      bottom: 0; /* Aligned to the bottom of the screen */
       left: 0;
       width: 100%;
-      height: 100px; /* Adjust height as needed */
+      height: 100px;
       background: linear-gradient(
         to bottom,
-        rgba(255, 255, 255, 0.2) 0%, /* Brighter, more transparent */
-        rgba(0, 0, 0, 0.8) 100% /* Fades to black */
+        rgba(255, 255, 255, 0.2) 0%,
+        rgba(0, 0, 0, 0.8) 100%
       );
-      border-top: 1px solid rgba(255, 255, 255, 0.4); /* Brighter top border */
-      backdrop-filter: blur(15px); /* Stronger blur for more glassmorphism */
+      border-top: 1px solid rgba(255, 255, 255, 0.4);
+      backdrop-filter: blur(15px);
       -webkit-backdrop-filter: blur(15px);
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
       z-index: 1000;
