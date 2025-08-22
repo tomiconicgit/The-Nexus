@@ -91,7 +91,10 @@ function injectNavigationCSS() {
       flex: 1;
       padding: 10px 0;
       position: relative;
-      overflow: hidden; /* Crucial for containing the pulse effect */
+      overflow: hidden; /* Crucial for containing the ripple effect */
+      transform: scale(1); /* Initial state for depth effect */
+      filter: brightness(1); /* Initial state for darkening effect */
+      transition: transform 0.3s ease, filter 0.3s ease;
     }
     .nav-item::after {
       content: '';
@@ -100,16 +103,19 @@ function injectNavigationCSS() {
       left: 50%;
       width: 0;
       height: 0;
-      background: transparent; /* Changed to transparent */
+      background: rgba(255, 255, 255, 0.4);
       border-radius: 50%;
       opacity: 0;
       transform: translate(-50%, -50%);
     }
     .nav-item.pulsing::after {
-      animation: pulse-animation 0.5s cubic-bezier(0, 0, 0.2, 1) forwards;
+      animation: pulse-animation 0.6s cubic-bezier(0, 0, 0.2, 1) forwards;
     }
     .nav-item.active {
       color: #f2f2f7;
+      transform: scale(1.05) translateY(-5px);
+      filter: brightness(0.9);
+      z-index: 1001; /* Brings the active item forward */
     }
     .nav-item:hover {
       color: #f2f2f7;
@@ -126,7 +132,6 @@ function injectNavigationCSS() {
       height: 24px;
       transition: all 0.3s ease-in-out;
     }
-    
     .nav-item:not(:last-child)::before {
       content: '';
       position: absolute;
@@ -137,17 +142,18 @@ function injectNavigationCSS() {
       width: 1px;
       background: rgba(255, 255, 255, 0.1);
     }
-    
     @keyframes pulse-animation {
       from {
         width: 0;
         height: 0;
-        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+        opacity: 0.5;
+        transform: translate(-50%, -50%);
       }
       to {
         width: 150%;
         height: 150%;
-        box-shadow: 0 0 10px 10px rgba(255, 255, 255, 0);
+        opacity: 0;
+        transform: translate(-50%, -50%);
       }
     }
   `;
