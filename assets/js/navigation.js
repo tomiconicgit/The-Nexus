@@ -53,8 +53,8 @@ function injectNavigationCSS() {
         rgba(0, 0, 0, 0.4) 28%,
         rgba(255, 255, 255, 0.05) 28%
       );
-      /* New border-radius for straight sides and curved corners */
-      border-radius: 40px 0 0 40px;
+      /* Corrected border-radius for straight sides and curved corners */
+      border-radius: 40px 40px 40px 40px;
       border: 1px solid rgba(255, 255, 255, 0.2);
       box-shadow: 
         0 0 15px rgba(255, 255, 255, 0.2) inset,
