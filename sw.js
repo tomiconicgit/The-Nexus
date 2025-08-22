@@ -9,6 +9,7 @@ const urlsToCache = [
   '/assets/js/homescreen.js',
   '/assets/js/map.js',
   '/assets/js/missioncards.js',
+  '/assets/js/activemissions.js',
   '/assets/js/bootscreen.js',
   '/assets/js/loginscreen.js',
   '/assets/js/performance.js',
