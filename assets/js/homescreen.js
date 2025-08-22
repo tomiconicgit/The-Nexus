@@ -5,6 +5,7 @@ import { initMap } from './map.js';
 import { initMissionCards } from './missioncards.js';
 import { initActiveMissions } from './activemissions.js';
 import { initHeader } from './header.js';
+import { initNavigation } from './navigation.js';
 
 export async function loadHomeScreen(container) {
   try {
@@ -30,20 +31,7 @@ export async function loadHomeScreen(container) {
           <div id="mission-cards-container"></div>
           <div class="section-container"></div>
         </div>
-        <div id="bottom-nav">
-          <div class="nav-item active">
-            <span class="nav-icon">⌂</span>
-            <span class="nav-label">Home</span>
-          </div>
-          <div class="nav-item">
-            <span class="nav-icon">⎈</span>
-            <span class="nav-label">Wallet</span>
-          </div>
-          <div class="nav-item">
-            <span class="nav-icon">⚙︎</span>
-            <span class="nav-label">Settings</span>
-          </div>
-        </div>
+        <div id="navigation-container"></div>
       </div>
     `;
 
@@ -52,9 +40,10 @@ export async function loadHomeScreen(container) {
     initMap(container.querySelector('#map-container'));
     initMissionCards(container.querySelector('#mission-cards-container'));
     initActiveMissions(container.querySelector('.section-container'));
+    initNavigation(container.querySelector('#navigation-container'));
 
     const homeScreen = container.querySelector('#home-screen');
-    if (!homeScreen) throw new Error('Header or home screen element not found.');
+    if (!homeScreen) throw new Error('Home screen element not found.');
     homeScreen.style.transition = 'opacity 0.5s ease-in-out';
     setTimeout(() => { homeScreen.style.opacity = '1'; }, 10);
   } catch (err) {
@@ -117,57 +106,6 @@ function injectHomeCSS() {
       -webkit-overflow-scrolling: touch;
       padding-bottom: 120px;
       z-index: 1;
-    }
-    #bottom-nav {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 90%;
-      max-width: 370px;
-      display: flex;
-      justify-content: space-around;
-      padding: 10px 0;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 40px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
-      z-index: 1000;
-      height: 70px;
-    }
-    .nav-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      color: var(--secondary-text-color);
-      font-size: 14px;
-      font-weight: 600;
-      transition: all 0.3s ease-in-out;
-      cursor: pointer;
-      position: relative;
-    }
-    .nav-item:hover {
-      transform: translateY(-5px);
-      color: var(--text-color);
-    }
-    .nav-item.active {
-      color: var(--text-color);
-    }
-    .nav-item.active .nav-icon {
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 50%;
-      padding: 8px;
-      box-shadow: 0 0 10px rgba(52, 199, 89, 0.7);
-      transform: scale(1.1);
-    }
-    .nav-icon {
-      font-size: 1.5em;
-      transition: all 0.3s ease-in-out;
-    }
-    .nav-label {
-      font-size: 0.7em;
-      margin-top: 5px;
     }
     @keyframes glow-fade {
       0% { box-shadow: inset 0 0 15px rgba(26, 26, 26, 0.2); }
