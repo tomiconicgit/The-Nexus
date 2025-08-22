@@ -7,6 +7,7 @@ const urlsToCache = [
   '/manifest.json',
   '/assets/js/errors.js',
   '/assets/js/homescreen.js',
+  '/assets/js/map.js',
   '/assets/js/bootscreen.js',
   '/assets/js/loginscreen.js',
   '/assets/js/performance.js',
