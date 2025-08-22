@@ -100,13 +100,13 @@ function injectNavigationCSS() {
       left: 50%;
       width: 0;
       height: 0;
-      background: rgba(255, 255, 255, 0.4);
+      background: transparent; /* Changed to transparent */
       border-radius: 50%;
       opacity: 0;
       transform: translate(-50%, -50%);
     }
     .nav-item.pulsing::after {
-      animation: pulse-animation 0.5s ease-out forwards;
+      animation: pulse-animation 0.5s cubic-bezier(0, 0, 0.2, 1) forwards;
     }
     .nav-item.active {
       color: #f2f2f7;
@@ -142,12 +142,12 @@ function injectNavigationCSS() {
       from {
         width: 0;
         height: 0;
-        opacity: 0.5;
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
       }
       to {
         width: 150%;
         height: 150%;
-        opacity: 0;
+        box-shadow: 0 0 10px 10px rgba(255, 255, 255, 0);
       }
     }
   `;
