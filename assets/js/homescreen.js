@@ -42,6 +42,20 @@ export async function loadHomeScreen(container) {
     initActiveMissions(container.querySelector('.section-container'));
     initNavigation(container.querySelector('#navigation-container'));
 
+    // Add scroll-based header fade
+    const mainContent = container.querySelector('#main-content');
+    const headerPill = container.querySelector('#top-header-pill');
+    if (mainContent && headerPill) {
+      mainContent.addEventListener('scroll', () => {
+        const scrollTop = mainContent.scrollTop;
+        if (scrollTop > 50) {
+          headerPill.classList.add('solid');
+        } else {
+          headerPill.classList.remove('solid');
+        }
+      });
+    }
+
     const homeScreen = container.querySelector('#home-screen');
     if (!homeScreen) throw new Error('Home screen element not found.');
     homeScreen.style.transition = 'opacity 0.5s ease-in-out';
@@ -87,9 +101,8 @@ function injectHomeCSS() {
       left: 0;
       width: 100%;
       height: 100%;
-      background: linear-gradient(135deg, #1a1a1a, #0f0f0f);
+      background: #000; /* Solid black */
       z-index: -2;
-      animation: glow-fade 10s infinite alternate ease-in-out;
     }
     #home-screen {
       width: 100%;
@@ -104,10 +117,6 @@ function injectHomeCSS() {
       -webkit-overflow-scrolling: touch;
       padding-bottom: 120px;
       z-index: 1;
-    }
-    @keyframes glow-fade {
-      0% { box-shadow: inset 0 0 15px rgba(26, 26, 26, 0.2); }
-      100% { box-shadow: inset 0 0 25px rgba(15, 15, 15, 0.3); }
     }
   `;
   document.head.appendChild(styleTag);
