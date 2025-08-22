@@ -48,7 +48,11 @@ function injectNavigationCSS() {
       justify-content: center;
       align-items: center;
       padding: 8px 15px;
-      background: rgba(255, 255, 255, 0.05); /* Lighter base color for the pill */
+      background: linear-gradient(
+        to right,
+        rgba(0, 0, 0, 0.4) 10%, /* Dark section solid up to 10% */
+        rgba(255, 255, 255, 0.05) 10% /* Transparent section starts immediately after */
+      );
       border-radius: 40px;
       border: 1px solid rgba(255, 255, 255, 0.2);
       box-shadow: 
@@ -61,23 +65,6 @@ function injectNavigationCSS() {
       height: 5vh;
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
-      
-      /* New mask properties for the curved dark section */
-      mask-image: radial-gradient(circle at 120% 50%, transparent 40px, black 41px);
-      -webkit-mask-image: radial-gradient(circle at 120% 50%, transparent 40px, black 41px);
-    }
-
-    #bottom-header-pill::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.4);
-      border-radius: 40px;
-      mask-image: radial-gradient(circle at 120% 50%, transparent 40px, black 41px);
-      -webkit-mask-image: radial-gradient(circle at 120% 50%, transparent 40px, black 41px);
     }
   `;
   document.head.appendChild(styleTag);
