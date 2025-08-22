@@ -61,23 +61,21 @@ function injectNavigationCSS() {
   styleTag.innerHTML = `
     #bottom-nav {
       position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: calc(100% - 30px);
-      max-width: 600px;
+      bottom: 0;
+      left: 0;
+      width: 100%;
       display: flex;
       justify-content: space-around;
       align-items: center;
-      padding: 10px;
+      padding: 10px 0;
       background: rgba(26, 26, 26, 0.8);
-      border-radius: 40px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
-      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.5);
       z-index: 1000;
-      transition: all 0.3s ease-in-out;
     }
     .nav-item {
       display: flex;
@@ -87,10 +85,20 @@ function injectNavigationCSS() {
       color: #8e8e93;
       font-size: 14px;
       font-weight: 600;
-      transition: all 0.3s ease-in-out;
       cursor: pointer;
       flex: 1;
-      gap: 5px;
+      padding: 10px 0;
+      position: relative;
+    }
+    .nav-item:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 60%;
+      width: 1px;
+      background: rgba(255, 255, 255, 0.1);
     }
     .nav-item.active {
       color: #f2f2f7;
