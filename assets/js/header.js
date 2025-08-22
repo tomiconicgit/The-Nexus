@@ -4,7 +4,6 @@ import { displayError } from './errors.js';
 
 export function initHeader(container) {
   try {
-    // Inject header HTML
     container.innerHTML = `
       <div id="top-header-pill">
         <div class="time-display">08:51</div>
@@ -22,7 +21,6 @@ export function initHeader(container) {
       </div>
     `;
 
-    // Inject header CSS
     injectHeaderCSS();
   } catch (err) {
     displayError(`Failed to initialize header: ${err.message}`, 'Header', 'ERR_HEADER_INIT');
@@ -47,11 +45,13 @@ function injectHeaderCSS() {
       border: 1px solid rgba(255, 255, 255, 0.2);
       box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
       z-index: 1000;
-      transition: background 0.3s ease-in-out, border 0.3s ease-in-out;
+      transition: background 0.3s ease-in-out, border 0.3s ease-in-out, backdrop-filter 0.3s ease-in-out;
     }
     #top-header-pill.solid {
-      background: #1a1a1a; /* Solid dark background */
-      border: 1px solid #1a1a1a;
+      background: rgba(26, 26, 26, 0.8); /* Glassmorphic dark grey */
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px); /* Glassmorphism effect */
+      -webkit-backdrop-filter: blur(10px);
     }
     .time-display {
       font-weight: bold;
