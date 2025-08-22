@@ -22,7 +22,12 @@ const urlsToCache = [
   'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
   'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
   'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
-  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+  '/assets/images/icon-180.png',
+  '/assets/images/icon-192.png',
+  '/assets/images/icon-512.png',
+  '/assets/images/icon-192-maskable.png',
+  '/assets/images/icon-512-maskable.png'
 ];
 
 self.addEventListener('install', event => {
