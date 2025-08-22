@@ -85,16 +85,14 @@ function injectNavigationCSS() {
       align-items: center;
       justify-content: center;
       color: #8e8e93;
-      font-size: 14px;
-      font-weight: 600;
       cursor: pointer;
       flex: 1;
       padding: 10px 0;
       position: relative;
-      overflow: hidden; /* Crucial for containing the ripple effect */
-      transform: scale(1); /* Initial state for depth effect */
-      filter: brightness(1); /* Initial state for darkening effect */
-      transition: transform 0.3s ease, filter 0.3s ease;
+      overflow: hidden;
+      transition: transform 0.3s ease, filter 0.3s ease, box-shadow 0.3s ease;
+      z-index: 1000;
+      will-change: transform, filter;
     }
     .nav-item::after {
       content: '';
@@ -113,19 +111,13 @@ function injectNavigationCSS() {
     }
     .nav-item.active {
       color: #f2f2f7;
-      transform: scale(1.05) translateY(-5px);
-      filter: brightness(0.9);
-      z-index: 1001; /* Brings the active item forward */
+      transform: translateY(-5px);
+      filter: brightness(0.85);
+      z-index: 1001;
+      box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.3);
     }
     .nav-item:hover {
       color: #f2f2f7;
-    }
-    .nav-item.active .nav-icon {
-      background: rgba(52, 199, 89, 0.15);
-      box-shadow: 0 0 10px rgba(52, 199, 89, 0.7), inset 0 0 5px rgba(52, 199, 89, 0.5);
-      transform: scale(1.1);
-      border-radius: 12px;
-      padding: 10px;
     }
     .nav-icon {
       width: 24px;
