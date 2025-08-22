@@ -4,19 +4,16 @@ import { displayError } from './errors.js';
 
 export function initMap(container) {
   try {
-    // Check if Leaflet is available
     if (typeof L === 'undefined') {
       throw new Error('Leaflet library not loaded.');
     }
 
-    // Inject map HTML
     container.innerHTML = `
       <div id="live-map-card">
         <div id="map"></div>
       </div>
     `;
 
-    // Inject map CSS
     injectMapCSS();
 
     const mapElement = container.querySelector('#map');
@@ -25,36 +22,34 @@ export function initMap(container) {
     const map = L.map(mapElement, {
       zoomControl: false,
       attributionControl: false,
-      dragging: false, // Disable dragging
-      scrollWheelZoom: false, // Disable scroll wheel zoom
-      doubleClickZoom: false, // Disable double-click zoom
-      boxZoom: false, // Disable box zoom
+      dragging: false,
+      scrollWheelZoom: false,
+      doubleClickZoom: false,
+      boxZoom: false,
       minZoom: 2,
       maxZoom: 19
     }).setView([20, 0], 2);
 
-    // Use Esri World Imagery tiles
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
       maxZoom: 19,
       minZoom: 2
     }).addTo(map);
 
-    // City lights GeoJSON
     const cityLightsGeoJSON = {
       "type": "FeatureCollection",
       "features": [
-        { "type": "Feature", "properties": {}, "geometry": { "type": "Point", "coordinates": [-74.0060, 40.7128] } }, // NYC
-        { "type": "Feature", "properties": {}, "geometry": { "type": "Point", "coordinates": [-0.1278, 51.5074] } },  // London
-        { "type": "Feature", "properties": {}, "geometry": { "type": "Point", "coordinates": [139.6917, 35.6895] } },  // Tokyo
-        { "type": "Feature", "properties": {}, "geometry": { "type": "Point", "coordinates": [116.4074, 39.9042] } },  // Beijing
-        { "type": "Feature", "properties": {}, "geometry": { "type": "Point", "coordinates": [2.3522, 48.8566] } },   // Paris
-        { "type": "Feature", "properties": {}, "geometry": { "type": "Point", "coordinates": [151.2093, -33.8688] } }, // Sydney
-        { "type": "Feature", "properties": {}, "geometry": { "type": "Point", "coordinates": [77.2090, 28.6139] } },  // New Delhi
-        { "type": "Feature", "properties": {}, "geometry": { "type": "Point", "coordinates": [-3.7038, 40.4168] } },  // Madrid
-        { "type": "Feature", "properties": {}, "geometry": { "type": "Point", "coordinates": [-99.1332, 19.4326] } }, // Mexico City
-        { "type": "Feature", "properties": {}, "geometry": { "type": "Point", "coordinates": [12.4964, 41.9028] } },  // Rome
-        { "type": "Feature", "properties": {}, "geometry": { "type": "Point", "coordinates": [37.6173, 55.7558] } },  // Moscow
-        { "type": "Feature", "properties": {}, "geometry": { "type": "Point", "coordinates": [31.2357, 30.0444] } }   // Cairo
+        { "type": "Feature", "properties": {}, "geometry": { "type": "Point", "coordinates": [-74.0060, 40.7128] } },
+        { "type": "Feature", "properties": {}, "geometry": { "type": "Point", "coordinates": [-0.1278, 51.5074] } },
+        { "type": "Feature", "properties": {}, "geometry": { "type": "Point", "coordinates": [139.6917, 35.6895] } },
+        { "type": "Feature", "properties": {}, "geometry": { "type": "Point", "coordinates": [116.4074, 39.9042] } },
+        { "type": "Feature", "properties": {}, "geometry": { "type": "Point", "coordinates": [2.3522, 48.8566] } },
+        { "type": "Feature", "properties": {}, "geometry": { "type": "Point", "coordinates": [151.2093, -33.8688] } },
+        { "type": "Feature", "properties": {}, "geometry": { "type": "Point", "coordinates": [77.2090, 28.6139] } },
+        { "type": "Feature", "properties": {}, "geometry": { "type": "Point", "coordinates": [-3.7038, 40.4168] } },
+        { "type": "Feature", "properties": {}, "geometry": { "type": "Point", "coordinates": [-99.1332, 19.4326] } },
+        { "type": "Feature", "properties": {}, "geometry": { "type": "Point", "coordinates": [12.4964, 41.9028] } },
+        { "type": "Feature", "properties": {}, "geometry": { "type": "Point", "coordinates": [37.6173, 55.7558] } },
+        { "type": "Feature", "properties": {}, "geometry": { "type": "Point", "coordinates": [31.2357, 30.0444] } }
       ]
     };
 
@@ -64,7 +59,6 @@ export function initMap(container) {
       iconSize: [20, 20]
     });
 
-    // Day/night cycle animation
     let cityLayer;
     function animateDayNightCycle() {
       const now = new Date();
@@ -72,7 +66,6 @@ export function initMap(container) {
       const utcMinutes = now.getUTCMinutes();
       const sunLongitude = ((utcHours * 60 + utcMinutes) / (24 * 60)) * 360 - 180;
 
-      // Update city lights based on sun position
       if (cityLayer) map.removeLayer(cityLayer);
       cityLayer = L.geoJSON(cityLightsGeoJSON, {
         pointToLayer: function (feature, latlng) {
@@ -84,9 +77,8 @@ export function initMap(container) {
         }
       }).addTo(map);
 
-      // Slow map pan (looping effect)
       const currentView = map.getCenter();
-      const newLng = currentView.lng + 0.05; // Slow pan to the right
+      const newLng = currentView.lng + 0.05;
       if (newLng > 180) {
         map.setView([currentView.lat, -180], 2, { animate: false });
       } else {
@@ -97,7 +89,6 @@ export function initMap(container) {
     }
     requestAnimationFrame(animateDayNightCycle);
 
-    // Resize observer to maintain map responsiveness
     const resizeObserver = new ResizeObserver(() => map.invalidateSize());
     resizeObserver.observe(mapElement);
   } catch (err) {
@@ -115,12 +106,13 @@ function injectMapCSS() {
   styleTag.innerHTML = `
     #live-map-card {
       width: 100%;
-      height: calc(100vw * 0.8); /* 5:4 aspect ratio */
+      height: calc(100vw * 0.8);
       margin: 0;
       position: relative;
       overflow: hidden;
-      mask-image: linear-gradient(to bottom, #000 0%, black 15%, black 80%, transparent 100%); /* True black at top */
-      -webkit-mask-image: linear-gradient(to bottom, #000 0%, black 15%, black 80%, transparent 100%);
+      mask-image: linear-gradient(to bottom, #000 0%, #000 15%, black 80%, transparent 100%); /* True black top */
+      -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 15%, black 80%, transparent 100%);
+      z-index: 1;
     }
     #map {
       width: 100%;
