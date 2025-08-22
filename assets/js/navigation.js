@@ -48,11 +48,7 @@ function injectNavigationCSS() {
       justify-content: center;
       align-items: center;
       padding: 8px 15px;
-      background: linear-gradient(
-        to right,
-        rgba(0, 0, 0, 0.4) 28%,
-        rgba(255, 255, 255, 0.05) 28%
-      );
+      background: rgba(255, 255, 255, 0.05); /* Lighter base color for the pill */
       border-radius: 40px;
       border: 1px solid rgba(255, 255, 255, 0.2);
       box-shadow: 
@@ -65,6 +61,23 @@ function injectNavigationCSS() {
       height: 5vh;
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    #bottom-header-pill::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      /* Correct blue/cyan gradient from the login screen */
+      background: linear-gradient(to right, #1E90FF, #00CED1);
+      border-radius: 40px;
+      /* Mask to create the curved shape on the right */
+      mask-image: radial-gradient(circle at 31% 50%, black 0%, black 30%, transparent 31%);
+      -webkit-mask-image: radial-gradient(circle at 31% 50%, black 0%, black 30%, transparent 31%);
     }
   `;
   document.head.appendChild(styleTag);
