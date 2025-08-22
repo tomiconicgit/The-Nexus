@@ -8,7 +8,7 @@ function displayError(message, component, code) {
 export function initHeader(container) {
   try {
     container.innerHTML = `
-      <div id="top-header-pill">
+      <div id="top-header">
         <div class="time-display">08:51</div>
         <div id="profile-container">
           <div id="agent-icon"></div>
@@ -25,7 +25,6 @@ export function initHeader(container) {
     `;
 
     injectHeaderCSS();
-    setupScrollListener(); // Call the new function to set up the scroll listener
   } catch (err) {
     displayError(`Failed to initialize header: ${err.message}`, 'Header', 'ERR_HEADER_INIT');
   }
@@ -38,37 +37,21 @@ function injectHeaderCSS() {
   const styleTag = document.createElement('style');
   styleTag.id = styleId;
   styleTag.innerHTML = `
-    #top-header-pill {
-      position: fixed; /* Use fixed position for the floating effect */
-      top: 15px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: calc(100% - 30px); /* Account for the margin */
-      max-width: 600px; /* Optional: Set a max-width for large screens */
+    #top-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin: 0; /* Margin is handled by the top/left/transform properties */
       padding: 8px 15px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 40px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
-      z-index: 1000;
-      transition: background 0.3s ease-in-out, border 0.3s ease-in-out, backdrop-filter 0.3s ease-in-out, border-radius 0.3s ease-in-out, width 0.3s ease-in-out, transform 0.3s ease-in-out;
-    }
-    #top-header-pill.solid {
       background: rgba(26, 26, 26, 0.8);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
-      width: 100%; /* Expands to full width */
-      max-width: none;
-      top: 0;
-      left: 0;
-      transform: none;
-      border-radius: 0; /* Becomes a solid bar */
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); /* A more prominent shadow */
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+      z-index: 1000;
     }
     .time-display {
       font-weight: bold;
@@ -115,19 +98,4 @@ function injectHeaderCSS() {
     }
   `;
   document.head.appendChild(styleTag);
-}
-
-function setupScrollListener() {
-  const header = document.getElementById('top-header-pill');
-  if (!header) return;
-
-  const SCROLL_THRESHOLD = 50; // The number of pixels to scroll before the header changes
-
-  window.addEventListener('scroll', () => {
-    if (window.scrollY > SCROLL_THRESHOLD) {
-      header.classList.add('solid');
-    } else {
-      header.classList.remove('solid');
-    }
-  });
 }
