@@ -48,24 +48,36 @@ function injectNavigationCSS() {
       justify-content: center;
       align-items: center;
       padding: 8px 15px;
-      /* Extends the dark section to 25% (10% + 15%) */
-      background: linear-gradient(
-        to right,
-        rgba(0, 0, 0, 0.4) 25%, 
-        rgba(255, 255, 255, 0.05) 25% 
-      );
+      background: rgba(255, 255, 255, 0.05);
       border-radius: 40px;
       border: 1px solid rgba(255, 255, 255, 0.2);
       box-shadow: 
-        0 0 15px rgba(255, 255, 255, 0.2) inset, /* Slightly darker inset glow */
-        0 0 10px rgba(0, 0, 0, 0.6), /* Darker overall shadow */
-        0 4px 15px rgba(0, 0, 0, 0.4); /* Darker overall shadow */
+        0 0 15px rgba(255, 255, 255, 0.2) inset,
+        0 0 10px rgba(0, 0, 0, 0.6),
+        0 4px 15px rgba(0, 0, 0, 0.4);
       transition: background 0.3s ease-in-out, border 0.3s ease-in-out, backdrop-filter 0.3s ease-in-out;
       width: 400px;
       max-width: 90%;
       height: 5vh;
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    #bottom-header-pill::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      /* The blue-green gradient background */
+      background: linear-gradient(to right, #4AF6A4, #34B9A7);
+      border-radius: 40px;
+      /* Mask to create the curved shape on the right */
+      mask-image: radial-gradient(circle at 31% 50%, black 0%, black 30%, transparent 31%);
+      -webkit-mask-image: radial-gradient(circle at 31% 50%, black 0%, black 30%, transparent 31%);
     }
   `;
   document.head.appendChild(styleTag);
