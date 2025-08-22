@@ -40,13 +40,18 @@ function injectHeaderCSS() {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin: 15px; /* Adjusted for full-width */
+      margin: 15px;
       padding: 8px 15px;
       background: rgba(255, 255, 255, 0.1);
       border-radius: 40px;
       border: 1px solid rgba(255, 255, 255, 0.2);
       box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
       z-index: 1000;
+      transition: background 0.3s ease-in-out, border 0.3s ease-in-out;
+    }
+    #top-header-pill.solid {
+      background: #1a1a1a; /* Solid dark background */
+      border: 1px solid #1a1a1a;
     }
     .time-display {
       font-weight: bold;
