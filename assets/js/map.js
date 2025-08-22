@@ -23,21 +23,20 @@ export function initMap(container) {
     if (!mapElement) throw new Error('Map element not found.');
 
     const map = L.map(mapElement, {
-      zoomControl: true,
-      attributionControl: true,
+      zoomControl: false, // Remove zoom buttons
+      attributionControl: false, // Remove attribution
       dragging: true,
       scrollWheelZoom: true,
       doubleClickZoom: true,
       boxZoom: true,
       minZoom: 2,
-      maxZoom: 19 // Support Esri World Imagery zoom levels
+      maxZoom: 19
     }).setView([20, 0], 2);
 
     // Use Esri World Imagery tiles
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
       maxZoom: 19,
-      minZoom: 2,
-      attribution: '&copy; <a href="https://www.esri.com/en-us/arcgis/products/arcgis-online">Esri</a>, USGS, NOAA'
+      minZoom: 2
     }).addTo(map);
 
     // Resize observer to maintain map responsiveness
