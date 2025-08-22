@@ -1,5 +1,73 @@
 // assets/js/missioncards.js
-// ... (rest of the file)
+
+//... (rest of the file)
+
+export function initMissionCards(container) {
+  try {
+    container.innerHTML = `
+      <div id="mission-card-section">
+        <div id="mission-bg-blur"></div>
+        <div id="app-cards-container">
+          <div class="app-card" data-bg-image="assets/images/IMG_8857.jpeg">
+            <div class="card-bg"></div>
+            <div class="app-card-content">
+              <div class="fade-overlay"></div>
+              <div class="card-text">
+                <div class="card-title-badge">INTEL</div>
+                <div class="card-subtitle">Locate Stolen Nuke Codes</div>
+              </div>
+            </div>
+          </div>
+          <div class="app-card" data-bg-image="assets/images/IMG_8858.jpeg">
+            <div class="card-bg"></div>
+            <div class="app-card-content">
+              <div class="fade-overlay"></div>
+              <div class="card-text">
+                <div class="card-title-badge">OP</div>
+                <div class="card-subtitle">Rogue Asset Extraction</div>
+              </div>
+            </div>
+          </div>
+          <div class="app-card" data-bg-image="https://images.unsplash.com/photo-1603145731082-2e16b6d4a3f2?auto=format&fit=crop&w=400&q=80">
+            <div class="card-bg"></div>
+            <div class="app-card-content">
+              <div class="fade-overlay"></div>
+              <div class="card-text">
+                <div class="card-title-badge">DATA</div>
+                <div class="card-subtitle">Decrypt Encrypted Data</div>
+              </div>
+            </div>
+          </div>
+          <div class="app-card" data-bg-image="https://images.unsplash.com/photo-1603570322020-0b16eaf89335?auto=format&fit=crop&w=400&q=80">
+            <div class="card-bg"></div>
+            <div class="app-card-content">
+              <div class="fade-overlay"></div>
+              <div class="card-text">
+                <div class="card-title-badge">INTEL</div>
+                <div class="card-subtitle">Cyber Warfare Defense</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    injectMissionCardsCSS();
+
+    const cardsContainer = container.querySelector('#app-cards-container');
+    const bgBlur = container.querySelector('#mission-bg-blur');
+    if (!cardsContainer || !bgBlur) {
+      throw new Error('Mission card container or background element not found.');
+    }
+
+    setupMissionCardBackground(cardsContainer, bgBlur);
+    setupCarousel(cardsContainer);
+    setupCardAnimations(cardsContainer);
+  } catch (err) {
+    displayError(`Failed to initialize mission cards: ${err.message}`, 'MissionCards', 'ERR_MISSIONCARDS_INIT');
+  }
+}
+
 function setupMissionCardBackground(container, bgBlur) {
   try {
     const cards = container.querySelectorAll('.app-card');
@@ -7,39 +75,40 @@ function setupMissionCardBackground(container, bgBlur) {
       throw new Error('No mission cards found.');
     }
 
-    // Set the background image on the mission-card-section instead
-    // of individual cards to create the blending effect.
-    const missionSection = document.getElementById('mission-card-section');
-    if (missionSection) {
-      missionSection.style.backgroundImage = `url('${cards[0].dataset.bgImage}')`;
-      missionSection.style.backgroundAttachment = 'fixed';
-    }
+    // Set the initial background blur image
+    bgBlur.style.backgroundImage = `url('${cards[0].dataset.bgImage}')`;
 
-    // This part is no longer needed because the background is on the parent container.
-    // The individual card backgrounds are now for the fade-in effect on scroll.
-    cards.forEach(card => {
-        const bg = document.createElement('div');
-        bg.className = 'card-bg';
-        bg.style.backgroundImage = `url('${card.dataset.bgImage}')`;
-        card.insertBefore(bg, card.firstChild);
-    });
-
-    // You still need to manage the opacity of the card's background to create the fade effect.
     const updateBackground = () => {
-        const containerRect = container.getBoundingClientRect();
-        const containerCenter = containerRect.left + containerRect.width / 2;
+      const containerRect = container.getBoundingClientRect();
+      const containerCenter = containerRect.left + containerRect.width / 2;
 
-        cards.forEach(card => {
-            const cardRect = card.getBoundingClientRect();
-            const cardCenter = cardRect.left + cardRect.width / 2;
-            const distance = Math.abs(containerCenter - cardCenter);
-            const maxDistance = containerRect.width / 2;
-            const opacity = 1 - (distance / maxDistance);
-            const cardBg = card.querySelector('.card-bg');
-            if (cardBg) {
-                cardBg.style.opacity = Math.max(0, Math.min(1, opacity));
-            }
-        });
+      let closestCardImage = null;
+      let minDistance = Infinity;
+
+      cards.forEach(card => {
+        const cardRect = card.getBoundingClientRect();
+        const cardCenter = cardRect.left + cardRect.width / 2;
+        const distance = Math.abs(containerCenter - cardCenter);
+
+        if (distance < minDistance) {
+          minDistance = distance;
+          closestCardImage = card.dataset.bgImage;
+        }
+
+        // Apply opacity to the individual card background
+        const cardBg = card.querySelector('.card-bg');
+        if (cardBg) {
+          cardBg.style.backgroundImage = `url('${card.dataset.bgImage}')`;
+          const maxDistance = containerRect.width;
+          const opacity = 1 - Math.min(distance, maxDistance) / maxDistance;
+          cardBg.style.opacity = Math.max(0, Math.min(1, opacity * 2)); // Fade in and out
+        }
+      });
+
+      // Update the main background blur with the closest card's image
+      if (closestCardImage) {
+        bgBlur.style.backgroundImage = `url('${closestCardImage}')`;
+      }
     };
 
     let scrollTimeout;
@@ -54,7 +123,7 @@ function setupMissionCardBackground(container, bgBlur) {
   }
 }
 
-// ... (rest of the file)
+//... (rest of the file)
 
 function injectMissionCardsCSS() {
   const styleId = 'missioncards-styles';
@@ -72,10 +141,8 @@ function injectMissionCardsCSS() {
       overflow: hidden;
       padding-top: 20px;
       width: 100%;
-      margin-top: -50px;
+      margin-top: -100px; /* Increased overlap for a smooth transition */
       z-index: 2;
-      background-size: cover; /* Add this */
-      background-position: center; /* Add this */
     }
     #mission-bg-blur {
       position: absolute;
@@ -88,14 +155,15 @@ function injectMissionCardsCSS() {
       filter: blur(25px);
       transform: scale(1.1);
       z-index: -1;
-      mask-image: linear-gradient(to top, transparent, black 30%, black 100%);
-      -webkit-mask-image: linear-gradient(to top, transparent, black 30%, black 100%);
+      /* Adjusted mask for better fade to black */
+      mask-image: linear-gradient(to top, transparent 0%, black 30%, black 100%);
+      -webkit-mask-image: linear-gradient(to top, transparent 0%, black 30%, black 100%);
     }
     #app-cards-container {
       display: flex;
       overflow-x: scroll;
       scroll-snap-type: x mandatory;
-      padding: 0 20px; /* Add padding to sides */
+      padding: 0 40px; /* Increased padding */
       gap: 20px;
       -webkit-overflow-scrolling: touch;
       width: 100%;
@@ -115,7 +183,7 @@ function injectMissionCardsCSS() {
       cursor: pointer;
       display: flex;
       align-items: flex-end;
-      background: rgba(0,0,0,0); /* Set background to transparent */
+      background: transparent;
     }
     .app-card:hover {
       transform: scale(1.05);
