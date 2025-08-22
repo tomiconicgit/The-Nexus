@@ -110,8 +110,8 @@ function injectMapCSS() {
       margin: 0;
       position: relative;
       overflow: hidden;
-      mask-image: linear-gradient(to bottom, #000 0%, #000 15%, black 80%, transparent 100%); /* True black top */
-      -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 15%, black 80%, transparent 100%);
+      mask-image: linear-gradient(to bottom, #000 0%, black 15%, black 80%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to bottom, #000 0%, black 15%, black 80%, transparent 100%);
       z-index: 1;
     }
     #map {
