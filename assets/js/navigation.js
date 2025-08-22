@@ -12,6 +12,7 @@ export function initNavigation(container) {
   try {
     container.innerHTML = `
       <div id="bottom-nav">
+        <div id="active-indicator"></div>
         <div class="nav-item active" data-nav-id="home">
           <svg class="nav-icon home-icon" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
         </div>
@@ -30,19 +31,34 @@ export function initNavigation(container) {
     injectNavigationCSS();
 
     const navItems = container.querySelectorAll('.nav-item');
-    if (!navItems.length) {
+    const activeIndicator = container.querySelector('#active-indicator');
+    if (!navItems.length || !activeIndicator) {
       throw new Error('Navigation elements not found.');
     }
+
+    // Initial positioning of the indicator
+    const initialActive = container.querySelector('.nav-item.active');
+    updateIndicatorPosition(initialActive, activeIndicator);
 
     navItems.forEach(item => {
       item.addEventListener('click', () => {
         navItems.forEach(i => i.classList.remove('active'));
         item.classList.add('active');
+        updateIndicatorPosition(item, activeIndicator);
       });
     });
   } catch (err) {
     displayError(`Failed to initialize navigation: ${err.message}`, 'Navigation', 'ERR_NAVIGATION_INIT');
   }
+}
+
+function updateIndicatorPosition(activeItem, indicator) {
+  const itemRect = activeItem.getBoundingClientRect();
+  const navRect = activeItem.parentElement.getBoundingClientRect();
+  
+  const leftPosition = itemRect.left - navRect.left + (itemRect.width / 2);
+
+  indicator.style.transform = `translateX(${leftPosition}px)`;
 }
 
 function injectNavigationCSS() {
@@ -71,6 +87,18 @@ function injectNavigationCSS() {
       height: 70px;
       position: relative;
     }
+    #active-indicator {
+        position: absolute;
+        bottom: 15px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background-color: #f0a040;
+        box-shadow: 0 0 8px 4px #f0a040;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 1001;
+        transform: translateX(-50%);
+    }
     .nav-item {
       display: flex;
       flex-direction: column;
@@ -79,14 +107,10 @@ function injectNavigationCSS() {
       cursor: pointer;
       flex: 1;
       position: relative;
-      height: 50px;
-      width: 50px;
-      transition: background-color 0.3s ease;
-      border-radius: 12px;
-      margin: 0 10px;
-    }
-    .nav-item.active {
-      background-color: rgba(255, 255, 255, 0.1);
+      z-index: 1003;
+      transition: all 0.3s ease;
+      height: 100%;
+      padding: 0 5px;
     }
     .nav-icon {
       width: 28px;
@@ -98,10 +122,10 @@ function injectNavigationCSS() {
       color: #f2f2f7;
     }
     .nav-item[data-nav-id="home"] .nav-icon {
-      color: #f0a040;
+        color: #f0a040;
     }
     .nav-item[data-nav-id="home"].active .nav-icon {
-      color: #f2f2f7;
+        color: #f2f2f7;
     }
   `;
   document.head.appendChild(styleTag);
