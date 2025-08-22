@@ -62,8 +62,7 @@ function injectNavigationCSS() {
       bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
-      width: 90%;
-      max-width: 370px;
+      width: calc(100% - 30px); /* Full-width minus margins */
       display: flex;
       justify-content: space-around;
       padding: 10px 0;
