@@ -4,6 +4,7 @@ import { displayError } from './errors.js';
 import { initMap } from './map.js';
 import { initMissionCards } from './missioncards.js';
 import { initActiveMissions } from './activemissions.js';
+import { initHeader } from './header.js';
 
 export async function loadHomeScreen(container) {
   try {
@@ -23,20 +24,7 @@ export async function loadHomeScreen(container) {
     container.innerHTML = `
       <div id="homescreen-background"></div>
       <div id="home-screen">
-        <div id="top-header-pill">
-          <div class="time-display">08:51</div>
-          <div id="profile-container">
-            <div id="agent-icon"></div>
-            <span class="username">AgentX</span>
-            <div id="clearance-tag">
-              <div class="clearance-level">Level 1</div>
-            </div>
-          </div>
-          <div id="currency-pill">
-            <span class="currency">₿ 0</span>
-            <span class="currency">Ξ 0</span>
-          </div>
-        </div>
+        <div id="header-container"></div>
         <div id="main-content">
           <div id="map-container"></div>
           <div id="mission-cards-container"></div>
@@ -60,6 +48,7 @@ export async function loadHomeScreen(container) {
     `;
 
     // Initialize components
+    initHeader(container.querySelector('#header-container'));
     initMap(container.querySelector('#map-container'));
     initMissionCards(container.querySelector('#mission-cards-container'));
     initActiveMissions(container.querySelector('.section-container'));
@@ -121,61 +110,6 @@ function injectHomeCSS() {
       display: flex;
       flex-direction: column;
       position: relative;
-    }
-    #top-header-pill {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin: 15px 15px 0;
-      padding: 8px 15px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 40px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
-      z-index: 1000;
-    }
-    .time-display {
-      font-weight: bold;
-      font-size: 1.1em;
-      color: var(--text-color);
-    }
-    #profile-container {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    #agent-icon {
-      width: 25px;
-      height: 25px;
-      background-image: url('assets/images/placeholder.jpg');
-      background-size: cover;
-      background-position: center;
-      border-radius: 50%;
-      border: 1.5px solid var(--accent-color);
-      box-shadow: 0 0 5px rgba(52, 199, 89, 0.5);
-    }
-    .username {
-      font-weight: 600;
-      font-size: 0.9em;
-      color: var(--text-color);
-    }
-    #clearance-tag {
-      font-size: 0.7em;
-      color: var(--secondary-text-color);
-      background: rgba(255, 255, 255, 0.1);
-      padding: 2px 6px;
-      border-radius: 12px;
-      font-weight: 500;
-    }
-    #currency-pill {
-      display: flex;
-      align-items: center;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 20px;
-      padding: 4px 10px;
-      font-size: 0.8em;
-      font-weight: 600;
-      gap: 8px;
     }
     #main-content {
       flex: 1;
