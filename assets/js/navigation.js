@@ -76,6 +76,7 @@ function injectNavigationCSS() {
       -webkit-backdrop-filter: blur(10px);
       box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.5);
       z-index: 1000;
+      height: 70px; /* Ensure a consistent height */
     }
     .nav-item {
       display: flex;
@@ -114,7 +115,6 @@ function injectNavigationCSS() {
       padding: 10px;
     }
     .nav-icon {
-      font-size: 20px;
       width: 24px;
       height: 24px;
       transition: all 0.3s ease-in-out;
@@ -122,6 +122,7 @@ function injectNavigationCSS() {
     .nav-label {
       font-size: 0.7em;
       opacity: 0.8;
+      margin-top: 5px;
       transition: opacity 0.3s ease-in-out;
     }
   `;
