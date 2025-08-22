@@ -21,7 +21,8 @@ const urlsToCache = [
   'https://unpkg.com/leaflet@1.7.1/dist/leaflet.css',
   'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
   'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
-  'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png'
+  'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
+  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}' // Note: Dynamic tiles may not cache
 ];
 
 self.addEventListener('install', event => {
