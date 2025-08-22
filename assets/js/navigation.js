@@ -27,10 +27,10 @@ function injectNavigationCSS() {
   styleTag.innerHTML = `
     #floating-pill-container {
       position: fixed;
-      bottom: 0;
+      bottom: 15px;
       left: 0;
       width: 100%;
-      height: 6vh; /* The container is now 6% of the viewport height */
+      height: 6vh;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -51,11 +51,15 @@ function injectNavigationCSS() {
       background: rgba(255, 255, 255, 0.1);
       border-radius: 40px;
       border: 1px solid rgba(255, 255, 255, 0.2);
-      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+      /* The new box-shadow property for the bevel effect */
+      box-shadow: 
+        0 0 15px rgba(255, 255, 255, 0.3) inset,
+        0 0 10px rgba(0, 0, 0, 0.5),
+        0 4px 15px rgba(0, 0, 0, 0.3);
       transition: background 0.3s ease-in-out, border 0.3s ease-in-out, backdrop-filter 0.3s ease-in-out;
       width: 400px;
       max-width: 90%;
-      height: 5vh; /* This height maintains the pill's vertical size */
+      height: 5vh;
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
     }
