@@ -25,7 +25,7 @@ function injectNavigationCSS() {
   styleTag.innerHTML = `
     #taskbar {
       position: fixed;
-      bottom: 0; /* Aligned to the bottom of the screen */
+      bottom: 0;
       left: 0;
       width: 100%;
       height: 100px;
