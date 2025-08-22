@@ -48,17 +48,18 @@ function injectNavigationCSS() {
       justify-content: center;
       align-items: center;
       padding: 8px 15px;
+      /* Extends the dark section to 25% (10% + 15%) */
       background: linear-gradient(
         to right,
-        rgba(0, 0, 0, 0.4) 10%, /* Dark section solid up to 10% */
-        rgba(255, 255, 255, 0.05) 10% /* Transparent section starts immediately after */
+        rgba(0, 0, 0, 0.4) 25%, 
+        rgba(255, 255, 255, 0.05) 25% 
       );
       border-radius: 40px;
       border: 1px solid rgba(255, 255, 255, 0.2);
       box-shadow: 
-        0 0 15px rgba(255, 255, 255, 0.3) inset,
-        0 0 10px rgba(0, 0, 0, 0.5),
-        0 4px 15px rgba(0, 0, 0, 0.3);
+        0 0 15px rgba(255, 255, 255, 0.2) inset, /* Slightly darker inset glow */
+        0 0 10px rgba(0, 0, 0, 0.6), /* Darker overall shadow */
+        0 4px 15px rgba(0, 0, 0, 0.4); /* Darker overall shadow */
       transition: background 0.3s ease-in-out, border 0.3s ease-in-out, backdrop-filter 0.3s ease-in-out;
       width: 400px;
       max-width: 90%;
