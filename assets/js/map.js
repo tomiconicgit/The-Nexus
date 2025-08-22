@@ -1,5 +1,7 @@
 // assets/js/map.js
-// ... (rest of the file)
+
+//... (rest of the file)
+
 function injectMapCSS() {
   const styleId = 'map-styles';
   if (document.getElementById(styleId)) return;
@@ -13,8 +15,9 @@ function injectMapCSS() {
       margin: 0;
       position: relative;
       overflow: hidden;
-      mask-image: linear-gradient(to top, transparent, black 15%, black 80%, transparent);
-      -webkit-mask-image: linear-gradient(to top, transparent, black 15%, black 80%, transparent);
+      /* Corrected mask-image for top fade to black */
+      mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 100%);
+      -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 100%);
       z-index: 1;
     }
     #map {
