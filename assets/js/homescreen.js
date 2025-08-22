@@ -9,10 +9,8 @@ import { initNavigation } from './navigation.js';
 
 export async function loadHomeScreen(container) {
   try {
-    // Inject global CSS
     injectHomeCSS();
 
-    // Set viewport meta
     let viewportMeta = document.querySelector('meta[name="viewport"]');
     if (!viewportMeta) {
       viewportMeta = document.createElement('meta');
@@ -21,7 +19,6 @@ export async function loadHomeScreen(container) {
     }
     viewportMeta.content = 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover';
 
-    // Set minimal HTML structure
     container.innerHTML = `
       <div id="homescreen-background"></div>
       <div id="home-screen">
@@ -35,14 +32,12 @@ export async function loadHomeScreen(container) {
       </div>
     `;
 
-    // Initialize components
     initHeader(container.querySelector('#header-container'));
     initMap(container.querySelector('#map-container'));
     initMissionCards(container.querySelector('#mission-cards-container'));
     initActiveMissions(container.querySelector('.section-container'));
     initNavigation(container.querySelector('#navigation-container'));
 
-    // Add scroll-based header fade
     const mainContent = container.querySelector('#main-content');
     const headerPill = container.querySelector('#top-header-pill');
     if (mainContent && headerPill) {
@@ -101,7 +96,7 @@ function injectHomeCSS() {
       left: 0;
       width: 100%;
       height: 100%;
-      background: #000; /* Solid black */
+      background: #000;
       z-index: -2;
     }
     #home-screen {
@@ -110,6 +105,7 @@ function injectHomeCSS() {
       display: flex;
       flex-direction: column;
       position: relative;
+      z-index: 0;
     }
     #main-content {
       flex: 1;
@@ -117,6 +113,9 @@ function injectHomeCSS() {
       -webkit-overflow-scrolling: touch;
       padding-bottom: 120px;
       z-index: 1;
+    }
+    #header-container {
+      z-index: 1000; /* Ensure header is above map */
     }
   `;
   document.head.appendChild(styleTag);
