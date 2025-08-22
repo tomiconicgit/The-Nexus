@@ -43,18 +43,20 @@ function injectNavigationCSS() {
       background: linear-gradient(to bottom, rgba(26, 26, 26, 0.7) 0%, rgba(0, 0, 0, 1) 100%);
     }
     #taskbar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
       display: flex;
       justify-content: flex-start;
       align-items: center;
-      width: 100%;
-      height: 60px;
-      max-width: none;
+      padding: 8px 15px;
       background: rgba(26, 26, 26, 0.8);
       border-top: 1px solid rgba(255, 255, 255, 0.1);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
-      box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.5);
-      padding: 0 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+      z-index: 1000;
     }
     #start-button {
       padding: 5px 15px;
