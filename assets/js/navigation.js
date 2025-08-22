@@ -111,7 +111,7 @@ function injectNavigationCSS() {
     }
     .nav-item.active {
       color: #f2f2f7;
-      transform: translateY(-5px);
+      transform: translateY(-5px) scaleY(1.3);
       filter: brightness(0.85);
       z-index: 1001;
       box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.3);
