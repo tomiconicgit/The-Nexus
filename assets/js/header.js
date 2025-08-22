@@ -40,7 +40,7 @@ function injectHeaderCSS() {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin: 15px 15px 0;
+      margin: 15px; /* Adjusted for full-width */
       padding: 8px 15px;
       background: rgba(255, 255, 255, 0.1);
       border-radius: 40px;
