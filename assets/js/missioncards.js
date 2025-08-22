@@ -171,6 +171,8 @@ function injectMissionCardsCSS() {
       padding-left: 20px;
       padding-right: 20px;
       box-sizing: border-box;
+      margin-top: -30px; /* Overlap with map fade */
+      z-index: 2; /* Ensure cards are above map */
     }
     #mission-bg-blur {
       position: absolute;
@@ -184,8 +186,8 @@ function injectMissionCardsCSS() {
       transform: scale(1.1);
       z-index: -1;
       transition: background-image 0.5s ease-in-out;
-      mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
-      -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
+      mask-image: linear-gradient(to bottom, transparent 0%, black 30%, black 100%); /* Fade to blend with map */
+      -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 30%, black 100%);
     }
     #app-cards-container {
       display: flex;
