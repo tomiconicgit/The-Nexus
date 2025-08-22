@@ -2,13 +2,24 @@
 
 import { displayError } from './errors.js';
 
-export function initMap(mapElement) {
+export function initMap(container) {
   try {
     // Check if Leaflet is available
     if (typeof L === 'undefined') {
       throw new Error('Leaflet library not loaded.');
     }
 
+    // Inject map HTML
+    container.innerHTML = `
+      <div id="live-map-card">
+        <div id="map"></div>
+      </div>
+    `;
+
+    // Inject map CSS
+    injectMapCSS();
+
+    const mapElement = container.querySelector('#map');
     if (!mapElement) throw new Error('Map element not found.');
 
     const map = L.map(mapElement, {
@@ -165,10 +176,55 @@ export function initMap(mapElement) {
     resizeObserver.observe(mapElement);
   } catch (err) {
     displayError(`Map initialization failed: ${err.message}`, 'Map', 'ERR_MAP_INIT', true);
-    mapElement.innerHTML = '<div class="map-fallback">Map unavailable</div>';
+    container.innerHTML = '<div class="map-fallback">Map unavailable</div>';
   }
 }
 
 function generateRandomPoint() {
   return [(Math.random() - 0.5) * 180, (Math.random() - 0.5) * 360];
+}
+
+function injectMapCSS() {
+  const styleId = 'map-styles';
+  if (document.getElementById(styleId)) return;
+
+  const styleTag = document.createElement('style');
+  styleTag.id = styleId;
+  styleTag.innerHTML = `
+    #live-map-card {
+      width: 100%;
+      height: calc(100vw * 0.8); /* 5:4 aspect ratio */
+      margin: 0;
+      position: relative;
+      overflow: hidden;
+      mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
+    }
+    #map {
+      width: 100%;
+      height: 100%;
+    }
+    .map-fallback {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #1a1a1a;
+      color: #f2f2f7;
+      font-size: 1em;
+      text-align: center;
+    }
+    .leaflet-container {
+      background: transparent;
+    }
+    .leaflet-pane {
+      filter: grayscale(80%) brightness(80%) hue-rotate(180deg);
+    }
+    .city-light-glow {
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0) 70%);
+      border-radius: 50%;
+    }
+  `;
+  document.head.appendChild(styleTag);
 }
