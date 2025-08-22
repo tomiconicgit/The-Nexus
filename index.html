@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agency</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <script type="module">
+    import { initApp } from './assets/js/router.js';
+    import { initErrorSystem } from './assets/js/errors.js';
+    import { initPerformanceMonitor } from './assets/js/performance.js';
+    const appContainer = document.getElementById('app');
+    initErrorSystem(appContainer);
+    initApp(appContainer);
+    initPerformanceMonitor();
+  </script>
+</head>
+<body style="margin:0; background:#000;">
+  <div id="app"></div>
+</body>
+</html>

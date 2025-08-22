@@ -1,0 +1,20 @@
+{
+  "name": "The Nexus",
+  "short_name": "Nexus",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#1a0033",
+  "theme_color": "#7216a6",
+  "icons": [
+    {
+      "src": "/assets/images/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/images/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
