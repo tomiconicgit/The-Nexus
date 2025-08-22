@@ -8,24 +8,26 @@ export function initNavigation(container) {
   try {
     container.innerHTML = `
       <div id="bottom-nav">
-        <div class="nav-item active" data-nav-id="home">
-          <div class="app-icon-container home-app">
-            <span class="app-label-text">HOME</span>
+        <div id="nav-dock">
+          <div class="nav-item active" data-nav-id="home">
+            <div class="app-icon-container">
+              <div class="app-content-home"></div>
+            </div>
           </div>
-        </div>
-        <div class="nav-item" data-nav-id="tools">
-          <div class="app-icon-container tools-app">
-            <svg class="app-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          <div class="nav-item" data-nav-id="tools">
+            <div class="app-icon-container">
+              <svg class="app-icon" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-5.31 5.31a1.25 1.25 0 0 1-1.85-.018l-2.9-2.9a1.25 1.25 0 0 1-.018-1.85l5.31-5.31a6 6 0 0 1 7.94-7.94l-3.77 3.77z"></path></svg>
+            </div>
           </div>
-        </div>
-        <div class="nav-item" data-nav-id="mail">
-          <div class="app-icon-container mail-app">
-            <svg class="app-icon" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+          <div class="nav-item" data-nav-id="mail">
+            <div class="app-icon-container">
+              <svg class="app-icon" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+            </div>
           </div>
-        </div>
-        <div class="nav-item" data-nav-id="settings">
-          <div class="app-icon-container settings-app">
-            <svg class="app-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M14.31 8a6 6 0 0 1 0 8.82m-4.64-8.82a6 6 0 0 1 0 8.82m-2.12-4.41a6 6 0 0 1 8.82 0m4.41 2.12a6 6 0 0 1-8.82 0"></path></svg>
+          <div class="nav-item" data-nav-id="settings">
+            <div class="app-icon-container">
+              <svg class="app-icon" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l1.2 1.2a.9.9 0 0 1 0 1.27l-2.9 2.9a.9.9 0 0 1-1.27 0l-1.2-1.2a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1.51-1H2a.9.9 0 0 1-.9-.9v-4a.9.9 0 0 1 .9-.9h2.07a1.65 1.65 0 0 0 .15-1 1.65 1.65 0 0 0 .33-1.82l-1.2-1.2a.9.9 0 0 1 0-1.27l2.9-2.9a.9.9 0 0 1 1.27 0l1.2 1.2a1.65 1.65 0 0 0 1.82-.33 1.65 1.65 0 0 0 1.51-1V2a.9.9 0 0 1 .9-.9h4a.9.9 0 0 1 .9.9v2.07a1.65 1.65 0 0 0 1 .15c.24.03.48.09.72.18a1.65 1.65 0 0 0 .6.39l1.2-1.2a.9.9 0 0 1 1.27 0l2.9 2.9a.9.9 0 0 1 0 1.27l-1.2 1.2a1.65 1.65 0 0 0 .33 1.82 1.65 1.65 0 0 0 1.51 1H22a.9.9 0 0 1 .9.9v4a.9.9 0 0 1-.9.9z"></path></svg>
+            </div>
           </div>
         </div>
       </div>
@@ -57,123 +59,82 @@ function injectNavigationCSS() {
   styleTag.innerHTML = `
     #bottom-nav {
       position: fixed;
-      bottom: 0;
+      bottom: 20px;
       left: 0;
       width: 100%;
-      height: 100px;
+      display: flex;
+      justify-content: center;
+      padding: 0;
+      z-index: 1000;
+      pointer-events: none;
+    }
+    #nav-dock {
       display: flex;
       justify-content: space-around;
       align-items: center;
-      padding: 0;
+      width: 95%;
+      height: 70px;
+      max-width: 350px;
+      padding: 5px 0;
       background: rgba(26, 26, 26, 0.8);
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
-      box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.5);
-      z-index: 1000;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+      pointer-events: auto;
     }
     .nav-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
       cursor: pointer;
-      color: #f2f2f7;
-      text-decoration: none;
-      transition: transform 0.2s ease-in-out;
-    }
-    .nav-item:hover {
-      transform: scale(1.05);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 5px;
+      position: relative;
     }
     .app-icon-container {
       display: flex;
       justify-content: center;
       align-items: center;
-      width: 65px;
-      height: 65px;
-      border-radius: 18px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-      backdrop-filter: blur(5px);
-      -webkit-backdrop-filter: blur(5px);
-      position: relative;
+      width: 55px;
+      height: 55px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       overflow: hidden;
+      transition: transform 0.2s ease-in-out;
     }
-    
-    /* Global App Icon Styling */
-    .app-icon-container {
-        border: 2px solid rgba(255, 255, 255, 0.4);
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.01) 100%);
-        backdrop-filter: blur(15px);
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    .nav-item.active .app-icon-container {
+      transform: scale(1.1);
     }
     .app-icon {
-        width: 35px;
-        height: 35px;
-        fill: none;
+        width: 30px;
+        height: 30px;
+        color: white;
     }
-    .app-label-text {
+    .app-content-home {
+        width: 100%;
+        height: 100%;
+        background-color: #555;
+        background-image: linear-gradient(135deg, #f0f0f0 0%, #dcdcdc 100%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 10px;
         font-weight: bold;
-        font-size: 16px;
-        letter-spacing: 1px;
+        color: black;
     }
-    
-    /* Specific App Styles */
-    .home-app .app-label-text {
-      background: linear-gradient(145deg, #f2f2f7 0%, #a0a0a0 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+    .app-icon[data-nav-id="tools"] {
+      color: #90ee90;
     }
-
-    .tools-app .app-icon {
-      stroke: url(#tools-gradient);
+    .app-icon[data-nav-id="mail"] {
+      color: #4169e1;
     }
-
-    .mail-app .app-icon {
-      fill: url(#mail-gradient);
-    }
-
-    .settings-app .app-icon {
-      stroke: url(#settings-gradient);
-    }
-
-    /* Gradients for SVG icons */
-    .svg-gradients {
-      position: absolute;
-      width: 0;
-      height: 0;
-    }
-
-    .nav-label {
-      display: none; /* Hide the text label below the app */
-    }
-
-    /* SVG definitions (add to HTML) */
-    .svg-defs {
-        display: none;
+    .app-icon[data-nav-id="settings"] {
+      color: #a9a9a9;
     }
   `;
   document.head.appendChild(styleTag);
-  
-  // Create and inject SVG gradients
-  const svgDefs = `
-    <svg class="svg-defs">
-      <defs>
-        <linearGradient id="tools-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style="stop-color:#9EF01A;stop-opacity:1" />
-          <stop offset="100%" style="stop-color:#00C7BE;stop-opacity:1" />
-        </linearGradient>
-        <linearGradient id="mail-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style="stop-color:#5E5CE6;stop-opacity:1" />
-          <stop offset="100%" style="stop-color:#3478F6;stop-opacity:1" />
-        </linearGradient>
-        <linearGradient id="settings-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style="stop-color:#8E8E93;stop-opacity:1" />
-          <stop offset="100%" style="stop-color:#6B6B6B;stop-opacity:1" />
-        </linearGradient>
-      </defs>
-    </svg>
-  `;
-  document.body.insertAdjacentHTML('beforeend', svgDefs);
 }
