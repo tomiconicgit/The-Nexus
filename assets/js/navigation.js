@@ -28,13 +28,13 @@ function injectNavigationCSS() {
       bottom: 0;
       left: 0;
       width: 100%;
-      height: 90px; /* 10% shorter */
+      height: 95px; /* Shorter taskbar */
       background: linear-gradient(
         to bottom,
-        rgba(255, 255, 255, 0.15) 0%, /* Slightly darker transparency */
-        rgba(0, 0, 0, 0.8) 100%
+        rgba(255, 255, 255, 0.18) 0%, /* Darker, less transparent */
+        rgba(0, 0, 0, 1) 100% /* Fades to solid black */
       );
-      border-top: 1px solid rgba(255, 255, 255, 0.3); /* Slightly darker border */
+      border-top: 1px solid rgba(255, 255, 255, 0.4);
       backdrop-filter: blur(15px);
       -webkit-backdrop-filter: blur(15px);
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
