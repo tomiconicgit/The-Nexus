@@ -57,7 +57,6 @@ export function initMissionCards(container) {
     }
 
     setupParallaxBackground(cardsContainer, missionBackground);
-    setupCarousel(cardsContainer);
     setupCardImages(cardsContainer);
     setupCardAnimations(cardsContainer);
   } catch (err) {
@@ -68,7 +67,7 @@ export function initMissionCards(container) {
 function setupParallaxBackground(cardsContainer, missionBackground) {
   try {
     const cards = cardsContainer.querySelectorAll('.app-card');
-    const bgImages = Array.from(cards).map(card => card.dataset.bgImageSrc);
+    const bgImages = Array.from(cards).map(card => card.dataset.bg-image-src);
     
     missionBackground.style.backgroundImage = bgImages.map(url => `url('${url}')`).join(', ');
     missionBackground.style.backgroundSize = `calc(100% / ${bgImages.length}), calc(100% / ${bgImages.length}), etc.`;
@@ -84,28 +83,12 @@ function setupParallaxBackground(cardsContainer, missionBackground) {
   }
 }
 
-function setupCarousel(container) {
-  try {
-    container.addEventListener('scroll', () => {
-      const containerWidth = container.offsetWidth;
-      const scrollWidth = container.scrollWidth;
-      const scrollLeft = container.scrollLeft;
-
-      if (scrollLeft + containerWidth >= scrollWidth - 10) {
-        container.scrollLeft = 0;
-      }
-    });
-  } catch (err) {
-    displayError(`Carousel setup failed: ${err.message}`, 'MissionCards', 'ERR_CAROUSEL');
-  }
-}
-
 function setupCardImages(container) {
   const cards = container.querySelectorAll('.app-card');
   cards.forEach(card => {
     const imgDiv = card.querySelector('.card-bg-image');
     if (imgDiv) {
-      imgDiv.style.backgroundImage = `url('${card.dataset.bgImageSrc}')`;
+      imgDiv.style.backgroundImage = `url('${card.dataset.bg-image-src}')`;
     }
   });
 }
@@ -115,8 +98,21 @@ function setupCardAnimations(container) {
     const cards = container.querySelectorAll('.app-card');
     if (cards.length === 0) throw new Error('No mission cards found for animation.');
 
-    // Removed the scroll listener here to fix the jitter
-    // The scroll-snap property now handles the smooth snapping effect
+    const handleScroll = () => {
+      const containerCenter = container.scrollLeft + container.offsetWidth / 2;
+      cards.forEach(card => {
+        const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+        const distance = cardCenter - containerCenter;
+        const maxDistance = container.offsetWidth / 2;
+        const rotationY = (distance / maxDistance) * 15;
+        const scale = 1 - (Math.abs(distance) / maxDistance) * 0.15;
+        
+        card.style.transform = `scale(${scale}) rotateY(${rotationY}deg)`;
+      });
+    };
+
+    container.addEventListener('scroll', handleScroll);
+    handleScroll();
   } catch (err) {
     displayError(`Card animations setup failed: ${err.message}`, 'MissionCards', 'ERR_CARD_ANIM');
   }
@@ -164,7 +160,6 @@ function injectMissionCardsCSS() {
     #app-cards-container {
       display: flex;
       overflow-x: scroll;
-      scroll-snap-type: x mandatory;
       padding: 0;
       gap: 15px;
       -webkit-overflow-scrolling: touch;
@@ -173,11 +168,13 @@ function injectMissionCardsCSS() {
       perspective: 1000px;
       z-index: 3;
     }
+    #app-cards-container::-webkit-scrollbar {
+        display: none;
+    }
     .app-card {
       flex-shrink: 0;
       width: 280px;
       height: 224px;
-      scroll-snap-align: center;
       border-radius: 20px;
       box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
       position: relative;
