@@ -93,8 +93,6 @@ function injectHomeCSS() {
     }
     #home-screen {
       width: 100%;
-      max-width: 390px;
-      margin: 0 auto;
       height: 100vh;
       display: flex;
       flex-direction: column;
