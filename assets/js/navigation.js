@@ -30,7 +30,7 @@ function injectNavigationCSS() {
       bottom: 0;
       left: 0;
       width: 100%;
-      height: 9vh; /* 10% smaller vertically than the previous 10vh */
+      height: 6vh; /* The container is now 6% of the viewport height */
       display: flex;
       justify-content: center;
       align-items: center;
@@ -55,7 +55,7 @@ function injectNavigationCSS() {
       transition: background 0.3s ease-in-out, border 0.3s ease-in-out, backdrop-filter 0.3s ease-in-out;
       width: 400px;
       max-width: 90%;
-      height: 10vh; /* This height maintains the pill's vertical size */
+      height: 5vh; /* This height maintains the pill's vertical size */
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
     }
