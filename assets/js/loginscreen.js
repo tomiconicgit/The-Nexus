@@ -1,14 +1,25 @@
 // assets/js/loginscreen.js
+// Purpose: Manages the login screen UI and animation sequence for TitanOS, simulating a secure authentication process.
+// Dependencies: ./homescreen.js (for post-login transition), ./errors.js (for error handling and status updates).
+// Notes: 
+// - Handles user input simulation (typing animation) and a covert-themed loading sequence.
+// - Integrates the Nexus seal logo (nexusseal.png) as the title, with error handling for load failures.
+// - Optimized for PWA compliance and iOS Safari, targeting ~60fps.
+// - Build version (0.153) is tracked for deployment consistency.
+// AI Usage: This file initializes the login interface; modify CSS or animation timings if aesthetic changes are needed.
 
-import { loadHomeScreen } from './homescreen.js';
-import { updateCheck, displayError } from './errors.js';
+import { loadHomeScreen } from './homescreen.js'; // Imports home screen loader for post-login transition.
+import { updateCheck, displayError } from './errors.js'; // Imports error handling utilities.
 
-const DEPLOYMENT_VERSION = "1.6.3";
+const BUILD_VERSION = "0.153"; // Defines the current build version for display and tracking.
 
 export function loadLoginScreen(container) {
+  // Purpose: Initializes and renders the login screen with interactive elements.
+  // Parameters: container - DOM element to render the login screen into.
+  // Returns: Promise resolving when the login process completes or fails.
   return new Promise((resolve) => {
     try {
-      updateCheck('loginscreen', 'ok');
+      updateCheck('loginscreen', 'ok'); // Updates component status to 'ok' in errors.js.
       container.innerHTML = `
         <div id="login-background">
           <div id="top-background"></div>
@@ -34,7 +45,7 @@ export function loadLoginScreen(container) {
             <div id="radar-loader"></div>
             <div id="loading-text"></div>
           </div>
-          <div id="deployment">Deployment v${DEPLOYMENT_VERSION}</div>
+          <div id="deployment">Build v${BUILD_VERSION}</div>
           <div id="login-footer">
             <div>Secure Software | All Rights Reserved</div>
             <div>&copy; 2025 | Iconic Developments OS</div>
@@ -45,8 +56,17 @@ export function loadLoginScreen(container) {
       const loginBackground = container.querySelector('#login-background');
       if (!loginBackground) throw new Error('Failed to create #login-background element');
 
-      injectLoginCSS();
-      generateParticles();
+      injectLoginCSS(); // Injects custom CSS for login screen styling.
+      generateParticles(); // Generates animated particles for visual effect.
+
+      // Verifies seal logo load with error handling.
+      const logoImg = new Image();
+      logoImg.src = '/assets/images/nexusseal.png'; // Case-sensitive; ensure file matches (PNG vs. PNG).
+      logoImg.onload = () => {
+        const loginTitle = container.querySelector('#login-title');
+        if (loginTitle) loginTitle.classList.add('loaded');
+      };
+      logoImg.onerror = () => displayError('Failed to load Nexus seal logo. Check file path or format.', 'LoginScreen', 'ERR_SEAL_LOAD', true);
 
       const loginBtn = container.querySelector('#login-btn');
       if (!loginBtn) {
@@ -56,7 +76,7 @@ export function loadLoginScreen(container) {
       }
 
       loginBtn.addEventListener('click', async () => {
-        if (navigator.vibrate) navigator.vibrate([50, 30, 50]); // Short pulse on tap
+        if (navigator.vibrate) navigator.vibrate([50, 30, 50]); // Short haptic feedback on tap.
         try {
           const formContainer = container.querySelector('#login-content');
           const sequenceContainer = container.querySelector('#login-sequence');
@@ -69,43 +89,34 @@ export function loadLoginScreen(container) {
             return;
           }
 
-          // Simulate human-like typing animation with varied pacing
+          // Optimized typing animation using requestAnimationFrame for smoothness.
           await new Promise(resolve => {
             const usernameInput = container.querySelector('#username');
             const passwordInput = container.querySelector('#password');
             const usernameText = 'AgentSmith';
             const passwordText = 'SecurePass123';
             let i = 0;
-            const type = () => {
+            function type() {
               if (i < usernameText.length) {
                 usernameInput.value += usernameText.charAt(i);
                 i++;
-                const delay = Math.random() * 200 + 100; // 100-300ms for realism
-                setTimeout(type, delay);
+                requestAnimationFrame(type);
               } else if (i < usernameText.length + passwordText.length) {
                 passwordInput.value += passwordText.charAt(i - usernameText.length);
                 i++;
-                const delay = Math.random() * 250 + 150; // 150-400ms for realism
-                setTimeout(type, delay);
+                requestAnimationFrame(type);
               } else {
                 resolve();
               }
-            };
-            type();
+            }
+            requestAnimationFrame(type);
           });
 
-          // Hide form and show sequence with vibration
           formContainer.setAttribute('aria-hidden', 'true');
           sequenceContainer.setAttribute('aria-hidden', 'false');
-          if (navigator.vibrate) navigator.vibrate([100, 50, 100]); // Longer vibration
+          if (navigator.vibrate) navigator.vibrate([100, 50, 100]); // Longer vibration.
 
-          // Covert-themed loading sequence with rotating phrases
-          const phrases = [
-            "Scanning Credentials",
-            "Decrypting Access",
-            "Verifying Identity",
-            "Establishing Secure Link"
-          ];
+          const phrases = ["Scanning Credentials", "Decrypting Access", "Verifying Identity", "Establishing Secure Link"];
           let phraseIndex = 0;
           const updateLoadingText = () => {
             loadingText.textContent = phrases[phraseIndex];
@@ -114,13 +125,11 @@ export function loadLoginScreen(container) {
           updateLoadingText();
           const textInterval = setInterval(updateLoadingText, 800);
 
-          // Wait for loading sequence (4s total)
-          await new Promise(resolve => setTimeout(resolve, 4000));
+          await new Promise(resolve => setTimeout(resolve, 4000)); // 4s loading sequence.
 
           clearInterval(textInterval);
           loadingText.textContent = "Access Granted";
 
-          // Fade out login screen
           bg.style.transition = 'opacity 0.3s ease-in-out';
           bg.style.opacity = '0';
           await new Promise(resolve => setTimeout(resolve, 300));
@@ -141,6 +150,7 @@ export function loadLoginScreen(container) {
   });
 }
 
+// Purpose: Injects CSS styles specific to the login screen.
 function injectLoginCSS() {
   const styleId = 'loginscreen-styles';
   if (document.getElementById(styleId)) return;
@@ -214,7 +224,7 @@ function injectLoginCSS() {
     }
     .particle {
       position: absolute;
-      background: linear-gradient(45deg, #1E90FF, #800080);
+      background: #1E90FF; /* Simplified for performance */
       border-radius: 50%;
       animation: float 15s infinite ease-in-out;
       will-change: transform;
@@ -338,10 +348,14 @@ function injectLoginCSS() {
       text-shadow: 0 0 3px rgba(30, 144, 255, 0.3);
     }
     #login-title {
-      max-width: 200px; /* Adjust based on seal size */
+      max-width: 200px;
       height: auto;
       margin-bottom: 10px;
       z-index: 2;
+    }
+    #login-title.loaded {
+      opacity: 1;
+      transition: opacity 0.5s ease-in-out;
     }
     #login-subtitle {
       font-size: 1.1rem;
@@ -427,6 +441,7 @@ function injectLoginCSS() {
   document.head.appendChild(styleTag);
 }
 
+// Purpose: Generates animated particles for the login screen background.
 function generateParticles() {
   const container = document.getElementById('particle-container');
   if (!container) {
@@ -434,23 +449,21 @@ function generateParticles() {
     return;
   }
 
-  const particleCount = 12;
+  const particleCount = 8; // Reduced for performance optimization.
   for (let i = 0; i < particleCount; i++) {
     const particle = document.createElement('div');
     particle.className = 'particle';
 
-    const size = Math.random() * 3 + 1;
+    const size = Math.random() * 2 + 1; // Smaller size for efficiency.
     const top = Math.random() * 100;
     const left = Math.random() * 100;
     const duration = Math.random() * 10 + 10;
-    const delay = Math.random() * 5;
 
     particle.style.width = `${size}px`;
     particle.style.height = `${size}px`;
     particle.style.top = `${top}vh`;
     particle.style.left = `${left}vw`;
     particle.style.animationDuration = `${duration}s`;
-    particle.style.animationDelay = `${delay}s`;
 
     container.appendChild(particle);
   }
