@@ -15,7 +15,7 @@ export function loadLoginScreen(container) {
           <div id="bottom-background"></div>
           <div id="particle-container"></div>
           <div id="login-content" class="stage-panel" aria-hidden="false">
-            <h1 id="login-title">Nexus</h1>
+            <img id="login-title" src="/assets/images/nexusseal.png" alt="Nexus Intelligence Agency Seal" loading="lazy">
             <h2 id="login-subtitle">Intelligence Network</h2>
             <div id="form-elements">
               <input type="text" id="username" placeholder="Username" autocomplete="off">
@@ -338,10 +338,9 @@ function injectLoginCSS() {
       text-shadow: 0 0 3px rgba(30, 144, 255, 0.3);
     }
     #login-title {
-      font-size: 2.2rem;
-      font-weight: bold;
-      letter-spacing: 1.5px;
-      margin-bottom: 5px;
+      max-width: 200px; /* Adjust based on seal size */
+      height: auto;
+      margin-bottom: 10px;
       z-index: 2;
     }
     #login-subtitle {
