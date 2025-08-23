@@ -53,13 +53,13 @@ function injectNavigationCSS() {
   styleTag.innerHTML = `
     /* General Styles for new UI */
     :root {
-      --taskbar-bg: rgba(26, 26, 26, 0.8);
-      --menu-bg: rgba(26, 26, 26, 0.8);
-      --section-bg: rgba(60, 60, 60, 0.5);
+      --taskbar-bg: rgba(255, 255, 255, 0.1);
+      --menu-bg: rgba(255, 255, 255, 0.1);
+      --section-bg: rgba(255, 255, 255, 0.2);
       --blue-highlight-bg: #2979ff;
       --text-color: #f2f2f7;
       --icon-color: #fff;
-      --border-color: rgba(255, 255, 255, 0.1);
+      --border-color: rgba(255, 255, 255, 0.2);
       --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
     
@@ -76,8 +76,8 @@ function injectNavigationCSS() {
       box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.3);
       font-family: var(--font-family);
       z-index: 900;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
     }
     #start-button {
       height: 100%;
@@ -116,8 +116,8 @@ function injectNavigationCSS() {
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
     }
     #start-menu.show {
       opacity: 1;
