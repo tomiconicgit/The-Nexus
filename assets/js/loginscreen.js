@@ -5,6 +5,7 @@
 // - Handles user input simulation (typing animation) and a covert-themed loading sequence without keyboard input.
 // - Integrates the Nexus seal logo (nexusseal.PNG) as the title.
 // - Optimized for PWA compliance and iOS Safari, targeting ~60fps.
+// - Step 6 Fix Notes: Matched button font to 'Courier New', added animated status text "Awaiting credentials...", updated login to trigger terminal animation with agency phrases.
 
 import { loadHomeScreen } from './homescreen.js';
 import { updateCheck, displayError } from './errors.js';
@@ -36,6 +37,7 @@ export function loadLoginScreen(container) {
                 <button class="glassy-btn primary" id="login-btn" disabled>Login</button>
                 <button class="glassy-btn outline" disabled>Register</button>
               </div>
+              <div id="status-text"></div> <!-- Added for terminal animation -->
             </div>
           </div>
           <div id="login-sequence" class="stage-panel" aria-hidden="true">
@@ -68,12 +70,18 @@ export function loadLoginScreen(container) {
       const usernameInput = container.querySelector('#username');
       const passwordInput = container.querySelector('#password');
       const loginBtn = container.querySelector('#login-btn');
+      const statusText = container.querySelector('#status-text');
 
-      if (!usernameInput || !passwordInput || !loginBtn) {
-        displayError('Login form elements not found.', 'LoginScreen', 'ERR_FORM_ELEMENTS');
+      if (!usernameInput || !passwordInput || !loginBtn || !statusText) {
+        displayError('Login form or status elements not found.', 'LoginScreen', 'ERR_FORM_ELEMENTS');
         resolve();
         return;
       }
+
+      // Initial status text animation
+      typeText(statusText, 'Awaiting credentials...').then(() => {
+        setInterval(() => typeText(statusText, 'Awaiting credentials...'), 5000); // Repeat animation
+      });
 
       // Username typing
       usernameInput.addEventListener('click', async () => {
@@ -115,25 +123,19 @@ export function loadLoginScreen(container) {
             sequenceContainer.setAttribute('aria-hidden', 'false');
             softHaptic();
 
-            // Loading text loop
+            // Terminal animation phrases
             const phrases = [
               "Scanning Credentials",
               "Decrypting Access",
               "Verifying Identity",
-              "Establishing Secure Link"
+              "Loading TitanOS",
+              "Establishing Secure Link",
+              "Access Granted"
             ];
-            let phraseIndex = 0;
-            const updateLoadingText = () => {
-              loadingText.textContent = phrases[phraseIndex];
-              phraseIndex = (phraseIndex + 1) % phrases.length;
-            };
-            updateLoadingText();
-            const textInterval = setInterval(updateLoadingText, 800);
-
-            await new Promise(resolve => setTimeout(resolve, 4000));
-
-            clearInterval(textInterval);
-            loadingText.textContent = "Access Granted";
+            for (let phrase of phrases) {
+              await typeText(loadingText, phrase);
+              await new Promise(resolve => setTimeout(resolve, 1000)); // Pause between phrases
+            }
 
             bg.style.transition = 'opacity 0.3s ease-in-out';
             bg.style.opacity = '0';
@@ -160,9 +162,10 @@ export function loadLoginScreen(container) {
 function typeText(element, text) {
   return new Promise(resolve => {
     let i = 0;
+    element.textContent = ''; // Clear text before typing
     function typeChar() {
       if (i < text.length) {
-        element.value += text.charAt(i);
+        element.textContent += text.charAt(i);
         softHaptic(); // subtle haptic per character
         i++;
         const randomDelay = 50 + Math.random() * 120;
@@ -302,6 +305,7 @@ function injectLoginCSS() {
       max-width: 140px;
       transition: background 0.2s ease, color 0.2s ease;
       will-change: background, color;
+      font-family: 'Courier New', Courier, monospace; /* Match ID/Password font */
     }
     .glassy-btn.primary {
       color: var(--text-color);
@@ -328,6 +332,13 @@ function injectLoginCSS() {
       height: auto;
       margin-bottom: 2px;
       object-fit: contain;
+    }
+    #status-text {
+      color: var(--text-color);
+      font-family: 'Courier New', Courier, monospace; /* Match terminal style */
+      font-size: 0.9rem;
+      margin-top: 10px;
+      text-align: center;
     }
     #login-footer {
       position: absolute;
