@@ -252,18 +252,25 @@ function injectLoginCSS() {
       max-width: 320px;
     }
     #form-elements {
-      text-align: center; /* Center align inputs */
+      display: flex; /* Using flexbox for form elements */
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
     }
     .input-group {
       display: flex;
       align-items: center;
-      justify-content: center; /* Ensure consistent centering */
       width: 100%;
+      max-width: 250px;
+      gap: 10px;
     }
     .input-group label {
       color: var(--text-color);
       font-weight: bold;
-      margin-right: 10px;
+      width: 80px; /* Fixed width for labels to align inputs */
+      text-align: right;
+      flex-shrink: 0;
       font-size: 0.9rem;
       font-family: 'Courier New', Courier, monospace; /* Agency/code font */
     }
@@ -273,25 +280,24 @@ function injectLoginCSS() {
       background: #fff;
       color: #000;
       font-size: 0.9rem;
-      width: 180px; /* Matching size */
+      flex-grow: 1; /* Allows input to take up remaining space */
       box-sizing: border-box;
-      display: inline-block; /* Ensure inline alignment */
     }
     #login-buttons {
       display: flex;
       justify-content: center;
       gap: 10px;
-      margin-top: 15px; /* Moved below inputs */
-      width: 220px; /* Retained expanded width */
+      margin-top: 15px;
+      width: 220px;
     }
     .glassy-btn {
       padding: 12px;
       border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 10px; /* Curved edges */
+      border-radius: 10px;
       cursor: pointer;
       font-weight: 600;
       letter-spacing: 0.2px;
-      width: 110px; /* Retained 110px each, total 220px */
+      width: 110px;
       transition: background 0.2s ease, color 0.2s ease;
       will-change: background, color;
     }
@@ -322,10 +328,10 @@ function injectLoginCSS() {
       object-fit: contain;
     }
     #login-subtitle {
-      display: none; /* Already removed */
+      display: none;
     }
     #login-monitoring {
-      display: none; /* Already removed */
+      display: none;
     }
     #login-footer {
       position: absolute;
