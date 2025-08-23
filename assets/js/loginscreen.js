@@ -1,11 +1,8 @@
 // assets/js/loginscreen.js
-// Purpose: TitanOS login UI + animation, including A.N.N.A. (fluid Siri-like spinner) post-login.
-// Dependencies: ./homescreen.js, ./errors.js
-
 import { loadHomeScreen } from './homescreen.js';
 import { updateCheck, displayError } from './errors.js';
 
-const BUILD_VERSION = "0.163";
+const BUILD_VERSION = "0.164";
 let usernameTyped = false;
 let passwordTyped = false;
 
@@ -52,7 +49,7 @@ export function loadLoginScreen(container) {
 
       injectLoginCSS();
 
-      // Ensure SEAL stays small & in place after load
+      // Ensure SEAL stays small & in place
       const logoImg = new Image();
       logoImg.src = 'assets/images/nexusseal.PNG';
       logoImg.onload = () => {
@@ -60,7 +57,7 @@ export function loadLoginScreen(container) {
         if (t) t.classList.add('loaded');
       };
       logoImg.onerror = () =>
-        displayError('Failed to load Nexus seal logo (assets/images/nexusseal.PNG)', 'LoginScreen', 'ERR_SEAL_LOAD', true);
+        displayError('Failed to load Nexus seal logo', 'LoginScreen', 'ERR_SEAL_LOAD', true);
 
       const usernameInput = container.querySelector('#username');
       const passwordInput = container.querySelector('#password');
@@ -76,7 +73,7 @@ export function loadLoginScreen(container) {
         return;
       }
 
-      // Username typing (tap-to-type)
+      // Username typing
       usernameInput.addEventListener('click', async () => {
         if (!usernameTyped) {
           usernameInput.value = '';
@@ -86,7 +83,7 @@ export function loadLoginScreen(container) {
         }
       });
 
-      // Password typing (tap-to-type)
+      // Password typing
       passwordInput.addEventListener('click', async () => {
         if (usernameTyped && !passwordTyped) {
           passwordInput.value = '';
@@ -96,49 +93,40 @@ export function loadLoginScreen(container) {
         }
       });
 
-      // LOGIN pressed → hide form, show A.N.N.A. (fluid spinner) + status phrases → welcome → fade to Home
+      // LOGIN sequence
       loginBtn.addEventListener('click', async () => {
         if (!passwordTyped) return;
         softHaptic();
 
         try {
-          // Toggle panels using aria-hidden (CSS controls display)
           formPanel.setAttribute('aria-hidden', 'true');
           annaPanel.setAttribute('aria-hidden', 'false');
 
-          // Status loop (A.N.N.A. "spinner" text)
           const agentID = (usernameInput.value && usernameInput.value.trim()) || 'Agent 173';
-          const phrases = [
-            "Checking Credentials",
-            "Decrypting Security Keys",
-            "Authorising Clearance",
-            "Loading NEXUS Intelligence Software",
+
+          // Phrase + KB count simulation
+          const sequences = [
+            "Decrypting Credentials",
+            "Loading Security Keys",
+            "Verifying Access",
+            "Initializing NEXUS Software",
             "Establishing Secure Session"
           ];
 
-          let i = 0;
-          const tick = () => {
-            if (i < phrases.length) {
-              annaText.textContent = phrases[i++];
-              softHaptic();
-            } else {
-              clearInterval(loop);
-              setTimeout(() => {
-                annaText.textContent = `Welcome, ${agentID}`;
-                setTimeout(async () => {
-                  bg.style.transition = 'opacity 0.45s ease-in-out';
-                  bg.style.opacity = '0';
-                  await wait(460);
-                  bg.remove();
-                  await loadHomeScreen(container);
-                  resolve();
-                }, 1600);
-              }, 900);
-            }
-          };
-          tick();
-          const loop = setInterval(tick, 1100);
+          for (let seq of sequences) {
+            await animateKBSequence(annaText, seq);
+            await wait(500); // small pause between sequences
+          }
 
+          annaText.textContent = `Welcome, ${agentID}`;
+          await wait(1600);
+
+          bg.style.transition = 'opacity 0.45s ease-in-out';
+          bg.style.opacity = '0';
+          await wait(460);
+          bg.remove();
+          await loadHomeScreen(container);
+          resolve();
         } catch (err) {
           displayError(`Login sequence failed: ${err.message}`, 'LoginScreen', 'ERR_LOGIN_FAIL');
           resolve();
@@ -153,7 +141,7 @@ export function loadLoginScreen(container) {
   });
 }
 
-// Typing with random speed + haptic per character
+// Simulated typing
 function typeText(el, text) {
   return new Promise((res) => {
     let i = 0;
@@ -167,15 +155,30 @@ function typeText(el, text) {
   });
 }
 
-function softHaptic() {
-  if (navigator.vibrate) navigator.vibrate(10);
+// Soft haptic
+function softHaptic() { if (navigator.vibrate) navigator.vibrate(10); }
+function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// Animate KB counter for each sequence
+function animateKBSequence(el, phrase) {
+  return new Promise((res) => {
+    const targetKB = Math.floor(100 + Math.random() * 900); // 100-1000 KB
+    let kb = 0;
+    const speed = 10 + Math.random() * 20;
+
+    const interval = setInterval(() => {
+      kb += Math.floor(Math.random() * speed);
+      if (kb >= targetKB) kb = targetKB;
+      el.textContent = `${phrase} ... ${kb}KB`;
+      if (kb >= targetKB) {
+        clearInterval(interval);
+        setTimeout(res, 250); // small pause at the end
+      }
+    }, 35);
+  });
 }
 
-function wait(ms) {
-  return new Promise(r => setTimeout(r, ms));
-}
-
-// CSS injection
+// Inject CSS
 function injectLoginCSS() {
   const id = 'loginscreen-styles';
   if (document.getElementById(id)) return;
@@ -191,9 +194,8 @@ function injectLoginCSS() {
       --font-agency:'Courier New',Courier,monospace;
     }
 
-    /* Panels toggle strictly by aria-hidden */
-    .stage-panel[aria-hidden="true"]  { display: none; }
-    .stage-panel[aria-hidden="false"] { display: flex; }
+    .stage-panel[aria-hidden="true"]{ display:none; }
+    .stage-panel[aria-hidden="false"]{ display:flex; }
 
     #login-background{
       height:100vh;width:100vw;
@@ -216,104 +218,52 @@ function injectLoginCSS() {
       z-index:0;pointer-events:none;
     }
 
-    /* --- FORM PANEL --- */
-    #login-content{
-      z-index:2;flex-direction:column;justify-content:center;align-items:center;gap:14px;
-      padding:20px;width:90%;max-width:360px;
-    }
-    #login-title{
-      max-width:170px;width:70%;height:auto;object-fit:contain;margin-bottom:6px;
-      transition:transform .2s ease, opacity .2s ease;
-    }
+    #login-content{z-index:2;flex-direction:column;justify-content:center;align-items:center;gap:14px;padding:20px;width:90%;max-width:360px;}
+    #login-title{max-width:170px;width:70%;height:auto;object-fit:contain;margin-bottom:6px;transition:transform .2s ease,opacity .2s ease;}
     #login-title.loaded{ opacity:1; transform:none; }
 
     #form-elements{display:flex;flex-direction:column;align-items:center;gap:14px;width:100%;}
-    .input-group{
-      display:flex;justify-content:center;align-items:center;
-      width:100%;max-width:300px;margin:0 auto;gap:10px;
-    }
-    .input-group label{
-      color:var(--text-color);font-weight:bold;width:70px;text-align:right;font-size:.9rem;
-      font-family:var(--font-agency);flex-shrink:0;
-    }
-    .login-input{
-      padding:6px;border:1px solid var(--input-border-color);background:#fff;color:#000;
-      font-size:.9rem;width:160px;box-sizing:border-box;
-    }
-    #login-buttons{
-      display:flex;justify-content:center;gap:10px;margin-top:12px;width:100%;max-width:300px;margin-left:auto;margin-right:auto;
-    }
-    .glassy-btn{
-      font-family:var(--font-agency);padding:10px;border:1px solid rgba(255,255,255,.1);border-radius:8px;cursor:pointer;
-      font-weight:bold;width:100%;max-width:140px;transition:background .2s ease,color .2s ease;
-    }
+    .input-group{display:flex;justify-content:center;align-items:center;width:100%;max-width:300px;margin:0 auto;gap:10px;}
+    .input-group label{color:var(--text-color);font-weight:bold;width:70px;text-align:right;font-size:.9rem;font-family:var(--font-agency);flex-shrink:0;}
+    .login-input{padding:6px;border:1px solid var(--input-border-color);background:#fff;color:#000;font-size:.9rem;width:160px;box-sizing:border-box;}
+    #login-buttons{display:flex;justify-content:center;gap:10px;margin-top:12px;width:100%;max-width:300px;margin-left:auto;margin-right:auto;}
+    .glassy-btn{font-family:var(--font-agency);padding:10px;border:1px solid rgba(255,255,255,.1);border-radius:8px;cursor:pointer;font-weight:bold;width:100%;max-width:140px;transition:background .2s ease,color .2s ease;}
     .glassy-btn.primary{ color:var(--text-color);background:var(--accent-color);border-color:var(--accent-color); }
     .glassy-btn.outline{ background:var(--glass-bg);color:rgba(255,255,255,.7); }
     .glassy-btn:disabled{ opacity:.5; cursor:default; }
 
     /* --- A.N.N.A. PANEL --- */
-    #anna-sequence{
-      z-index:3;flex-direction:column;align-items:center;justify-content:center;gap:18px;
-      min-height:260px;padding:10px;text-align:center;
-    }
-
-    /* Fluid spinner: layered rainbow rings + inner swirl, iOS-compatible masks */
+    #anna-sequence{z-index:3;flex-direction:column;align-items:center;justify-content:center;gap:14px;min-height:180px;padding:10px;text-align:center;}
     #anna-orb{
-      position:relative;width:150px;height:150px;border-radius:50%;
-      background:conic-gradient(
-        from 0deg,
-        #ff0057, #ff7b00, #ffe600, #00ff85, #00cfff, #7a00ff, #ff00d4, #ff0057
-      );
-      animation: anna-rotate 3.8s linear infinite, anna-breathe 2.2s ease-in-out infinite;
-      box-shadow:0 0 40px rgba(0,180,255,.6), inset 0 0 20px rgba(255,255,255,.08);
-      /* make it a ring */
-      -webkit-mask: radial-gradient(circle at 50% 50%, transparent 56%, black 57%);
-              mask: radial-gradient(circle at 50% 50%, transparent 56%, black 57%);
+      position:relative;width:90px;height:90px;border-radius:50%;
+      background:conic-gradient(from 0deg,#0099ff,#00ccff,#0066ff,#0099ff);
+      animation: anna-rotate 3.6s linear infinite, anna-breathe 2s ease-in-out infinite;
+      box-shadow:0 0 20px rgba(0,180,255,.5), inset 0 0 12px rgba(255,255,255,.06);
+      -webkit-mask: radial-gradient(circle at 50% 50%, transparent 55%, black 56%);
+              mask: radial-gradient(circle at 50% 50%, transparent 55%, black 56%);
     }
-    /* inner liquid glow */
     #anna-orb::before{
-      content:"";position:absolute;inset:14%;border-radius:50%;
-      background:conic-gradient(
-        from 90deg,
-        #00cfff, #7a00ff, #ff00d4, #ff0057, #ff7b00, #ffe600, #00ff85, #00cfff
-      );
-      filter:blur(8px);opacity:.9;
-      animation: anna-swirl 3.2s linear infinite reverse;
-      /* soft disc, not a ring */
+      content:"";position:absolute;inset:12%;border-radius:50%;
+      background:conic-gradient(from 90deg,#00cfff,#0066ff,#0099ff,#00ccff);
+      filter:blur(6px);opacity:.9;
+      animation: anna-swirl 2.8s linear infinite reverse;
       -webkit-mask: radial-gradient(circle at 50% 50%, black 60%, transparent 62%);
               mask: radial-gradient(circle at 50% 50%, black 60%, transparent 62%);
     }
-    /* subtle outer ripple */
     #anna-orb::after{
-      content:"";position:absolute;inset:-6%;border-radius:50%;
-      background:radial-gradient(closest-side, rgba(255,255,255,.25), rgba(255,255,255,0) 70%);
-      filter:blur(6px);opacity:.6;
-      animation: anna-ripple 2.6s ease-in-out infinite;
+      content:"";position:absolute;inset:-5%;border-radius:50%;
+      background:radial-gradient(closest-side, rgba(0,200,255,.2), rgba(0,200,255,0) 70%);
+      filter:blur(4px);opacity:.6;
+      animation: anna-ripple 2.4s ease-in-out infinite;
     }
+    #anna-text{font-family:var(--font-agency);font-size:.95rem;color:#aadfff;min-height:1.2em;text-shadow:0 0 4px rgba(0,0,0,.35);}
 
-    #anna-text{
-      font-family:var(--font-agency);font-size:1rem;color:#ddd;min-height:1.2em;
-      text-shadow:0 0 6px rgba(0,0,0,.35);
-    }
+    @keyframes anna-rotate{ to{ transform: rotate(360deg);} }
+    @keyframes anna-breathe{0%,100%{transform:scale(1);}50%{transform:scale(1.06);}}
+    @keyframes anna-swirl{0%{transform:rotate(0deg) scale(1);}50%{transform:rotate(180deg) scale(1.02);}100%{transform:rotate(360deg) scale(1);}}
+    @keyframes anna-ripple{0%,100%{transform:scale(1);opacity:.55;}50%{transform:scale(1.05);opacity:.75;}}
 
-    @keyframes anna-rotate { to { transform: rotate(360deg); } }
-    @keyframes anna-breathe {
-      0%,100% { transform: scale(1);   }
-      50%     { transform: scale(1.07);}
-    }
-    @keyframes anna-swirl {
-      0% { transform: rotate(0deg) scale(1.00); }
-      50%{ transform: rotate(180deg) scale(1.03);}
-      100%{transform: rotate(360deg) scale(1.00);}
-    }
-    @keyframes anna-ripple {
-      0%,100% { transform: scale(1);   opacity:.55; }
-      50%     { transform: scale(1.06);opacity:.85; }
-    }
-
-    #login-footer{
-      position:absolute;bottom:20px;font-size:.8rem;color:#ddd;text-align:center;z-index:2;line-height:1.4;
-    }
+    #login-footer{position:absolute;bottom:20px;font-size:.8rem;color:#ddd;text-align:center;z-index:2;line-height:1.4;}
   `;
   document.head.appendChild(style);
 }
