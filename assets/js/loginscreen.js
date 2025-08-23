@@ -31,9 +31,6 @@ function injectLoginCSS() {
       touch-action: manipulation;
       -webkit-user-select: none;
     }
-    meta[name=viewport] {
-      content: "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no";
-    }
     #fade-overlay {
       position: absolute;
       bottom: 0;
@@ -76,7 +73,7 @@ function injectLoginCSS() {
     .input-group {
       display: flex;
       align-items: center;
-      width: 220px; /* Aligned with buttons */
+      width: 220px;
       gap: 10px;
     }
     .input-group label {
@@ -158,55 +155,4 @@ function injectLoginCSS() {
     }
   `;
   document.head.appendChild(styleTag);
-}
-
-// Typing with random speed + haptic each character
-function typeText(element, text) {
-  return new Promise(resolve => {
-    let i = 0;
-    function typeChar() {
-      if (i < text.length) {
-        element.value += text.charAt(i);
-        softHaptic(); // subtle haptic per character
-        i++;
-        const randomDelay = 50 + Math.random() * 120;
-        setTimeout(typeChar, randomDelay);
-      } else {
-        resolve();
-      }
-    }
-    typeChar();
-  });
-}
-
-// Subtle haptic feedback
-function softHaptic() {
-  if (navigator.vibrate) {
-    navigator.vibrate(10); // very short tap feel
-  }
-}
-
-// Particles
-function generateParticles() {
-  const container = document.getElementById('particle-container');
-  if (!container) return;
-
-  const particleCount = 8;
-  for (let i = 0; i < particleCount; i++) {
-    const particle = document.createElement('div');
-    particle.className = 'particle';
-
-    const size = Math.random() * 2 + 1;
-    const top = Math.random() * 100;
-    const left = Math.random() * 100;
-    const duration = Math.random() * 10 + 10;
-
-    particle.style.width = `${size}px`;
-    particle.style.height = `${size}px`;
-    particle.style.top = `${top}vh`;
-    particle.style.left = `${left}vw`;
-    particle.style.animationDuration = `${duration}s`;
-
-    container.appendChild(particle);
-  }
 }
