@@ -2,17 +2,17 @@
 // Purpose: Manages the login screen UI and animation sequence for TitanOS, simulating a secure authentication process.
 // Dependencies: ./homescreen.js (for post-login transition), ./errors.js (for error handling and status updates).
 // Notes:
-// - Handles user input simulation (typing animation) and a covert-themed loading sequence without keyboard input.
-// - Integrates the Nexus seal logo (nexusseal.PNG) as the title.
-// - Optimized for PWA compliance and iOS Safari, targeting ~60fps.
+// - Handles user input simulation (typing animation) and covert-style loading sequence.
+// - Features A.N.N.A. assistant (Siri-like orb animation) during login.
+// - Optimized for PWA compliance and iOS Safari.
 
 import { loadHomeScreen } from './homescreen.js';
 import { updateCheck, displayError } from './errors.js';
 
-const BUILD_VERSION = "0.156"; 
+const BUILD_VERSION = "0.160"; 
 let usernameTyped = false;
 let passwordTyped = false;
-let idleBlinkInterval = null;
+let agentID = "Agent 173";
 
 export function loadLoginScreen(container) {
   return new Promise((resolve) => {
@@ -23,7 +23,7 @@ export function loadLoginScreen(container) {
           <div id="grid-overlay"></div>
           <div id="fade-overlay"></div>
           <div id="login-content" class="stage-panel" aria-hidden="false">
-            <img id="login-title" src="assets/images/nexusseal.PNG" alt="Nexus Intelligence Agency Seal" loading="lazy">
+            <img id="login-title" src="assets/images/nexusseal.PNG" alt="Nexus Seal" loading="lazy">
             <div id="form-elements">
               <div class="input-group">
                 <label for="username">ID</label>
@@ -37,12 +37,11 @@ export function loadLoginScreen(container) {
                 <button class="glassy-btn primary" id="login-btn" disabled>Login</button>
                 <button class="glassy-btn outline" disabled>Register</button>
               </div>
-              <div id="idle-status">Awaiting Credentials<span id="blink-dots">...</span></div>
             </div>
           </div>
-          <div id="login-sequence" class="stage-panel" aria-hidden="true">
-            <div id="radar-loader"></div>
-            <div id="loading-text"></div>
+          <div id="anna-sequence" class="stage-panel" aria-hidden="true">
+            <div id="anna-orb"></div>
+            <div id="anna-text"></div>
           </div>
           <div id="login-footer">
             <div>Secure Software | All Rights Reserved</div>
@@ -51,39 +50,14 @@ export function loadLoginScreen(container) {
         </div>
       `;
 
-      const loginBackground = container.querySelector('#login-background');
-      if (!loginBackground) throw new Error('Failed to create #login-background element');
-
       injectLoginCSS();
-      generateParticles();
-
-      // Blinking dots for idle status
-      const blinkDots = container.querySelector('#blink-dots');
-      if (blinkDots) {
-        let visible = true;
-        idleBlinkInterval = setInterval(() => {
-          blinkDots.style.visibility = visible ? "hidden" : "visible";
-          visible = !visible;
-        }, 500);
-      }
-
-      // Seal logo check
-      const logoImg = new Image();
-      const logoUrl = 'assets/images/nexusseal.PNG';
-      logoImg.src = logoUrl;
-      logoImg.onload = () => {
-        const loginTitle = container.querySelector('#login-title');
-        if (loginTitle) loginTitle.classList.add('loaded');
-      };
-      logoImg.onerror = () => displayError(`Failed to load Nexus seal logo from ${logoUrl}`, 'LoginScreen', 'ERR_SEAL_LOAD', true);
 
       const usernameInput = container.querySelector('#username');
       const passwordInput = container.querySelector('#password');
       const loginBtn = container.querySelector('#login-btn');
-      const idleStatus = container.querySelector('#idle-status');
 
       if (!usernameInput || !passwordInput || !loginBtn) {
-        displayError('Login form elements not found.', 'LoginScreen', 'ERR_FORM_ELEMENTS');
+        displayError("Login form elements not found", "LoginScreen", "ERR_FORM_ELEMENTS");
         resolve();
         return;
       }
@@ -92,7 +66,8 @@ export function loadLoginScreen(container) {
       usernameInput.addEventListener('click', async () => {
         if (!usernameTyped) {
           usernameInput.value = '';
-          await typeText(usernameInput, 'Agent 173');
+          agentID = "Agent 173"; // can be dynamic later
+          await typeText(usernameInput, agentID);
           usernameTyped = true;
           passwordInput.removeAttribute('readonly');
         }
@@ -108,82 +83,81 @@ export function loadLoginScreen(container) {
         }
       });
 
-      // Login button
+      // Login button pressed
       loginBtn.addEventListener('click', async () => {
         if (passwordTyped) {
-          softHaptic(); // subtle tap
+          softHaptic();
           try {
-            const formContainer = container.querySelector('#login-content');
-            const sequenceContainer = container.querySelector('#login-sequence');
-            const bg = loginBackground;
-            const loadingText = container.querySelector('#loading-text');
+            const formContainer = container.querySelector('#form-elements');
+            const annaContainer = container.querySelector('#anna-sequence');
+            const annaText = container.querySelector('#anna-text');
+            const bg = container.querySelector('#login-background');
 
-            if (!formContainer || !sequenceContainer || !bg || !loadingText) {
-              displayError('Login sequence elements not found.', 'LoginScreen', 'ERR_LOGIN_SEQ');
+            if (!formContainer || !annaContainer || !annaText || !bg) {
+              displayError("ANNA sequence elements missing", "LoginScreen", "ERR_ANNA");
               resolve();
               return;
             }
 
-            // Stop idle blinking
-            if (idleBlinkInterval) clearInterval(idleBlinkInterval);
-            if (idleStatus) idleStatus.style.display = "none";
+            // Hide form, show ANNA
+            formContainer.style.display = "none";
+            annaContainer.setAttribute("aria-hidden", "false");
 
-            formContainer.setAttribute('aria-hidden', 'true');
-            sequenceContainer.setAttribute('aria-hidden', 'false');
-            softHaptic();
-
-            // Loading text loop
+            // Status phrases
             const phrases = [
               "Checking Credentials",
-              "Decrypting Secure Key",
-              "Scanning Biometrics",
-              "Establishing Encrypted Tunnel",
+              "Decrypting Security Keys",
               "Authorising Clearance",
-              "Loading TitanOS Modules",
-              "Finalising Access"
+              "Loading NEXUS Intelligence Software",
+              "Establishing Secure Session"
             ];
             let phraseIndex = 0;
-            const updateLoadingText = () => {
-              loadingText.textContent = phrases[phraseIndex];
-              phraseIndex = (phraseIndex + 1) % phrases.length;
+
+            const updateAnnaText = () => {
+              annaText.textContent = phrases[phraseIndex];
+              phraseIndex++;
+              if (phraseIndex >= phrases.length) {
+                clearInterval(textInterval);
+                setTimeout(() => {
+                  annaText.textContent = `Welcome, ${agentID}`;
+                  setTimeout(async () => {
+                    bg.style.transition = 'opacity 0.5s ease-in-out';
+                    bg.style.opacity = '0';
+                    await new Promise(r => setTimeout(r, 500));
+                    bg.remove();
+                    await loadHomeScreen(container);
+                    resolve();
+                  }, 2000);
+                }, 1200);
+              }
             };
-            updateLoadingText();
-            const textInterval = setInterval(updateLoadingText, 1000);
 
-            await new Promise(resolve => setTimeout(resolve, 6000));
+            updateAnnaText();
+            const textInterval = setInterval(updateAnnaText, 1500);
 
-            clearInterval(textInterval);
-            loadingText.textContent = "Access Granted";
-
-            bg.style.transition = 'opacity 0.3s ease-in-out';
-            bg.style.opacity = '0';
-            await new Promise(resolve => setTimeout(resolve, 300));
-
-            bg.remove();
-            await loadHomeScreen(container);
-            resolve();
           } catch (err) {
-            displayError(`Login sequence failed: ${err.message}`, 'LoginScreen', 'ERR_LOGIN_FAIL');
+            displayError(`ANNA failed: ${err.message}`, "LoginScreen", "ERR_LOGIN_FAIL");
             resolve();
           }
         }
       });
+
     } catch (err) {
       updateCheck('loginscreen', 'fail');
-      displayError(`Failed to load login screen: ${err.message}`, 'LoginScreen', 'ERR_LOGIN_LOAD');
+      displayError(`Failed to load login screen: ${err.message}`, "LoginScreen", "ERR_LOGIN_LOAD");
       resolve();
     }
   });
 }
 
-// Typing with random speed + haptic each character
+// Typing with random speed + haptic per character
 function typeText(element, text) {
   return new Promise(resolve => {
     let i = 0;
     function typeChar() {
       if (i < text.length) {
         element.value += text.charAt(i);
-        softHaptic(); // subtle haptic per character
+        softHaptic();
         i++;
         const randomDelay = 50 + Math.random() * 120;
         setTimeout(typeChar, randomDelay);
@@ -197,27 +171,23 @@ function typeText(element, text) {
 
 // Subtle haptic feedback
 function softHaptic() {
-  if (navigator.vibrate) {
-    navigator.vibrate(10); // very short tap feel
-  }
+  if (navigator.vibrate) navigator.vibrate(10);
 }
 
-// Inject CSS
+// Inject CSS for login + ANNA
 function injectLoginCSS() {
   const styleId = 'loginscreen-styles';
   if (document.getElementById(styleId)) return;
 
-  const styleTag = document.createElement('style');
-  styleTag.id = styleId;
-  styleTag.innerHTML = `
+  const style = document.createElement('style');
+  style.id = styleId;
+  style.innerHTML = `
     :root {
       --dark-theme-bg: #000;
       --glass-bg: rgba(255, 255, 255, 0.1);
       --input-border-color: #555;
       --text-color: #f2f2f7;
-      --secondary-text-color: #8e8e93;
       --accent-color: #1E90FF;
-      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
     #login-background {
       height: 100vh;
@@ -228,7 +198,6 @@ function injectLoginCSS() {
       justify-content: center;
       align-items: center;
       color: var(--text-color);
-      font-family: var(--font-family);
       position: relative;
       overflow: hidden;
       transition: opacity 0.3s ease-in-out;
@@ -251,8 +220,8 @@ function injectLoginCSS() {
       left: 0;
       width: 100%;
       height: 100%;
-      background: repeating-linear-gradient(to right, transparent, transparent 99px, rgba(255, 255, 255, 0.05) 100px),
-                  repeating-linear-gradient(to bottom, transparent, transparent 99px, rgba(255, 255, 255, 0.05) 100px);
+      background: repeating-linear-gradient(to right, transparent, transparent 99px, rgba(255,255,255,0.05) 100px),
+                  repeating-linear-gradient(to bottom, transparent, transparent 99px, rgba(255,255,255,0.05) 100px);
       z-index: 0;
       pointer-events: none;
     }
@@ -266,13 +235,6 @@ function injectLoginCSS() {
       padding: 20px;
       width: 90%;
       max-width: 350px;
-    }
-    #form-elements {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 15px;
-      width: 100%;
     }
     .input-group {
       display: flex;
@@ -300,7 +262,6 @@ function injectLoginCSS() {
       font-size: 0.9rem;
       width: 150px;
       box-sizing: border-box;
-      font-family: 'Courier New', Courier, monospace;
     }
     #login-buttons {
       display: flex;
@@ -313,50 +274,61 @@ function injectLoginCSS() {
       margin-right: auto;
     }
     .glassy-btn {
+      font-family: 'Courier New', Courier, monospace;
       padding: 10px;
       border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 8px;
       cursor: pointer;
       font-weight: bold;
-      letter-spacing: 0.2px;
       width: 100%;
       max-width: 140px;
       transition: background 0.2s ease, color 0.2s ease;
-      will-change: background, color;
-      font-family: 'Courier New', Courier, monospace; /* match ID/PW font */
     }
     .glassy-btn.primary {
       color: var(--text-color);
       background: var(--accent-color);
       border-color: var(--accent-color);
     }
-    .glassy-btn.primary:hover {
-      background: #36a4ff;
-    }
     .glassy-btn.outline {
       background: var(--glass-bg);
-      color: rgba(255, 255, 255, 0.5);
+      color: rgba(255,255,255,0.7);
     }
-    .glassy-btn.outline:hover {
-      background: rgba(255, 255, 255, 0.1);
-      color: var(--text-color);
+    .glassy-btn:disabled { opacity: 0.5; cursor: default; }
+
+    #anna-sequence {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      z-index: 3;
     }
-    .glassy-btn:disabled {
-      opacity: 0.5;
-      cursor: default;
+    #anna-orb {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: conic-gradient(
+        from 0deg,
+        #ff0057, #ff7b00, #ffe600, #00ff85, #00cfff, #7a00ff, #ff00d4, #ff0057
+      );
+      background-size: 400% 400%;
+      animation: annaWave 4s infinite linear, annaPulse 2s infinite ease-in-out;
+      box-shadow: 0 0 40px rgba(0, 180, 255, 0.7);
     }
-    #idle-status {
-      margin-top: 10px;
-      font-size: 0.8rem;
-      color: var(--secondary-text-color);
+    #anna-text {
       font-family: 'Courier New', Courier, monospace;
+      font-size: 1rem;
+      color: #ddd;
       text-align: center;
     }
-    #login-title {
-      max-width: 200px;
-      height: auto;
-      margin-bottom: 2px;
-      object-fit: contain;
+    @keyframes annaWave {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    @keyframes annaPulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 30px rgba(0,200,255,0.7); }
+      50% { transform: scale(1.1); box-shadow: 0 0 50px rgba(0,255,200,1); }
     }
     #login-footer {
       position: absolute;
@@ -365,33 +337,7 @@ function injectLoginCSS() {
       color: #ddd;
       text-align: center;
       z-index: 2;
-      line-height: 1.4;
     }
   `;
-  document.head.appendChild(styleTag);
-}
-
-// Particles
-function generateParticles() {
-  const container = document.getElementById('particle-container');
-  if (!container) return;
-
-  const particleCount = 8;
-  for (let i = 0; i < particleCount; i++) {
-    const particle = document.createElement('div');
-    particle.className = 'particle';
-
-    const size = Math.random() * 2 + 1;
-    const top = Math.random() * 100;
-    const left = Math.random() * 100;
-    const duration = Math.random() * 10 + 10;
-
-    particle.style.width = `${size}px`;
-    particle.style.height = `${size}px`;
-    particle.style.top = `${top}vh`;
-    particle.style.left = `${left}vw`;
-    particle.style.animationDuration = `${duration}s`;
-
-    container.appendChild(particle);
-  }
+  document.head.appendChild(style);
 }
