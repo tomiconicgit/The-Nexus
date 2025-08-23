@@ -36,12 +36,6 @@ export async function loadHomeScreen(container) {
     initHeader(container.querySelector('#header-container'));
     initNavigation(container.querySelector('#navigation-container'));
 
-    // Lazy load background image
-    const background = container.querySelector('#homescreen-background');
-    if (!background) throw new Error('Homescreen background element not found.');
-    background.style.backgroundImage = 'url(/assets/images/covert-bg.webp)';
-    background.setAttribute('loading', 'lazy');
-
     const mainContent = container.querySelector('#main-content');
     const headerPill = container.querySelector('#top-header-pill');
     if (mainContent && headerPill) {
@@ -52,24 +46,13 @@ export async function loadHomeScreen(container) {
         } else {
           headerPill.classList.remove('solid');
         }
-      }, { passive: true });
+      });
     }
 
     const homeScreen = container.querySelector('#home-screen');
     if (!homeScreen) throw new Error('Home screen element not found.');
     homeScreen.style.transition = 'opacity 0.5s ease-in-out';
     setTimeout(() => { homeScreen.style.opacity = '1'; }, 10);
-
-    // Verify background image load
-    const img = new Image();
-    img.src = '/assets/images/covert-bg.webp';
-    img.onload = () => {
-      background.classList.add('loaded');
-    };
-    img.onerror = () => {
-      displayError('Failed to load homescreen background image.', 'HomeScreen', 'ERR_BG_LOAD');
-      background.style.background = 'linear-gradient(145deg, #0d0d0d, #1a1a2e)'; // Fallback
-    };
   } catch (err) {
     displayError(`Failed to load home screen: ${err.message}`, 'HomeScreen', 'ERR_HOMESCR', true);
   }
@@ -100,6 +83,7 @@ function injectHomeCSS() {
       color: var(--text-color);
       height: 100vh;
       overflow: hidden;
+      background: linear-gradient(145deg, #0d0d0d, #1a1a2e);
     }
     #homescreen-background {
       position: fixed;
@@ -107,16 +91,8 @@ function injectHomeCSS() {
       left: 0;
       width: 100%;
       height: 100%;
-      background: linear-gradient(145deg, #0d0d0d, #1a1a2e); /* Fallback */
-      background-size: cover;
-      background-position: center;
-      opacity: 0.7; /* Subtle transparency for covert aesthetic */
+      background: linear-gradient(145deg, #0d0d0d, #1a1a2e);
       z-index: -2;
-      transition: opacity 0.5s ease-in-out;
-      will-change: opacity;
-    }
-    #homescreen-background.loaded {
-      opacity: 1;
     }
     #home-screen {
       width: 100%;
