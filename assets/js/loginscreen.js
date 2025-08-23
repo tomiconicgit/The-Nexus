@@ -5,7 +5,7 @@
 // - Handles user input simulation (typing animation) and a covert-themed loading sequence without keyboard input.
 // - Integrates the Nexus seal logo (nexusseal.PNG) as the title.
 // - Optimized for PWA compliance and iOS Safari, targeting ~60fps.
-// - Step 3 Fix Notes: Prevented keyboard on password click with onfocus blur, reduced input length to 180px with ID/Password labels, removed Intelligence Network, moved inputs below Nexus seal.
+// - Step 4 Fix Notes: Moved ID box above password box with matching 180px size, repositioned buttons below as rectangles with curved edges (200px), updated ID/Password to Courier New font, changed monitoring text to "NEXUS software is powered and monitored by TitanOS" and moved down.
 
 import { loadHomeScreen } from './homescreen.js';
 import { updateCheck, displayError } from './errors.js';
@@ -24,7 +24,7 @@ export function loadLoginScreen(container) {
           <div id="fade-overlay"></div>
           <div id="login-content" class="stage-panel" aria-hidden="false">
             <img id="login-title" src="assets/images/nexusseal.PNG" alt="Nexus Intelligence Agency Seal" loading="lazy">
-            <div id="form-elements" style="margin-top: 10px;"> <!-- Move inputs up -->
+            <div id="form-elements" style="margin-top: 10px;">
               <div class="input-group">
                 <label for="username">ID</label>
                 <input type="text" id="username" autocomplete="off" class="login-input" readonly onfocus="this.blur()">
@@ -38,8 +38,8 @@ export function loadLoginScreen(container) {
                 <button class="glassy-btn outline" disabled>Register</button>
               </div>
             </div>
-            <div id="login-monitoring">
-              <span class="nexus-powered">NEXUS</span> System Powered By 
+            <div id="login-monitoring" style="margin-top: 20px;"> <!-- Moved down -->
+              <span class="nexus-powered">NEXUS</span> software is powered and monitored by 
               <span id="mini-titanos">TitanOS</span>
             </div>
           </div>
@@ -86,7 +86,7 @@ export function loadLoginScreen(container) {
           usernameInput.value = '';
           await typeText(usernameInput, 'Agent 173');
           usernameTyped = true;
-          passwordInput.removeAttribute('readonly'); // Enable without focus
+          passwordInput.removeAttribute('readonly');
         }
       });
 
@@ -250,7 +250,7 @@ function injectLoginCSS() {
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      gap: 5px; /* Reduced gap to move inputs up */
+      gap: 5px;
       padding: 20px;
       width: 90%;
       max-width: 320px;
@@ -266,6 +266,7 @@ function injectLoginCSS() {
       font-weight: bold;
       margin-right: 10px;
       font-size: 0.9rem;
+      font-family: 'Courier New', Courier, monospace; /* Agency/code font */
     }
     .login-input {
       padding: 6px;
@@ -273,29 +274,24 @@ function injectLoginCSS() {
       background: #fff;
       color: #000;
       font-size: 0.9rem;
-      width: 180px; /* Reduced length */
+      width: 180px; /* Matching size */
       box-sizing: border-box;
     }
     #login-buttons {
       display: flex;
       justify-content: center;
       gap: 10px;
-      margin-top: -5px; /* Attach to password box */
-      width: 200px; /* Match input length */
-      position: relative; /* For attachment */
+      margin-top: 15px; /* Moved below inputs */
+      width: 200px; /* Match total width from ID to password end */
     }
     .glassy-btn {
       padding: 12px;
       border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 10px;
-      border-top-left-radius: 0;
-      border-top-right-radius: 0;
-      border-bottom-left-radius: 10px;
-      border-bottom-right-radius: 10px;
+      border-radius: 10px; /* Curved edges */
       cursor: pointer;
       font-weight: 600;
       letter-spacing: 0.2px;
-      width: 100px; /* Resized to 100px each */
+      width: 100px; /* Resized to 100px each, total 200px */
       transition: background 0.2s ease, color 0.2s ease;
       will-change: background, color;
     }
@@ -326,7 +322,7 @@ function injectLoginCSS() {
       object-fit: contain;
     }
     #login-subtitle {
-      display: none; /* Remove Intelligence Network */
+      display: none; /* Already removed */
     }
     .nexus-powered {
       font-weight: 700;
