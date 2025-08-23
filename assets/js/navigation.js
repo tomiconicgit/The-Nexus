@@ -51,15 +51,16 @@ function injectNavigationCSS() {
   const styleTag = document.createElement('style');
   styleTag.id = styleId;
   styleTag.innerHTML = `
+    /* New high-detail UI variables */
     :root {
-      --taskbar-bg: rgba(20, 20, 20, 0.6);
-      --menu-bg: rgba(25, 25, 25, 0.85);
-      --top-section-bg: rgba(0, 0, 0, 0.2);
+      --taskbar-bg: rgba(60, 100, 200, 0.15); /* Translucent blue */
+      --menu-bg: rgba(40, 70, 150, 0.2); /* Slightly darker translucent blue */
+      --top-section-bg: rgba(0, 0, 0, 0.3); /* Dark opaque top */
       --highlight-bg: rgba(255, 255, 255, 0.1);
       --blue-highlight-bg: #2979ff;
       --text-color: #f2f2f7;
       --icon-color: #fff;
-      --border-color: rgba(255, 255, 255, 0.2);
+      --border-color: rgba(60, 100, 200, 0.4);
       --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
@@ -73,9 +74,11 @@ function injectNavigationCSS() {
       align-items: center;
       background: var(--taskbar-bg);
       border-top: 1px solid var(--border-color);
-      box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(12px) saturate(180%);
-      -webkit-backdrop-filter: blur(12px) saturate(180%);
+      box-shadow: 
+        0 -4px 12px rgba(0, 0, 0, 0.4), 
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(15px) saturate(180%);
+      -webkit-backdrop-filter: blur(15px) saturate(180%);
       z-index: 900;
     }
 
@@ -90,7 +93,9 @@ function injectNavigationCSS() {
       text-align: center;
       cursor: pointer;
       border-radius: 10px;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 4px 6px rgba(0,0,0,0.4);
+      box-shadow: 
+        inset 0 1px 0 rgba(255,255,255,0.2), 
+        0 4px 6px rgba(0,0,0,0.4);
       position: relative;
       overflow: hidden;
       transition: all 0.2s ease-in-out;
@@ -129,7 +134,9 @@ function injectNavigationCSS() {
       background: var(--menu-bg);
       border: 1px solid var(--border-color);
       border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      box-shadow: 
+        0 4px 12px rgba(0,0,0,0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
       opacity: 0;
       transform: scaleY(0.8) skewY(-2deg);
       transform-origin: bottom center;
@@ -138,8 +145,8 @@ function injectNavigationCSS() {
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      backdrop-filter: blur(15px);
-      -webkit-backdrop-filter: blur(15px);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
     }
     #start-menu.show {
       opacity: 1;
@@ -162,6 +169,7 @@ function injectNavigationCSS() {
       color: var(--text-color);
       font-weight: 600;
       font-size: 16px;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
     }
     .top-controls {
       display: flex;
@@ -172,6 +180,7 @@ function injectNavigationCSS() {
       cursor: pointer;
       font-size: 1.1em;
       transition: color 0.2s ease;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
     }
     .top-controls i:hover {
       color: var(--blue-highlight-bg);
@@ -193,10 +202,11 @@ function injectNavigationCSS() {
       color: var(--text-color);
       font-size: 15px;
       cursor: pointer;
-      transition: background 0.2s ease-in-out;
+      transition: background 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
     }
     #start-menu-app-list li:hover {
       background: var(--highlight-bg);
+      box-shadow: inset 5px 0 0 var(--blue-highlight-bg);
     }
     #start-menu-app-list li i {
       width: 20px;
