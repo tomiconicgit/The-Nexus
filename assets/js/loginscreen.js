@@ -5,6 +5,7 @@
 // - Handles user input simulation (typing animation) and a covert-themed loading sequence.
 // - Integrates the Nexus seal logo (nexusseal.PNG) as the title.
 // - Optimized for PWA compliance and iOS Safari, targeting ~60fps.
+// - Step 1 Fix Notes: Removed "OPERATIVE ID" and "PASSWORD" labels, centered/shortened inputs to 200px, moved buttons below with 200px width and curved corners, restored NEXUS gradient and TitanOS font, moved footer above fade.
 
 import { loadHomeScreen } from './homescreen.js';
 import { updateCheck, displayError } from './errors.js';
@@ -26,11 +27,9 @@ export function loadLoginScreen(container) {
             <h2 id="login-subtitle">Intelligence Network</h2>
             <div id="form-elements">
               <div class="input-group">
-                <label for="username">OPERATIVE ID</label>
                 <input type="text" id="username" autocomplete="off" class="login-input" readonly>
               </div>
               <div class="input-group">
-                <label for="password">PASSWORD</label>
                 <input type="password" id="password" autocomplete="off" class="login-input" readonly>
               </div>
               <div id="login-buttons">
@@ -39,7 +38,8 @@ export function loadLoginScreen(container) {
               </div>
             </div>
             <div id="login-monitoring">
-              <span class="nexus-powered"><strong>NEXUS</strong> powered by TitanOS</span>
+              <span class="nexus-powered">NEXUS</span> System Powered By 
+              <span id="mini-titanos">TitanOS</span>
             </div>
           </div>
           <div id="login-sequence" class="stage-panel" aria-hidden="true">
@@ -86,7 +86,6 @@ export function loadLoginScreen(container) {
           await typeText(usernameInput, 'Agent 173');
           usernameTyped = true;
           passwordInput.removeAttribute('readonly');
-          // Removed passwordInput.focus() to avoid auto keyboard popup
         }
       });
 
@@ -202,7 +201,7 @@ function injectLoginCSS() {
       --text-color: #f2f2f7;
       --secondary-text-color: #8e8e93;
       --accent-color: #1E90FF;
-      --font-family: Arial, sans-serif;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
     #login-background {
       height: 100vh;
@@ -225,7 +224,7 @@ function injectLoginCSS() {
       width: 100%;
       height: 50%;
       background: linear-gradient(to top, black, transparent);
-      z-index: 2;
+      z-index: 1;
       pointer-events: none;
     }
     #grid-overlay {
@@ -236,11 +235,11 @@ function injectLoginCSS() {
       height: 100%;
       background: repeating-linear-gradient(to right, transparent, transparent 99px, rgba(255, 255, 255, 0.05) 100px),
                   repeating-linear-gradient(to bottom, transparent, transparent 99px, rgba(255, 255, 255, 0.05) 100px);
-      z-index: 1;
+      z-index: 0;
       pointer-events: none;
     }
     #login-content {
-      z-index: 3;
+      z-index: 2;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -252,10 +251,9 @@ function injectLoginCSS() {
     }
     .input-group {
       display: flex;
-      align-items: center;
+      justify-content: center; /* Center the inputs */
       width: 100%;
-      max-width: 200px;
-      gap: 10px;
+      margin: 0 auto; /* Center horizontally */
     }
     .login-input {
       padding: 6px;
@@ -263,8 +261,50 @@ function injectLoginCSS() {
       background: #fff;
       color: #000;
       font-size: 0.9rem;
-      flex-grow: 1;
+      width: 200px; /* Shortened length */
       box-sizing: border-box;
+    }
+    #login-buttons {
+      display: flex;
+      justify-content: center; /* Center the buttons */
+      gap: 10px;
+      margin-top: 15px; /* Space below inputs */
+      width: 100%;
+    }
+    .glassy-btn {
+      padding: 12px; /* Slightly bigger */
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px; /* Curved corners */
+      border-top-left-radius: 0; /* Straight top */
+      border-top-right-radius: 0; /* Straight top */
+      border-bottom-left-radius: 10px; /* Curved bottom */
+      border-bottom-right-radius: 10px; /* Curved bottom */
+      cursor: pointer;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+      width: 200px; /* Match input length */
+      transition: background 0.2s ease, color 0.2s ease;
+      will-change: background, color;
+    }
+    .glassy-btn.primary {
+      color: var(--text-color);
+      background: var(--accent-color);
+      border-color: var(--accent-color);
+    }
+    .glassy-btn.primary:hover {
+      background: #36a4ff;
+    }
+    .glassy-btn.outline {
+      background: var(--glass-bg);
+      color: rgba(255, 255, 255, 0.5);
+    }
+    .glassy-btn.outline:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-color);
+    }
+    .glassy-btn:disabled {
+      opacity: 0.5;
+      cursor: default;
     }
     #login-title {
       max-width: 200px;
@@ -278,10 +318,27 @@ function injectLoginCSS() {
       margin-bottom: 15px;
     }
     .nexus-powered {
-      color: #aaa;
-      font-weight: 500;
+      font-weight: 700;
       font-size: 0.9rem;
-      text-transform: none;
+      background: linear-gradient(to right, #1E90FF, #800080); /* Gradient for NEXUS */
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    #mini-titanos {
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--text-color);
+      text-shadow: 0 0 3px rgba(30, 144, 255, 0.3); /* Match TitanOS logo */
+    }
+    #login-footer {
+      position: absolute;
+      bottom: 20px;
+      font-size: 0.8rem;
+      color: #ddd;
+      text-align: center;
+      z-index: 2; /* Above fade-overlay */
+      line-height: 1.4;
     }
   `;
   document.head.appendChild(styleTag);
