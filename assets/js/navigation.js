@@ -1,43 +1,3 @@
-// assets/js/navigation.js
-
-function displayError(message, component, code) {
-  console.error(`[${component} - ${code}]: ${message}`);
-}
-
-export function initNavigation(container) {
-  try {
-    container.innerHTML = `
-      <div id="taskbar">
-        <button id="start-button">Start</button>
-        <div id="task-icons">
-          <div class="task-icon">🌐</div>
-          <div class="task-icon">📂</div>
-          <div class="task-icon">💻</div>
-        </div>
-        <div id="system-tray">
-          <span id="clock">09:41</span>
-        </div>
-      </div>
-
-      <div id="start-menu" class="hidden">
-        <ul>
-          <li>Mission Control</li>
-          <li>Encrypted Terminal</li>
-          <li>Global Map</li>
-          <li>Data Vault</li>
-          <li>Agency Mail</li>
-        </ul>
-      </div>
-    `;
-
-    injectNavigationCSS();
-    initClock();
-    initStartMenu();
-  } catch (err) {
-    displayError(`Failed to initialize navigation: ${err.message}`, 'Navigation', 'ERR_NAVIGATION_INIT');
-  }
-}
-
 function injectNavigationCSS() {
   const styleId = 'navigation-styles';
   if (document.getElementById(styleId)) return;
@@ -51,13 +11,14 @@ function injectNavigationCSS() {
       bottom: 0;
       left: 0;
       width: 100%;
-      height: 50px;
+      height: 60px; /* slightly taller for comfort */
       display: flex;
       align-items: center;
-      background: rgba(15, 15, 15, 0.95);
+      background: rgba(20, 20, 20, 0.6);
       border-top: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(6px);
+      box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(12px) saturate(180%);
+      border-radius: 12px 12px 0 0;
       font-family: monospace;
       z-index: 1000;
     }
@@ -65,10 +26,10 @@ function injectNavigationCSS() {
     /* Start Button */
     #start-button {
       height: 100%;
-      width: 90px;
+      width: 110px; /* slightly wider for thumb reach */
       margin: 0;
       padding: 0;
-      background: linear-gradient(145deg, #1a73e8, #185abc);
+      background: rgba(30, 115, 230, 0.8);
       border: none;
       color: white;
       font-size: 16px;
@@ -78,12 +39,14 @@ function injectNavigationCSS() {
       overflow: hidden;
       position: relative;
       border-right: 1px solid rgba(255,255,255,0.2);
-      box-shadow: inset 0 0 4px rgba(255,255,255,0.15), 0 2px 6px rgba(0,0,0,0.4);
-      transition: background 0.2s ease-in-out;
+      box-shadow: inset 0 0 6px rgba(255,255,255,0.15), 0 2px 6px rgba(0,0,0,0.4);
+      border-radius: 10px;
+      transition: background 0.2s ease-in-out, transform 0.15s ease;
     }
 
     #start-button:hover {
-      background: linear-gradient(145deg, #2a83f8, #276acc);
+      background: rgba(40, 140, 250, 0.9);
+      transform: scale(1.02);
     }
 
     /* Shine Effect */
@@ -120,14 +83,16 @@ function injectNavigationCSS() {
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(255, 255, 255, 0.06);
-      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
       cursor: pointer;
-      transition: background 0.2s ease-in-out;
+      transition: background 0.2s ease-in-out, transform 0.15s ease;
+      backdrop-filter: blur(8px);
     }
 
     .task-icon:hover {
       background: rgba(255, 255, 255, 0.15);
+      transform: scale(1.1);
     }
 
     /* System Tray */
@@ -141,14 +106,14 @@ function injectNavigationCSS() {
     /* Start Menu */
     #start-menu {
       position: fixed;
-      bottom: 55px;
+      bottom: 65px; /* adjusted for taller taskbar */
       left: 0;
-      width: 240px;
-      background: rgba(20, 20, 20, 0.97);
+      width: 260px;
+      background: rgba(25, 25, 25, 0.85);
       border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 4px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.6);
-      backdrop-filter: blur(8px);
+      border-radius: 12px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+      backdrop-filter: blur(14px) saturate(180%);
       overflow: hidden;
       transform: translateY(20px);
       opacity: 0;
@@ -168,11 +133,12 @@ function injectNavigationCSS() {
     }
 
     #start-menu li {
-      padding: 10px 15px;
+      padding: 12px 18px;
       color: rgba(255,255,255,0.9);
-      font-size: 14px;
+      font-size: 15px;
       cursor: pointer;
       transition: background 0.2s ease-in-out;
+      border-radius: 8px;
     }
 
     #start-menu li:hover {
@@ -180,36 +146,4 @@ function injectNavigationCSS() {
     }
   `;
   document.head.appendChild(styleTag);
-}
-
-function initClock() {
-  function updateClock() {
-    const clock = document.getElementById("clock");
-    if (!clock) return;
-    const now = new Date();
-    clock.textContent = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-  }
-  updateClock();
-  setInterval(updateClock, 60000);
-}
-
-function initStartMenu() {
-  const startButton = document.getElementById("start-button");
-  const startMenu = document.getElementById("start-menu");
-
-  startButton.addEventListener("click", () => {
-    // Shine animation
-    startButton.classList.add("shine");
-    setTimeout(() => startButton.classList.remove("shine"), 400);
-
-    // Toggle start menu
-    startMenu.classList.toggle("show");
-  });
-
-  // Optional: click outside to close
-  document.addEventListener("click", (e) => {
-    if (!startButton.contains(e.target) && !startMenu.contains(e.target)) {
-      startMenu.classList.remove("show");
-    }
-  });
 }
