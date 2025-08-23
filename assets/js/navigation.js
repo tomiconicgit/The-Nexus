@@ -16,7 +16,7 @@ export function initNavigation(container) {
         <div id="start-menu-top">
           <div class="user-profile">
             <i class="fas fa-user-circle"></i>
-            <span class="user-name">AgentX</span>
+            <span class="user-name">Applications</span>
           </div>
           <div class="top-controls">
             <i class="fas fa-cog"></i>
@@ -53,9 +53,10 @@ function injectNavigationCSS() {
   styleTag.innerHTML = `
     /* General Styles for new UI */
     :root {
-      --taskbar-bg: rgba(255, 255, 255, 0.1);
-      --menu-bg: rgba(255, 255, 255, 0.1);
-      --section-bg: rgba(255, 255, 255, 0.2);
+      --taskbar-bg: rgba(255, 255, 255, 0.05); /* Made a tad darker */
+      --menu-bg: rgba(255, 255, 255, 0.05); /* Made a tad darker */
+      --top-section-bg: rgba(0, 0, 0, 0.2);  /* New variable for a darker top section */
+      --highlight-bg: rgba(255, 255, 255, 0.1); /* Darker highlight color */
       --blue-highlight-bg: #2979ff;
       --text-color: #f2f2f7;
       --icon-color: #fff;
@@ -82,7 +83,8 @@ function injectNavigationCSS() {
     #start-button {
       height: 100%;
       width: 110px;
-      background: var(--blue-highlight-bg);
+      /* 3D button styling */
+      background: linear-gradient(to bottom, #4090ff, #2979ff);
       border: none;
       color: var(--text-color);
       font-size: 16px;
@@ -90,13 +92,19 @@ function injectNavigationCSS() {
       text-align: center;
       cursor: pointer;
       border-radius: 0;
-      transition: background 0.2s ease-in-out, transform 0.15s ease;
+      box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.2), 
+        0 4px 6px rgba(0, 0, 0, 0.4);
+      transition: all 0.2s ease-in-out;
     }
     #start-button:hover {
-      background: #4090ff;
+      background: linear-gradient(to bottom, #50a0ff, #36a4ff);
     }
     #start-button:active {
-      transform: scale(0.98);
+      transform: translateY(2px);
+      box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.2), 
+        0 2px 3px rgba(0, 0, 0, 0.4);
     }
     
     #start-menu {
@@ -130,6 +138,7 @@ function injectNavigationCSS() {
       align-items: center;
       padding: 15px;
       border-bottom: 1px solid var(--border-color);
+      background: var(--top-section-bg);
     }
     .user-profile {
       display: flex;
@@ -172,7 +181,7 @@ function injectNavigationCSS() {
       transition: background 0.2s ease-in-out;
     }
     #start-menu-app-list li:hover {
-      background: rgba(255, 255, 255, 0.1);
+      background: var(--highlight-bg);
     }
     #start-menu-app-list li i {
       width: 20px;
