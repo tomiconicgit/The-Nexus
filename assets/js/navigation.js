@@ -10,41 +10,35 @@ export function initNavigation(container) {
       <div id="taskbar">
         <button id="start-button">Start</button>
         <div id="system-tray">
-          <div class="tray-icon" id="network-status">
-            <i class="fas fa-wifi"></i>
-          </div>
-          <div class="tray-icon" id="notifications">
-            <i class="fas fa-bell"></i>
-          </div>
+          <div class="tray-icon" id="network-status"><i class="fas fa-wifi"></i></div>
+          <div class="tray-icon" id="notifications"><i class="fas fa-bell"></i></div>
           <span id="clock">09:41</span>
         </div>
       </div>
-
       <div id="system-tray-panel" class="hidden">
         <div class="widget-header">
-            <h4>System Status</h4>
+          <h4>System Status</h4>
         </div>
         <div class="widget">
-            <h5>Network Activity</h5>
-            <div class="network-graph"></div>
+          <h5>Network Activity</h5>
+          <div class="network-graph"></div>
         </div>
         <div class="widget">
-            <h5>Active Transfers</h5>
-            <div class="transfer-item">
-                <span class="file-name">Briefing_001.zip</span>
-                <div class="progress-bar-container">
-                    <div class="progress-bar" style="width: 75%;"></div>
-                </div>
+          <h5>Active Transfers</h5>
+          <div class="transfer-item">
+            <span class="file-name">Briefing_001.zip</span>
+            <div class="progress-bar-container">
+              <div class="progress-bar" style="width: 75%;"></div>
             </div>
-            <div class="transfer-item">
-                <span class="file-name">Intel_Report.enc</span>
-                <div class="progress-bar-container">
-                    <div class="progress-bar" style="width: 20%;"></div>
-                </div>
+          </div>
+          <div class="transfer-item">
+            <span class="file-name">Intel_Report.enc</span>
+            <div class="progress-bar-container">
+              <div class="progress-bar" style="width: 20%;"></div>
             </div>
+          </div>
         </div>
       </div>
-
       <div id="start-menu" class="hidden">
         <div id="start-menu-top">
           <div class="user-profile">
@@ -76,7 +70,7 @@ export function initNavigation(container) {
             <ul class="recent-list">
               <li><i class="far fa-file-alt"></i> Project Chimera Briefing</li>
               <li><i class="fas fa-lock"></i> Encryption Log #134</li>
-              <li><i class="far fa-map"></i> Classified Sat-Image </li>
+              <li><i class="far fa-map"></i> Classified Sat-Image</li>
               <li><i class="far fa-envelope"></i> Re: Operation Ghost</li>
             </ul>
           </div>
@@ -101,25 +95,15 @@ function injectNavigationCSS() {
   styleTag.id = styleId;
   styleTag.innerHTML = `
     :root {
-      --taskbar-bg: rgba(18,18,20,0.9);
-      --menu-bg: rgba(25,25,30,0.95);
-      --top-section-bg: rgba(0,0,0,0.25);
-      --highlight-bg: rgba(40,100,255,0.08);
+      --taskbar-bg: rgba(18, 18, 20, 0.9);
+      --menu-bg: rgba(25, 25, 30, 0.95);
+      --top-section-bg: rgba(0, 0, 0, 0.25);
+      --highlight-bg: rgba(40, 100, 255, 0.08);
       --accent-color: #2979ff;
       --text-color: #f2f2f7;
-      --border-color: rgba(255,255,255,0.1);
+      --border-color: rgba(255, 255, 255, 0.1);
       --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
-
-    /* --- General UI & Body Styles --- */
-    body {
-      margin: 0;
-      height: 100vh;
-      font-family: var(--font-family);
-      background: linear-gradient(145deg, #0d0d0d, #1a1a2e);
-    }
-
-    /* --- Taskbar --- */
     #taskbar {
       position: fixed;
       bottom: 0;
@@ -131,32 +115,26 @@ function injectNavigationCSS() {
       justify-content: space-between;
       background: var(--taskbar-bg);
       border-top: 1px solid var(--border-color);
-      box-shadow: 0 -4px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
-      backdrop-filter: blur(15px) saturate(180%);
-      -webkit-backdrop-filter: blur(15px) saturate(180%);
+      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.3);
       padding: 0 12px;
       z-index: 900;
       box-sizing: border-box;
     }
-
-    /* --- Start Button --- */
     #start-button {
       height: 48px;
       min-width: 110px;
-      background: linear-gradient(to bottom, #1f65ff, #0f3dff);
+      background: linear-gradient(to bottom, #2979ff, #0f3dff);
       border: none;
       border-radius: 10px;
       color: var(--text-color);
       font-weight: bold;
       font-size: 16px;
       cursor: pointer;
-      position: relative;
-      overflow: hidden;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 4px 6px rgba(0,0,0,0.4);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
       transition: all 0.2s ease-in-out;
     }
     #start-button:hover {
-      background: linear-gradient(to bottom, #2979ff, #0f4dff);
+      background: linear-gradient(to bottom, #3b8cff, #1f4dff);
       transform: scale(1.02);
     }
     #start-button:active {
@@ -169,7 +147,7 @@ function injectNavigationCSS() {
       left: -75%;
       width: 50%;
       height: 100%;
-      background: linear-gradient(120deg, transparent, rgba(255,255,255,0.3), transparent);
+      background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.3), transparent);
       transform: skewX(-20deg);
     }
     #start-button.shine::after {
@@ -179,31 +157,27 @@ function injectNavigationCSS() {
       0% { left: -75%; }
       100% { left: 125%; }
     }
-
-    /* --- System Tray --- */
     #system-tray {
       display: flex;
       align-items: center;
       gap: 10px;
-      background: rgba(20,20,25,0.5);
+      background: rgba(20, 20, 25, 0.5);
       padding: 5px 12px;
       border-radius: 16px;
-      box-shadow: inset 0 1px 2px rgba(255,255,255,0.05), 0 2px 4px rgba(0,0,0,0.4);
       color: var(--text-color);
       font-size: 14px;
     }
-    .tray-icon {
+    .tray-icon, .top-controls i, #start-menu-app-list i, .recent-list i {
       font-size: 1.2em;
       transition: all 0.15s ease-in-out;
       cursor: pointer;
     }
-    .tray-icon:hover {
+    .tray-icon:hover, .top-controls i:hover {
       filter: brightness(1.3);
     }
     #clock {
       margin-left: 6px;
     }
-
     #network-status.transferring i {
       color: #34c759;
       animation: transferPulse 1.5s infinite;
@@ -213,7 +187,6 @@ function injectNavigationCSS() {
       50% { transform: scale(1.2); opacity: 0.8; }
       100% { transform: scale(1); opacity: 1; }
     }
-
     #notifications {
       position: relative;
     }
@@ -229,18 +202,14 @@ function injectNavigationCSS() {
       border: 1px solid var(--taskbar-bg);
       box-shadow: 0 0 5px #ff3b30;
     }
-
-    /* --- System Tray Panel --- */
     #system-tray-panel {
       position: fixed;
       bottom: 70px;
       right: 10px;
-      width: 300px;
+      width: 280px;
       background: var(--menu-bg);
       border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
-      backdrop-filter: blur(18px) saturate(180%);
-      -webkit-backdrop-filter: blur(18px) saturate(180%);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
       opacity: 0;
       transform: scale(0.95);
       transform-origin: bottom right;
@@ -269,7 +238,7 @@ function injectNavigationCSS() {
     }
     .network-graph {
       height: 60px;
-      background: url('path/to/network-graph.png');
+      background: linear-gradient(to right, rgba(52, 199, 89, 0.3), rgba(52, 199, 89, 0.1));
       background-size: cover;
       opacity: 0.6;
     }
@@ -284,7 +253,7 @@ function injectNavigationCSS() {
     }
     .progress-bar-container {
       height: 5px;
-      background: rgba(255,255,255,0.1);
+      background: rgba(255, 255, 255, 0.1);
       border-radius: 5px;
       overflow: hidden;
     }
@@ -293,32 +262,26 @@ function injectNavigationCSS() {
       background: var(--accent-color);
       transition: width 0.3s ease-in-out;
     }
-
-    /* --- Start Menu --- */
     #start-menu {
       position: fixed;
       bottom: 60px;
       left: 10px;
-      width: 500px; /* Increased width for two columns */
+      width: 380px;
       background: var(--menu-bg);
       border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
       opacity: 0;
-      transform: scaleY(0.85) skewY(-1deg);
-      transform-origin: bottom center;
-      transition: transform 0.35s cubic-bezier(0.25,1,0.5,1), opacity 0.25s ease-in-out;
+      transform: translateY(10px);
+      transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
       z-index: 899;
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      backdrop-filter: blur(18px) saturate(180%);
-      -webkit-backdrop-filter: blur(18px) saturate(180%);
     }
     #start-menu.show {
       opacity: 1;
-      transform: scaleY(1) skewY(0deg);
+      transform: translateY(0);
     }
-    /* New: Two-column layout */
     .start-menu-content {
       display: flex;
       flex-grow: 1;
@@ -331,7 +294,7 @@ function injectNavigationCSS() {
     #start-menu-right {
       flex: 1;
       border-left: 1px solid var(--border-color);
-      background: rgba(0,0,0,0.25);
+      background: var(--top-section-bg);
       padding: 10px 15px;
     }
     .right-panel-header {
@@ -363,8 +326,6 @@ function injectNavigationCSS() {
       width: 18px;
       text-align: center;
     }
-
-    /* --- Menu Top Section --- */
     #start-menu-top {
       display: flex;
       justify-content: space-between;
@@ -380,7 +341,6 @@ function injectNavigationCSS() {
       color: var(--text-color);
       font-weight: 600;
       font-size: 16px;
-      text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
     }
     .top-controls {
       display: flex;
@@ -390,13 +350,10 @@ function injectNavigationCSS() {
       color: var(--text-color);
       cursor: pointer;
       font-size: 1.1em;
-      transition: color 0.2s ease;
     }
     .top-controls i:hover {
       color: var(--accent-color);
     }
-
-    /* --- App List --- */
     #start-menu-app-list ul {
       list-style: none;
       margin: 0;
@@ -425,14 +382,18 @@ function injectNavigationCSS() {
 }
 
 function initClock() {
-  function updateClock() {
-    const clock = document.getElementById("clock");
-    if (!clock) return;
-    const now = new Date();
-    clock.textContent = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+  try {
+    const clock = document.getElementById('clock');
+    if (!clock) throw new Error('Clock element not found.');
+    function updateClock() {
+      const now = new Date();
+      clock.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+    updateClock();
+    setInterval(updateClock, 60000);
+  } catch (err) {
+    displayError(`Failed to initialize clock: ${err.message}`, 'Navigation', 'ERR_CLOCK_INIT');
   }
-  updateClock();
-  setInterval(updateClock, 60000);
 }
 
 function initStartMenu() {
@@ -446,14 +407,6 @@ function initStartMenu() {
       startMenu.classList.toggle('show');
       startButton.classList.add('shine');
       setTimeout(() => startButton.classList.remove('shine'), 400);
-
-      const rect = startButton.getBoundingClientRect();
-      startMenu.style.left = rect.left + 'px';
-      startMenu.style.bottom = (window.innerHeight - rect.top + 5) + 'px';
-
-      startButton.style.transition = 'transform 0.2s cubic-bezier(0.25,1,0.5,1)';
-      startButton.style.transform = 'scale(1.05)';
-      setTimeout(() => startButton.style.transform = 'scale(1)', 200);
     });
 
     document.addEventListener('click', (e) => {
@@ -467,19 +420,24 @@ function initStartMenu() {
 }
 
 function initSystemTrayPanel() {
-  const trayIcons = document.querySelectorAll('#system-tray .tray-icon, #clock');
-  const trayPanel = document.getElementById('system-tray-panel');
+  try {
+    const trayIcons = document.querySelectorAll('#system-tray .tray-icon, #clock');
+    const trayPanel = document.getElementById('system-tray-panel');
+    if (!trayPanel || trayIcons.length === 0) throw new Error('System tray panel or icons not found.');
 
-  trayIcons.forEach(icon => {
-    icon.addEventListener('click', (e) => {
-      e.stopPropagation();
-      trayPanel.classList.toggle('show');
+    trayIcons.forEach(icon => {
+      icon.addEventListener('click', (e) => {
+        e.stopPropagation();
+        trayPanel.classList.toggle('show');
+      });
     });
-  });
 
-  document.addEventListener('click', (e) => {
-    if (!trayPanel.contains(e.target) && !e.target.closest('#system-tray')) {
-      trayPanel.classList.remove('show');
-    }
-  });
+    document.addEventListener('click', (e) => {
+      if (!trayPanel.contains(e.target) && !e.target.closest('#system-tray')) {
+        trayPanel.classList.remove('show');
+      }
+    });
+  } catch (err) {
+    displayError(`Failed to initialize system tray panel: ${err.message}`, 'Navigation', 'ERR_SYSTEMTRAY_INIT');
+  }
 }
