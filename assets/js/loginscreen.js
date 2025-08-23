@@ -5,7 +5,7 @@
 // - Handles user input simulation (typing animation) and a covert-themed loading sequence without keyboard input.
 // - Integrates the Nexus seal logo (nexusseal.PNG) as the title.
 // - Optimized for PWA compliance and iOS Safari, targeting ~60fps.
-// - Step 4 Fix Notes: Moved ID box above password box with matching 180px size, repositioned buttons below as rectangles with curved edges (200px), updated ID/Password to Courier New font, changed monitoring text to "NEXUS software is powered and monitored by TitanOS" and moved down.
+// - Step 5 Fix Notes: Moved username box right to align above password box, reinforced zoom prevention, removed NEXUS software text.
 
 import { loadHomeScreen } from './homescreen.js';
 import { updateCheck, displayError } from './errors.js';
@@ -25,7 +25,7 @@ export function loadLoginScreen(container) {
           <div id="login-content" class="stage-panel" aria-hidden="false">
             <img id="login-title" src="assets/images/nexusseal.PNG" alt="Nexus Intelligence Agency Seal" loading="lazy">
             <div id="form-elements" style="margin-top: 10px;">
-              <div class="input-group">
+              <div class="input-group" style="margin-left: 20px;"> <!-- Shift right to align above password -->
                 <label for="username">ID</label>
                 <input type="text" id="username" autocomplete="off" class="login-input" readonly onfocus="this.blur()">
               </div>
@@ -37,10 +37,6 @@ export function loadLoginScreen(container) {
                 <button class="glassy-btn primary" id="login-btn" disabled>Login</button>
                 <button class="glassy-btn outline" disabled>Register</button>
               </div>
-            </div>
-            <div id="login-monitoring" style="margin-top: 20px;"> <!-- Moved down -->
-              <span class="nexus-powered">NEXUS</span> software is powered and monitored by 
-              <span id="mini-titanos">TitanOS</span>
             </div>
           </div>
           <div id="login-sequence" class="stage-panel" aria-hidden="true">
@@ -217,7 +213,7 @@ function injectLoginCSS() {
       position: relative;
       overflow: hidden;
       transition: opacity 0.3s ease-in-out;
-      touch-action: none; /* Prevent scrolling */
+      touch-action: manipulation; /* Prevent zoom/scroll with better control */
       -webkit-user-select: none; /* Prevent selection */
     }
     meta[name=viewport] {
@@ -324,19 +320,8 @@ function injectLoginCSS() {
     #login-subtitle {
       display: none; /* Already removed */
     }
-    .nexus-powered {
-      font-weight: 700;
-      font-size: 0.9rem;
-      background: linear-gradient(to right, #1C2526, #C0C0C0); /* Agency/authority vibe */
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-    #mini-titanos {
-      font-weight: 700;
-      font-size: 0.9rem;
-      color: var(--text-color);
-      text-shadow: 0 0 3px rgba(30, 144, 255, 0.3);
+    #login-monitoring {
+      display: none; /* Remove NEXUS software text */
     }
     #login-footer {
       position: absolute;
