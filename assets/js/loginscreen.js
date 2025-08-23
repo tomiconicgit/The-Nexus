@@ -3,10 +3,10 @@
 // Dependencies: ./homescreen.js (for post-login transition), ./errors.js (for error handling and status updates).
 // Notes: 
 // - Handles user input simulation (typing animation) and a covert-themed loading sequence.
-// - Integrates the Nexus seal logo (nexusseal.PNG) as the title, with error handling for load failures.
+// - Integrates the Nexus seal logo (nexusseal.PNG) as the centerpiece, with a minimalist redesign.
 // - Optimized for PWA compliance and iOS Safari, targeting ~60fps.
 // - Build version (0.153) is tracked for deployment consistency.
-// - Fix Notes: Updated to address ERR_SEAL_LOAD by using relative path (assets/images/nexusseal.PNG); added object-fit for image display.
+// - Design Notes: Removed IMG_8860.jpeg background; redesigned with radial gradient and centered logo.
 // AI Usage: This file initializes the login interface; modify CSS or animation timings if aesthetic changes are needed.
 
 import { loadHomeScreen } from './homescreen.js'; // Imports home screen loader for post-login transition.
@@ -23,8 +23,6 @@ export function loadLoginScreen(container) {
       updateCheck('loginscreen', 'ok'); // Updates component status to 'ok' in errors.js.
       container.innerHTML = `
         <div id="login-background">
-          <div id="top-background"></div>
-          <div id="bottom-background"></div>
           <div id="particle-container"></div>
           <div id="login-content" class="stage-panel" aria-hidden="false">
             <img id="login-title" src="assets/images/nexusseal.PNG" alt="Nexus Intelligence Agency Seal" loading="lazy">
@@ -34,7 +32,6 @@ export function loadLoginScreen(container) {
               <input type="password" id="password" placeholder="Password">
               <div id="login-buttons">
                 <button class="glassy-btn primary" id="login-btn">Login</button>
-                <button class="glassy-btn outline" disabled>Register</button>
               </div>
             </div>
             <div id="login-monitoring">
@@ -62,7 +59,7 @@ export function loadLoginScreen(container) {
 
       // Verifies seal logo load with enhanced error logging.
       const logoImg = new Image();
-      const logoUrl = 'assets/images/nexusseal.PNG'; // Relative path, no leading /.
+      const logoUrl = 'assets/images/nexusseal.PNG'; // Relative path.
       logoImg.src = logoUrl;
       logoImg.onload = () => {
         const loginTitle = container.querySelector('#login-title');
@@ -180,7 +177,7 @@ function injectLoginCSS() {
     #login-background {
       height: 100vh;
       width: 100vw;
-      background: var(--dark-theme-bg);
+      background: radial-gradient(circle at center, #1a1a1a 0%, #0d0d0d 100%);
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -191,36 +188,6 @@ function injectLoginCSS() {
       overflow: hidden;
       transition: opacity 0.3s ease-in-out;
       will-change: opacity;
-    }
-    #top-background {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 50vh;
-      background-image: url('assets/images/IMG_8860.jpeg');
-      background-size: cover;
-      background-position: center;
-      filter: brightness(0.5) contrast(1.2);
-      z-index: 0;
-    }
-    #top-background::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 50%;
-      background: linear-gradient(to top, var(--dark-theme-bg) 0%, transparent 80%);
-    }
-    #bottom-background {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 50vh;
-      background: var(--dark-theme-bg);
-      z-index: 1;
     }
     #particle-container {
       position: absolute;
@@ -233,7 +200,7 @@ function injectLoginCSS() {
     }
     .particle {
       position: absolute;
-      background: #1E90FF; /* Simplified for performance */
+      background: #1E90FF;
       border-radius: 50%;
       animation: float 15s infinite ease-in-out;
       will-change: transform;
@@ -250,10 +217,14 @@ function injectLoginCSS() {
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      gap: 15px;
-      padding: 20px;
+      gap: 20px;
+      padding: 30px;
+      background: var(--dark-glass-bg);
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(10px);
       width: 90%;
-      max-width: 340px;
+      max-width: 350px;
       transition: opacity 0.3s ease-in-out;
       will-change: opacity;
     }
@@ -273,13 +244,13 @@ function injectLoginCSS() {
     #form-elements {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 15px;
       width: 100%;
     }
     input {
-      padding: 10px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 30px;
+      padding: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 25px;
       background: var(--glass-bg);
       color: var(--text-color);
       outline: none;
@@ -291,23 +262,23 @@ function injectLoginCSS() {
       will-change: border-color, box-shadow;
     }
     input::placeholder {
-      color: rgba(255, 255, 255, 0.3);
+      color: rgba(255, 255, 255, 0.4);
     }
     input:focus {
       border-color: var(--accent-color);
-      box-shadow: 0 0 8px rgba(30, 144, 255, 0.4);
+      box-shadow: 0 0 10px rgba(30, 144, 255, 0.5);
     }
     #login-buttons {
       display: flex;
-      gap: 8px;
-      margin-top: 8px;
+      gap: 10px;
+      margin-top: 10px;
       width: 100%;
     }
     .glassy-btn {
       flex: 1;
-      padding: 10px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 30px;
+      padding: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 25px;
       cursor: pointer;
       font-weight: 600;
       letter-spacing: 0.2px;
@@ -322,29 +293,17 @@ function injectLoginCSS() {
     .glassy-btn.primary:hover {
       background: #36a4ff;
     }
-    .glassy-btn.outline {
-      background: var(--dark-glass-bg);
-      color: rgba(255, 255, 255, 0.5);
-    }
-    .glassy-btn.outline:hover {
-      background: rgba(255, 255, 255, 0.1);
-      color: var(--text-color);
-    }
-    .glassy-btn:disabled {
-      opacity: 0.5;
-      cursor: default;
-    }
     #login-monitoring {
       margin-top: auto;
       margin-bottom: 15px;
-      font-size: 0.7rem;
+      font-size: 0.8rem;
       color: var(--secondary-text-color);
       text-align: center;
       z-index: 2;
     }
     .nexus-powered {
       font-weight: 700;
-      font-size: 0.8rem;
+      font-size: 0.9rem;
       background: linear-gradient(to right, #1E90FF, #800080);
       -webkit-background-clip: text;
       background-clip: text;
@@ -352,30 +311,30 @@ function injectLoginCSS() {
     }
     #mini-titanos {
       font-weight: 700;
-      font-size: 0.8rem;
+      font-size: 0.9rem;
       color: var(--text-color);
-      text-shadow: 0 0 3px rgba(30, 144, 255, 0.3);
+      text-shadow: 0 0 4px rgba(30, 144, 255, 0.4);
     }
     #login-title {
-      max-width: 200px;
+      max-width: 250px;
       height: auto;
-      margin-bottom: 10px;
+      margin-bottom: 20px;
       z-index: 2;
-      object-fit: contain; /* Ensures image fits within dimensions */
+      object-fit: contain;
     }
     #login-title.loaded {
       opacity: 1;
       transition: opacity 0.5s ease-in-out;
     }
     #login-subtitle {
-      font-size: 1.1rem;
+      font-size: 1.2rem;
       color: var(--secondary-text-color);
-      margin-bottom: 15px;
+      margin-bottom: 20px;
       z-index: 2;
     }
     #radar-loader {
-      width: 60px;
-      height: 60px;
+      width: 70px;
+      height: 70px;
       position: relative;
       z-index: 2;
     }
@@ -384,7 +343,7 @@ function injectLoginCSS() {
       position: absolute;
       width: 100%;
       height: 100%;
-      border: 2px solid rgba(30, 144, 255, 0.3);
+      border: 2px solid rgba(30, 144, 255, 0.4);
       border-radius: 50%;
       animation: radarPulse 2s infinite ease-out;
       will-change: transform, opacity;
@@ -400,7 +359,7 @@ function injectLoginCSS() {
       will-change: transform;
     }
     @keyframes radarPulse {
-      0% { transform: scale(0.5); opacity: 0.5; }
+      0% { transform: scale(0.5); opacity: 0.6; }
       100% { transform: scale(1.5); opacity: 0; }
     }
     @keyframes radarSpin {
@@ -414,16 +373,16 @@ function injectLoginCSS() {
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      gap: 10px;
+      gap: 15px;
       z-index: 2;
       transition: opacity 0.3s ease-in-out;
       will-change: opacity;
     }
     #loading-text {
       color: var(--text-color);
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       font-weight: 600;
-      letter-spacing: 0.4px;
+      letter-spacing: 0.5px;
       opacity: 0;
       animation: text-fade-in 0.8s forwards;
       animation-delay: 0.3s;
@@ -433,7 +392,7 @@ function injectLoginCSS() {
     }
     #deployment {
       position: absolute;
-      bottom: 40px;
+      bottom: 20px;
       font-size: 0.7rem;
       color: var(--secondary-text-color);
       text-align: center;
