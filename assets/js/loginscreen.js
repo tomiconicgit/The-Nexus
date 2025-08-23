@@ -1,12 +1,12 @@
 // assets/js/loginscreen.js
 // Purpose: Manages the login screen UI and animation sequence for TitanOS, simulating a secure authentication process.
 // Dependencies: ./homescreen.js (for post-login transition), ./errors.js (for error handling and status updates).
-// Notes: 
+// Notes:
 // - Handles user input simulation (typing animation) and a covert-themed loading sequence.
-// - Integrates the Nexus seal logo (nexusseal.PNG) as the centerpiece, with a minimalist redesign.
+// - Integrates the Nexus seal logo (nexusseal.PNG) as the title, with error handling for load failures.
 // - Optimized for PWA compliance and iOS Safari, targeting ~60fps.
 // - Build version (0.153) is tracked for deployment consistency.
-// - Design Notes: Removed IMG_8860.jpeg background; redesigned with radial gradient and centered logo.
+// - Fix Notes: Updated to address ERR_SEAL_LOAD by using relative path (assets/images/nexusseal.PNG); added object-fit for image display.
 // AI Usage: This file initializes the login interface; modify CSS or animation timings if aesthetic changes are needed.
 
 import { loadHomeScreen } from './homescreen.js'; // Imports home screen loader for post-login transition.
@@ -23,30 +23,38 @@ export function loadLoginScreen(container) {
       updateCheck('loginscreen', 'ok'); // Updates component status to 'ok' in errors.js.
       container.innerHTML = `
         <div id="login-background">
-          <div id="particle-container"></div>
+          <div id="grid-overlay"></div>
           <div id="login-content" class="stage-panel" aria-hidden="false">
             <img id="login-title" src="assets/images/nexusseal.PNG" alt="Nexus Intelligence Agency Seal" loading="lazy">
             <h2 id="login-subtitle">Intelligence Network</h2>
             <div id="form-elements">
-              <input type="text" id="username" placeholder="Username" autocomplete="off">
-              <input type="password" id="password" placeholder="Password">
+              <div class="input-group">
+                <label for="username">AGENT ID</label>
+                <input type="text" id="username" autocomplete="off" class="login-input">
+              </div>
+              <div class="input-group">
+                <label for="password">PASSWORD</label>
+                <input type="password" id="password" class="login-input">
+              </div>
               <div id="login-buttons">
                 <button class="glassy-btn primary" id="login-btn">Login</button>
+                <button class="glassy-btn outline" disabled>Register</button>
               </div>
             </div>
             <div id="login-monitoring">
-              <span class="nexus-powered">NEXUS</span> System Powered By 
-              <span id="mini-titanos">TitanOS</span>
+              <span class="nexus-powered">nexus is powered by TitanOS</span>
             </div>
           </div>
           <div id="login-sequence" class="stage-panel" aria-hidden="true">
             <div id="radar-loader"></div>
             <div id="loading-text"></div>
           </div>
-          <div id="deployment">Build v${BUILD_VERSION}</div>
           <div id="login-footer">
-            <div>Secure Software | All Rights Reserved</div>
-            <div>&copy; 2025 | Iconic Developments OS</div>
+            You are entering a secured United States Government system, which may be used only <br>
+            for authorized purposes. Modification of any information on this system is subject <br>
+            to a criminal prosecution. The agency monitors all usage of this system. <br>
+            All persons are hereby notified that the use of this system constitutes consent to such <br>
+            monitoring and audition.
           </div>
         </div>
       `;
@@ -59,7 +67,7 @@ export function loadLoginScreen(container) {
 
       // Verifies seal logo load with enhanced error logging.
       const logoImg = new Image();
-      const logoUrl = 'assets/images/nexusseal.PNG'; // Relative path.
+      const logoUrl = 'assets/images/nexusseal.PNG';
       logoImg.src = logoUrl;
       logoImg.onload = () => {
         const loginTitle = container.querySelector('#login-title');
@@ -92,8 +100,8 @@ export function loadLoginScreen(container) {
           await new Promise(resolve => {
             const usernameInput = container.querySelector('#username');
             const passwordInput = container.querySelector('#password');
-            const usernameText = 'AgentSmith';
-            const passwordText = 'SecurePass123';
+            const usernameText = 'Agent 173';
+            const passwordText = '••••••••';
             let i = 0;
             function type() {
               if (i < usernameText.length) {
@@ -165,19 +173,18 @@ function injectLoginCSS() {
   styleTag.id = styleId;
   styleTag.innerHTML = `
     :root {
-      --dark-theme-bg: #0d0d0d;
-      --glass-bg: rgba(0, 0, 0, 0.3);
-      --dark-glass-bg: rgba(0, 0, 0, 0.6);
+      --dark-theme-bg: #000;
+      --glass-bg: rgba(255, 255, 255, 0.1);
+      --input-border-color: #555;
       --text-color: #f2f2f7;
       --secondary-text-color: #8e8e93;
       --accent-color: #1E90FF;
-      --secondary-accent: #800080;
-      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --font-family: Arial, sans-serif;
     }
     #login-background {
       height: 100vh;
       width: 100vw;
-      background: radial-gradient(circle at center, #1a1a1a 0%, #0d0d0d 100%);
+      background: url('assets/images/world-map.jpg') no-repeat center center/cover;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -189,6 +196,16 @@ function injectLoginCSS() {
       transition: opacity 0.3s ease-in-out;
       will-change: opacity;
     }
+    #grid-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: repeating-linear-gradient(to right, transparent, transparent 99px, rgba(255, 255, 255, 0.05) 100px), repeating-linear-gradient(to bottom, transparent, transparent 99px, rgba(255, 255, 255, 0.05) 100px);
+      z-index: 1;
+      pointer-events: none;
+    }
     #particle-container {
       position: absolute;
       top: 0;
@@ -196,7 +213,7 @@ function injectLoginCSS() {
       width: 100%;
       height: 100%;
       pointer-events: none;
-      z-index: 1;
+      z-index: 2;
     }
     .particle {
       position: absolute;
@@ -211,20 +228,16 @@ function injectLoginCSS() {
       100% { transform: translateY(0) scale(0.8); }
     }
     #login-content {
-      z-index: 2;
+      z-index: 3;
       position: relative;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
       gap: 20px;
-      padding: 30px;
-      background: var(--dark-glass-bg);
-      border-radius: 15px;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(10px);
+      padding: 20px;
       width: 90%;
-      max-width: 350px;
+      max-width: 400px;
       transition: opacity 0.3s ease-in-out;
       will-change: opacity;
     }
@@ -246,39 +259,46 @@ function injectLoginCSS() {
       flex-direction: column;
       gap: 15px;
       width: 100%;
+      align-items: center;
     }
-    input {
-      padding: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 25px;
-      background: var(--glass-bg);
-      color: var(--text-color);
-      outline: none;
-      font-size: 1.1rem;
+    .input-group {
+      display: flex;
+      align-items: center;
       width: 100%;
+      max-width: 300px;
+      gap: 10px;
+    }
+    .input-group label {
+      color: #fff;
+      font-weight: bold;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .login-input {
+      padding: 8px;
+      border: 1px solid var(--input-border-color);
+      background: #fff;
+      color: #000;
+      outline: none;
+      font-size: 1rem;
+      flex-grow: 1;
       box-sizing: border-box;
-      text-align: center;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
-      will-change: border-color, box-shadow;
     }
-    input::placeholder {
-      color: rgba(255, 255, 255, 0.4);
-    }
-    input:focus {
-      border-color: var(--accent-color);
-      box-shadow: 0 0 10px rgba(30, 144, 255, 0.5);
+    .login-input::placeholder {
+      color: #aaa;
     }
     #login-buttons {
       display: flex;
-      gap: 10px;
-      margin-top: 10px;
+      gap: 8px;
+      margin-top: 8px;
       width: 100%;
+      max-width: 300px;
     }
     .glassy-btn {
       flex: 1;
-      padding: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 25px;
+      padding: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 30px;
       cursor: pointer;
       font-weight: 600;
       letter-spacing: 0.2px;
@@ -293,57 +313,55 @@ function injectLoginCSS() {
     .glassy-btn.primary:hover {
       background: #36a4ff;
     }
+    .glassy-btn.outline {
+      background: var(--dark-glass-bg);
+      color: rgba(255, 255, 255, 0.5);
+    }
+    .glassy-btn.outline:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-color);
+    }
+    .glassy-btn:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
     #login-monitoring {
-      margin-top: auto;
-      margin-bottom: 15px;
+      margin-top: 15px;
       font-size: 0.8rem;
-      color: var(--secondary-text-color);
+      color: #aaa;
       text-align: center;
-      z-index: 2;
+      z-index: 3;
     }
     .nexus-powered {
-      font-weight: 700;
+      color: #aaa;
+      font-weight: 500;
       font-size: 0.9rem;
-      background: linear-gradient(to right, #1E90FF, #800080);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-    #mini-titanos {
-      font-weight: 700;
-      font-size: 0.9rem;
-      color: var(--text-color);
-      text-shadow: 0 0 4px rgba(30, 144, 255, 0.4);
     }
     #login-title {
-      max-width: 250px;
+      max-width: 200px;
       height: auto;
-      margin-bottom: 20px;
-      z-index: 2;
+      margin-bottom: 10px;
+      z-index: 3;
       object-fit: contain;
     }
-    #login-title.loaded {
-      opacity: 1;
-      transition: opacity 0.5s ease-in-out;
-    }
     #login-subtitle {
-      font-size: 1.2rem;
-      color: var(--secondary-text-color);
-      margin-bottom: 20px;
-      z-index: 2;
+      font-size: 1.5rem;
+      color: #fff;
+      margin-bottom: 25px;
+      z-index: 3;
     }
     #radar-loader {
-      width: 70px;
-      height: 70px;
+      width: 60px;
+      height: 60px;
       position: relative;
-      z-index: 2;
+      z-index: 3;
     }
     #radar-loader::before {
       content: '';
       position: absolute;
       width: 100%;
       height: 100%;
-      border: 2px solid rgba(30, 144, 255, 0.4);
+      border: 2px solid rgba(30, 144, 255, 0.3);
       border-radius: 50%;
       animation: radarPulse 2s infinite ease-out;
       will-change: transform, opacity;
@@ -359,7 +377,7 @@ function injectLoginCSS() {
       will-change: transform;
     }
     @keyframes radarPulse {
-      0% { transform: scale(0.5); opacity: 0.6; }
+      0% { transform: scale(0.5); opacity: 0.5; }
       100% { transform: scale(1.5); opacity: 0; }
     }
     @keyframes radarSpin {
@@ -373,16 +391,16 @@ function injectLoginCSS() {
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      gap: 15px;
-      z-index: 2;
+      gap: 10px;
+      z-index: 3;
       transition: opacity 0.3s ease-in-out;
       will-change: opacity;
     }
     #loading-text {
       color: var(--text-color);
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       font-weight: 600;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.4px;
       opacity: 0;
       animation: text-fade-in 0.8s forwards;
       animation-delay: 0.3s;
@@ -390,21 +408,14 @@ function injectLoginCSS() {
     @keyframes text-fade-in {
       to { opacity: 1; }
     }
-    #deployment {
-      position: absolute;
-      bottom: 20px;
-      font-size: 0.7rem;
-      color: var(--secondary-text-color);
-      text-align: center;
-      z-index: 2;
-    }
     #login-footer {
       position: absolute;
-      bottom: 10px;
+      bottom: 20px;
+      font-size: 0.8rem;
+      color: #ddd;
       text-align: center;
-      font-size: 0.7rem;
-      color: var(--secondary-text-color);
-      z-index: 2;
+      z-index: 3;
+      line-height: 1.4;
     }
   `;
   document.head.appendChild(styleTag);
@@ -418,12 +429,12 @@ function generateParticles() {
     return;
   }
 
-  const particleCount = 8; // Reduced for performance optimization.
+  const particleCount = 8;
   for (let i = 0; i < particleCount; i++) {
     const particle = document.createElement('div');
     particle.className = 'particle';
 
-    const size = Math.random() * 2 + 1; // Smaller size for efficiency.
+    const size = Math.random() * 2 + 1;
     const top = Math.random() * 100;
     const left = Math.random() * 100;
     const duration = Math.random() * 10 + 10;
