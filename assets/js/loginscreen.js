@@ -2,7 +2,7 @@
 import { loadHomeScreen } from './homescreen.js';
 import { updateCheck, displayError } from './errors.js';
 
-const BUILD_VERSION = "0.173";
+const BUILD_VERSION = "0.175";
 let usernameTyped = false;
 let passwordTyped = false;
 
@@ -16,7 +16,6 @@ export function loadLoginScreen(container) {
           <div id="grid-overlay"></div>
           <div id="fade-overlay"></div>
 
-          <!-- LOGIN PANEL -->
           <div id="login-content" class="stage-panel" aria-hidden="false">
             <img id="login-title" src="assets/images/nexusseal.PNG" alt="Nexus Intelligence Agency Seal" loading="lazy">
             <div id="form-elements">
@@ -35,7 +34,6 @@ export function loadLoginScreen(container) {
             </div>
           </div>
 
-          <!-- SEQUENCE PANEL -->
           <div id="sequence-panel" class="stage-panel" aria-hidden="true">
             <div id="sequence-text"></div>
             <div id="sequence-bar-container">
@@ -67,10 +65,8 @@ export function loadLoginScreen(container) {
         return;
       }
 
-      // Animate world map subtly
       animateBackground(bg);
 
-      // Username typing
       usernameInput.addEventListener('click', async () => {
         if (!usernameTyped) {
           usernameInput.value = '';
@@ -80,7 +76,6 @@ export function loadLoginScreen(container) {
         }
       });
 
-      // Password typing
       passwordInput.addEventListener('click', async () => {
         if (usernameTyped && !passwordTyped) {
           passwordInput.value = '';
@@ -90,7 +85,6 @@ export function loadLoginScreen(container) {
         }
       });
 
-      // LOGIN sequence
       loginBtn.addEventListener('click', async () => {
         if (!passwordTyped) return;
         softHaptic();
@@ -113,7 +107,6 @@ export function loadLoginScreen(container) {
             await wait(400);
           }
 
-          // Welcome text fade
           seqText.innerHTML = `<span id="welcome-text">Welcome, ${agentID}</span>`;
           const welcomeEl = container.querySelector('#welcome-text');
           welcomeEl.style.opacity = 0;
@@ -150,7 +143,7 @@ export function loadLoginScreen(container) {
   });
 }
 
-// Typing animation
+// Utilities
 function typeText(el, text) {
   return new Promise((res) => {
     let i = 0;
@@ -164,11 +157,9 @@ function typeText(el, text) {
   });
 }
 
-// Haptic feedback
 function softHaptic() { if (navigator.vibrate) navigator.vibrate(10); }
 function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-// KB simulation + progress bar
 function animateKBWithBar(textEl, barEl, phrase) {
   return new Promise((res) => {
     const targetKB = Math.floor(100 + Math.random() * 900);
@@ -178,7 +169,6 @@ function animateKBWithBar(textEl, barEl, phrase) {
     const interval = setInterval(() => {
       kb += Math.floor(Math.random() * speed);
       if (kb >= targetKB) kb = targetKB;
-
       textEl.textContent = `${phrase} ... ${kb}KB`;
       const pct = (kb / targetKB) * 100;
       barEl.style.width = pct + '%';
@@ -192,7 +182,6 @@ function animateKBWithBar(textEl, barEl, phrase) {
   });
 }
 
-// Background subtle animation
 function animateBackground(bgEl) {
   let scale = 1;
   let direction = 1;
@@ -203,7 +192,6 @@ function animateBackground(bgEl) {
   }, 30);
 }
 
-// Inject CSS
 function injectLoginCSS() {
   const id = 'loginscreen-styles';
   if (document.getElementById(id)) return;
@@ -218,7 +206,7 @@ function injectLoginCSS() {
   const style = document.createElement('style');
   style.id = id;
   style.innerHTML = `
-    :root{
+    :root {
       --glass-bg: rgba(255,255,255,0.1);
       --input-border-color:#555;
       --text-color:#f2f2f7;
@@ -226,11 +214,9 @@ function injectLoginCSS() {
       --font-ui:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
       --font-agency:'Courier New',Courier,monospace;
     }
-    html, body { touch-action: manipulation; -webkit-text-size-adjust: 100%; user-select: none; }
-
+    html,body { touch-action: manipulation; -webkit-text-size-adjust:100%; user-select:none; }
     .stage-panel[aria-hidden="true"]{ display:none; }
     .stage-panel[aria-hidden="false"]{ display:flex; }
-
     #login-background{
       height:100vh;width:100vw;
       background: url('assets/images/world-map.jpg') no-repeat center center/cover;
@@ -239,23 +225,32 @@ function injectLoginCSS() {
       transition:opacity .3s ease-in-out;
       filter:brightness(1.15) contrast(1.05);
     }
-
     #fade-overlay{position:absolute;bottom:0;left:0;width:100%;height:35%;background:linear-gradient(to top, rgba(0,0,0,.5), transparent);z-index:1;pointer-events:none;}
     #grid-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:
       repeating-linear-gradient(to right,transparent,transparent 99px,rgba(255,255,255,.03) 100px),
       repeating-linear-gradient(to bottom,transparent,transparent 99px,rgba(255,255,255,.03) 100px);
       z-index:0;pointer-events:none;
     }
-
     #login-content{z-index:2;flex-direction:column;justify-content:center;align-items:center;gap:14px;padding:20px;width:90%;max-width:360px;opacity:0;animation:fadeInLogin .8s ease forwards;}
     @keyframes fadeInLogin{ from{opacity:0;} to{opacity:1;} }
-
     #login-title{max-width:170px;width:70%;height:auto;object-fit:contain;margin-bottom:6px;transition:transform .2s ease,opacity .2s ease;}
     #login-title.loaded{ opacity:1; transform:none; }
-
     #form-elements{display:flex;flex-direction:column;align-items:center;gap:14px;width:100%;}
     .input-group{display:flex;justify-content:center;align-items:center;width:100%;max-width:300px;margin:0 auto;gap:10px;}
     .input-group label{color:var(--text-color);font-weight:bold;width:70px;text-align:right;font-size:16px;font-family:var(--font-agency);flex-shrink:0;}
     .login-input{font-size:16px;padding:6px;border:1px solid var(--input-border-color);background:#fff;color:#000;width:160px;box-sizing:border-box;touch-action:manipulation;-webkit-user-select:none;-webkit-touch-callout:none;}
     #login-buttons{display:flex;justify-content:center;gap:10px;margin-top:12px;width:100%;max-width:300px;margin-left:auto;margin-right:auto;}
-    .glassy-btn{font-family:var(--font-agency);padding:10px;border:1px solid rgba(255,255,255,.1);border-radius:8px;cursor:pointer;font-weight:bold;width:100%;max-width:140px;transition:background .2s ease,color .2s
+    .glassy-btn{font-family:var(--font-agency);padding:10px;border:1px solid rgba(255,255,255,.1);border-radius:8px;cursor:pointer;font-weight:bold;width:100%;max-width:140px;transition:background .2s ease,color .2s ease;}
+    .glassy-btn.primary{color:var(--text-color);background:var(--accent-color);border-color:var(--accent-color);}
+    .glassy-btn.primary:hover{background:#36a4ff;}
+    .glassy-btn.outline{background:var(--glass-bg);color:rgba(255,255,255,0.5);}
+    .glassy-btn.outline:hover{background:rgba(255,255,255,0.1);color:var(--text-color);}
+    .glassy-btn:disabled{opacity:0.5;cursor:default;}
+    #sequence-panel{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);flex-direction:column;align-items:center;gap:10px;z-index:3;}
+    #sequence-text{color:var(--text-color);font-family:var(--font-agency);font-size:16px;}
+    #sequence-bar-container{width:200px;height:6px;background:rgba(255,255,255,0.2);border-radius:3px;margin-top:6px;}
+    #sequence-bar{height:6px;width:0%;background:var(--accent-color);border-radius:3px;transition:width 0.2s linear;}
+    #login-footer{position:absolute;bottom:20px;font-size:0.8rem;color:#ddd;text-align:center;z-index:2;line-height:1.4;}
+  `;
+  document.head.appendChild(style);
+}
