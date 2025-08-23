@@ -13,64 +13,26 @@ export function initNavigation(container) {
         <button id="start-button">Start</button>
       </div>
       <div id="start-menu" class="hidden">
-        <div class="menu-section">
-          <h3>Visible Section</h3>
-          <div class="menu-items-container blue-section">
-            <div class="menu-item-icon">
-              <i class="fas fa-wifi"></i>
-              <span class="icon-text">100%</span>
-            </div>
-            <div class="menu-item-icon">
-              <i class="fas fa-battery-full"></i>
-            </div>
-            <div class="menu-item-icon">
-              <i class="fas fa-user-circle"></i>
-            </div>
-            <span class="menu-item-text">Tue 10:36 AM</span>
+        <div id="start-menu-top">
+          <div class="user-profile">
+            <i class="fas fa-user-circle"></i>
+            <span class="user-name">AgentX</span>
+          </div>
+          <div class="top-controls">
+            <i class="fas fa-cog"></i>
+            <i class="fas fa-power-off"></i>
           </div>
         </div>
-        <div class="menu-section">
-          <h3>Hidden Section</h3>
-          <div class="menu-items-container">
-            <div class="menu-item-icon">
-              <i class="fas fa-volume-up"></i>
-            </div>
-            <div class="menu-item-icon">
-              <i class="fas fa-moon"></i>
-            </div>
-            <div class="menu-item-icon">
-              <i class="fas fa-thumbtack"></i>
-            </div>
-            <div class="menu-item-icon">
-              <i class="fas fa-cloud"></i>
-            </div>
-            <div class="menu-item-icon">
-              <i class="fas fa-keyboard"></i>
-            </div>
-            <div class="menu-item-icon">
-              <i class="fas fa-bell"></i>
-            </div>
-            <div class="menu-item-icon">
-              <i class="fas fa-user-circle"></i>
-            </div>
-          </div>
-        </div>
-        <div class="menu-section">
-          <h3>Always-Hidden Section</h3>
-          <div class="menu-items-container">
-            <div class="menu-item-icon">
-              <i class="fas fa-thumbtack"></i>
-            </div>
-            <div class="menu-item-icon">
-              <i class="fas fa-lock"></i>
-            </div>
-            <div class="menu-item-icon">
-              <i class="fas fa-moon"></i>
-            </div>
-            <div class="menu-item-icon">
-              <i class="fas fa-search"></i>
-            </div>
-          </div>
+        <div id="start-menu-app-list">
+          <ul>
+            <li><i class="fas fa-compass"></i> Mission Control</li>
+            <li><i class="fas fa-terminal"></i> Encrypted Terminal</li>
+            <li><i class="fas fa-globe-americas"></i> Global Map</li>
+            <li><i class="fas fa-database"></i> Data Vault</li>
+            <li><i class="fas fa-envelope"></i> Agency Mail</li>
+            <li><i class="fas fa-chart-line"></i> Market Monitor</li>
+            <li><i class="fas fa-shield-alt"></i> Secure Hub</li>
+          </ul>
         </div>
       </div>
     `;
@@ -91,8 +53,8 @@ function injectNavigationCSS() {
   styleTag.innerHTML = `
     /* General Styles for new UI */
     :root {
-      --taskbar-bg: rgba(30, 30, 30, 0.8);
-      --menu-bg: rgba(40, 40, 40, 0.9);
+      --taskbar-bg: rgba(26, 26, 26, 0.8);
+      --menu-bg: rgba(26, 26, 26, 0.8);
       --section-bg: rgba(60, 60, 60, 0.5);
       --blue-highlight-bg: #2979ff;
       --text-color: #f2f2f7;
@@ -114,6 +76,8 @@ function injectNavigationCSS() {
       box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.3);
       font-family: var(--font-family);
       z-index: 900;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
     #start-button {
       height: 100%;
@@ -138,8 +102,8 @@ function injectNavigationCSS() {
     #start-menu {
       position: fixed;
       bottom: 60px;
-      left: 10px; /* Adjusted position to be on the left */
-      width: 380px;
+      left: 10px;
+      width: 280px;
       background: var(--menu-bg);
       border: 1px solid var(--border-color);
       border-radius: 12px;
@@ -148,54 +112,71 @@ function injectNavigationCSS() {
       transform: translateY(10px);
       transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
       z-index: 899;
-      padding: 15px;
+      padding: 0;
       display: flex;
       flex-direction: column;
-      gap: 15px;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
     #start-menu.show {
       opacity: 1;
       transform: translateY(0);
     }
     
-    .menu-section {
+    #start-menu-top {
       display: flex;
-      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px;
+      border-bottom: 1px solid var(--border-color);
     }
-    .menu-section h3 {
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--secondary-text-color, #8e8e93);
-      text-transform: uppercase;
-      margin-bottom: 8px;
-    }
-    .menu-items-container {
-      background: var(--section-bg);
-      border-radius: 8px;
-      padding: 8px 12px;
+    .user-profile {
       display: flex;
       align-items: center;
       gap: 10px;
+      color: var(--text-color);
+      font-weight: 600;
+      font-size: 16px;
     }
-    .blue-section {
-      background: var(--blue-highlight-bg);
+    .top-controls {
+      display: flex;
+      gap: 15px;
     }
-    .menu-item-icon {
-      width: 32px;
-      height: 32px;
+    .top-controls i {
+      color: var(--text-color);
+      cursor: pointer;
+      font-size: 1.1em;
+      transition: color 0.2s ease;
+    }
+    .top-controls i:hover {
+      color: var(--blue-highlight-bg);
+    }
+    
+    #start-menu-app-list {
+      padding: 10px 0;
+    }
+    #start-menu-app-list ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    #start-menu-app-list li {
       display: flex;
       align-items: center;
-      justify-content: center;
-      color: var(--icon-color);
-    }
-    .menu-item-icon .icon-text {
-        font-size: 12px;
-        margin-left: 4px;
-    }
-    .menu-item-text {
+      gap: 15px;
+      padding: 12px 18px;
       color: var(--text-color);
-      font-size: 14px;
-      margin-left: auto;
+      font-size: 15px;
+      cursor: pointer;
+      transition: background 0.2s ease-in-out;
+    }
+    #start-menu-app-list li:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    #start-menu-app-list li i {
+      width: 20px;
+      text-align: center;
     }
   `;
   document.head.appendChild(styleTag);
@@ -227,5 +208,3 @@ function initStartMenu() {
     displayError(`Failed to initialize start menu: ${err.message}`, 'Navigation', 'ERR_STARTMENU_INIT');
   }
 }
-
-// Function calls for the clock and app icons were removed
