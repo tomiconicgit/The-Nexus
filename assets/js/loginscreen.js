@@ -13,6 +13,8 @@ import { loadHomeScreen } from './homescreen.js'; // Imports home screen loader 
 import { updateCheck, displayError } from './errors.js'; // Imports error handling utilities.
 
 const BUILD_VERSION = "0.153"; // Defines the current build version for display and tracking.
+let usernameTyped = false;
+let passwordTyped = false;
 
 export function loadLoginScreen(container) {
   // Purpose: Initializes and renders the login screen with interactive elements.
@@ -29,15 +31,15 @@ export function loadLoginScreen(container) {
             <h2 id="login-subtitle">Intelligence Network</h2>
             <div id="form-elements">
               <div class="input-group">
-                <label for="username">AGENT ID</label>
-                <input type="text" id="username" autocomplete="off" class="login-input">
+                <label for="username">OPERATIVE ID</label>
+                <input type="text" id="username" autocomplete="off" class="login-input" readonly>
               </div>
               <div class="input-group">
                 <label for="password">PASSWORD</label>
-                <input type="password" id="password" class="login-input">
+                <input type="password" id="password" autocomplete="off" class="login-input" readonly>
               </div>
               <div id="login-buttons">
-                <button class="glassy-btn primary" id="login-btn">Login</button>
+                <button class="glassy-btn primary" id="login-btn" disabled>Login</button>
                 <button class="glassy-btn outline" disabled>Register</button>
               </div>
             </div>
@@ -50,11 +52,8 @@ export function loadLoginScreen(container) {
             <div id="loading-text"></div>
           </div>
           <div id="login-footer">
-            You are entering a secured United States Government system, which may be used only <br>
-            for authorized purposes. Modification of any information on this system is subject <br>
-            to a criminal prosecution. The agency monitors all usage of this system. <br>
-            All persons are hereby notified that the use of this system constitutes consent to such <br>
-            monitoring and audition.
+            <div>Secure Software | All Rights Reserved</div>
+            <div>&copy; 2025 | Iconic Developments OS</div>
           </div>
         </div>
       `;
@@ -75,85 +74,87 @@ export function loadLoginScreen(container) {
       };
       logoImg.onerror = () => displayError(`Failed to load Nexus seal logo from ${logoUrl}. Check file path or format.`, 'LoginScreen', 'ERR_SEAL_LOAD', true);
 
+      const usernameInput = container.querySelector('#username');
+      const passwordInput = container.querySelector('#password');
       const loginBtn = container.querySelector('#login-btn');
-      if (!loginBtn) {
-        displayError('Login button not found. Please refresh the page.', 'LoginScreen', 'ERR_LOGIN_BTN');
+
+      if (!usernameInput || !passwordInput || !loginBtn) {
+        displayError('Login form elements not found. Please refresh the page.', 'LoginScreen', 'ERR_FORM_ELEMENTS');
         resolve();
         return;
       }
 
+      // New Login Mechanics
+      usernameInput.addEventListener('click', async () => {
+        if (!usernameTyped) {
+          usernameInput.value = '';
+          await typeText(usernameInput, 'Agent 173', 80);
+          usernameTyped = true;
+          passwordInput.removeAttribute('readonly');
+          passwordInput.focus();
+        }
+      });
+
+      passwordInput.addEventListener('click', async () => {
+        if (usernameTyped && !passwordTyped) {
+          passwordInput.value = '';
+          await typeText(passwordInput, '••••••••', 80);
+          passwordTyped = true;
+          loginBtn.removeAttribute('disabled');
+        }
+      });
+
       loginBtn.addEventListener('click', async () => {
-        if (navigator.vibrate) navigator.vibrate([50, 30, 50]); // Short haptic feedback on tap.
-        try {
-          const formContainer = container.querySelector('#login-content');
-          const sequenceContainer = container.querySelector('#login-sequence');
-          const bg = loginBackground;
-          const loadingText = container.querySelector('#loading-text');
+        if (passwordTyped) {
+          if (navigator.vibrate) navigator.vibrate([50, 30, 50]); // Short haptic feedback on tap.
+          try {
+            const formContainer = container.querySelector('#login-content');
+            const sequenceContainer = container.querySelector('#login-sequence');
+            const bg = loginBackground;
+            const loadingText = container.querySelector('#loading-text');
 
-          if (!formContainer || !sequenceContainer || !bg || !loadingText) {
-            displayError('Login sequence elements not found.', 'LoginScreen', 'ERR_LOGIN_SEQ');
-            resolve();
-            return;
-          }
-
-          // Optimized typing animation using requestAnimationFrame for smoothness.
-          await new Promise(resolve => {
-            const usernameInput = container.querySelector('#username');
-            const passwordInput = container.querySelector('#password');
-            const usernameText = 'Agent 173';
-            const passwordText = '••••••••';
-            let i = 0;
-            function type() {
-              if (i < usernameText.length) {
-                usernameInput.value += usernameText.charAt(i);
-                i++;
-                requestAnimationFrame(type);
-              } else if (i < usernameText.length + passwordText.length) {
-                passwordInput.value += passwordText.charAt(i - usernameText.length);
-                i++;
-                requestAnimationFrame(type);
-              } else {
-                resolve();
-              }
+            if (!formContainer || !sequenceContainer || !bg || !loadingText) {
+              displayError('Login sequence elements not found.', 'LoginScreen', 'ERR_LOGIN_SEQ');
+              resolve();
+              return;
             }
-            requestAnimationFrame(type);
-          });
+            
+            // Transition with minimal reflow
+            formContainer.setAttribute('aria-hidden', 'true');
+            sequenceContainer.setAttribute('aria-hidden', 'false');
+            if (navigator.vibrate) navigator.vibrate([100, 50, 100]); // Longer vibration
 
-          // Transition with minimal reflow
-          formContainer.setAttribute('aria-hidden', 'true');
-          sequenceContainer.setAttribute('aria-hidden', 'false');
-          if (navigator.vibrate) navigator.vibrate([100, 50, 100]); // Longer vibration
+            // Optimized loading sequence
+            const phrases = [
+              "Scanning Credentials",
+              "Decrypting Access",
+              "Verifying Identity",
+              "Establishing Secure Link"
+            ];
+            let phraseIndex = 0;
+            const updateLoadingText = () => {
+              loadingText.textContent = phrases[phraseIndex];
+              phraseIndex = (phraseIndex + 1) % phrases.length;
+            };
+            updateLoadingText();
+            const textInterval = setInterval(updateLoadingText, 800);
 
-          // Optimized loading sequence
-          const phrases = [
-            "Scanning Credentials",
-            "Decrypting Access",
-            "Verifying Identity",
-            "Establishing Secure Link"
-          ];
-          let phraseIndex = 0;
-          const updateLoadingText = () => {
-            loadingText.textContent = phrases[phraseIndex];
-            phraseIndex = (phraseIndex + 1) % phrases.length;
-          };
-          updateLoadingText();
-          const textInterval = setInterval(updateLoadingText, 800);
+            await new Promise(resolve => setTimeout(resolve, 4000)); // 4s sequence
 
-          await new Promise(resolve => setTimeout(resolve, 4000)); // 4s sequence
+            clearInterval(textInterval);
+            loadingText.textContent = "Access Granted";
 
-          clearInterval(textInterval);
-          loadingText.textContent = "Access Granted";
+            bg.style.transition = 'opacity 0.3s ease-in-out';
+            bg.style.opacity = '0';
+            await new Promise(resolve => setTimeout(resolve, 300));
 
-          bg.style.transition = 'opacity 0.3s ease-in-out';
-          bg.style.opacity = '0';
-          await new Promise(resolve => setTimeout(resolve, 300));
-
-          bg.remove();
-          await loadHomeScreen(container);
-          resolve();
-        } catch (err) {
-          displayError(`Login sequence failed: ${err.message}`, 'LoginScreen', 'ERR_LOGIN_FAIL');
-          resolve();
+            bg.remove();
+            await loadHomeScreen(container);
+            resolve();
+          } catch (err) {
+            displayError(`Login sequence failed: ${err.message}`, 'LoginScreen', 'ERR_LOGIN_FAIL');
+            resolve();
+          }
         }
       });
     } catch (err) {
@@ -161,6 +162,22 @@ export function loadLoginScreen(container) {
       displayError(`Failed to load login screen: ${err.message}`, 'LoginScreen', 'ERR_LOGIN_LOAD');
       resolve();
     }
+  });
+}
+
+// Purpose: Types text into an element with a simulated delay.
+function typeText(element, text, delay) {
+  return new Promise(resolve => {
+    let i = 0;
+    const typingInterval = setInterval(() => {
+      if (i < text.length) {
+        element.value += text.charAt(i);
+        i++;
+      } else {
+        clearInterval(typingInterval);
+        resolve();
+      }
+    }, delay);
   });
 }
 
@@ -234,10 +251,10 @@ function injectLoginCSS() {
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      gap: 20px;
+      gap: 15px;
       padding: 20px;
       width: 90%;
-      max-width: 400px;
+      max-width: 320px; /* Adjusted for smaller form */
       transition: opacity 0.3s ease-in-out;
       will-change: opacity;
     }
@@ -257,7 +274,7 @@ function injectLoginCSS() {
     #form-elements {
       display: flex;
       flex-direction: column;
-      gap: 15px;
+      gap: 10px;
       width: 100%;
       align-items: center;
     }
@@ -265,7 +282,7 @@ function injectLoginCSS() {
       display: flex;
       align-items: center;
       width: 100%;
-      max-width: 300px;
+      max-width: 250px; /* Smaller input group width */
       gap: 10px;
     }
     .input-group label {
@@ -273,6 +290,7 @@ function injectLoginCSS() {
       font-weight: bold;
       white-space: nowrap;
       flex-shrink: 0;
+      font-family: 'Courier New', Courier, monospace; /* Agency-style font */
     }
     .login-input {
       padding: 8px;
@@ -292,7 +310,7 @@ function injectLoginCSS() {
       gap: 8px;
       margin-top: 8px;
       width: 100%;
-      max-width: 300px;
+      max-width: 250px;
     }
     .glassy-btn {
       flex: 1;
@@ -338,9 +356,9 @@ function injectLoginCSS() {
       font-size: 0.9rem;
     }
     #login-title {
-      max-width: 200px;
+      max-width: 150px; /* Smaller seal */
       height: auto;
-      margin-bottom: 10px;
+      margin-bottom: 5px; /* Less space to subtext */
       z-index: 3;
       object-fit: contain;
     }
