@@ -5,7 +5,7 @@
 // - Handles user input simulation (typing animation) and a covert-themed loading sequence without keyboard input.
 // - Integrates the Nexus seal logo (nexusseal.PNG) as the title.
 // - Optimized for PWA compliance and iOS Safari, targeting ~60fps.
-// - Step 2 Fix Notes: Resized/attached buttons to password box (100px each), updated NEXUS gradient to agency vibe (#1C2526 to #C0C0C0), prevented keyboard on input clicks, ensured no zoom/scrolling.
+// - Step 3 Fix Notes: Prevented keyboard on password click with onfocus blur, reduced input length to 180px with ID/Password labels, removed Intelligence Network, moved inputs below Nexus seal.
 
 import { loadHomeScreen } from './homescreen.js';
 import { updateCheck, displayError } from './errors.js';
@@ -24,13 +24,14 @@ export function loadLoginScreen(container) {
           <div id="fade-overlay"></div>
           <div id="login-content" class="stage-panel" aria-hidden="false">
             <img id="login-title" src="assets/images/nexusseal.PNG" alt="Nexus Intelligence Agency Seal" loading="lazy">
-            <h2 id="login-subtitle">Intelligence Network</h2>
-            <div id="form-elements">
+            <div id="form-elements" style="margin-top: 10px;"> <!-- Move inputs up -->
               <div class="input-group">
-                <input type="text" id="username" autocomplete="off" class="login-input" readonly>
+                <label for="username">ID</label>
+                <input type="text" id="username" autocomplete="off" class="login-input" readonly onfocus="this.blur()">
               </div>
               <div class="input-group">
-                <input type="password" id="password" autocomplete="off" class="login-input" readonly>
+                <label for="password">Password</label>
+                <input type="password" id="password" autocomplete="off" class="login-input" readonly onfocus="this.blur()">
               </div>
               <div id="login-buttons">
                 <button class="glassy-btn primary" id="login-btn" disabled>Login</button>
@@ -249,16 +250,22 @@ function injectLoginCSS() {
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      gap: 15px;
+      gap: 5px; /* Reduced gap to move inputs up */
       padding: 20px;
       width: 90%;
       max-width: 320px;
     }
     .input-group {
       display: flex;
-      justify-content: center;
+      align-items: center;
       width: 100%;
       margin: 0 auto;
+    }
+    .input-group label {
+      color: var(--text-color);
+      font-weight: bold;
+      margin-right: 10px;
+      font-size: 0.9rem;
     }
     .login-input {
       padding: 6px;
@@ -266,7 +273,7 @@ function injectLoginCSS() {
       background: #fff;
       color: #000;
       font-size: 0.9rem;
-      width: 200px;
+      width: 180px; /* Reduced length */
       box-sizing: border-box;
     }
     #login-buttons {
@@ -319,9 +326,7 @@ function injectLoginCSS() {
       object-fit: contain;
     }
     #login-subtitle {
-      font-size: 1.5rem;
-      color: #fff;
-      margin-bottom: 15px;
+      display: none; /* Remove Intelligence Network */
     }
     .nexus-powered {
       font-weight: 700;
