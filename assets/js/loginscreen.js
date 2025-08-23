@@ -2,7 +2,7 @@
 import { loadHomeScreen } from './homescreen.js';
 import { updateCheck, displayError } from './errors.js';
 
-const BUILD_VERSION = "0.173";
+const BUILD_VERSION = "0.174";
 let usernameTyped = false;
 let passwordTyped = false;
 
@@ -280,6 +280,21 @@ function drawContinents() {
   ctx.lineWidth = 1;
 
   const continents = [
-    { x: 0.05, y: 0.3, w: 0.15, h: 0.25 }, 
-    { x: 0.22, y: 0.45, w: 0.1, h: 0.2 },  
-    { x: 0.4, y: 0.2, w: 0.25
+    { x:0.05,y:0.3,w:0.15,h:0.25 },
+    { x:0.22,y:0.45,w:0.1,h:0.2 },
+    { x:0.4,y:0.2,w:0.25,h:0.25 },
+    { x:0.7,y:0.35,w:0.2,h:0.2 },
+    { x:0.85,y:0.6,w:0.1,h:0.15 }
+  ];
+
+  for (let c of continents) {
+    const x = c.x*canvas.width;
+    const y = c.y*canvas.height;
+    const w = c.w*canvas.width;
+    const h = c.h*canvas.height;
+    ctx.beginPath();
+    ctx.ellipse(x+w/2,y+h/2,w/2,h/2,0,0,Math.PI*2);
+    ctx.fill();
+    ctx.stroke();
+  }
+}
