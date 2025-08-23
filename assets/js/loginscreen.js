@@ -2,7 +2,7 @@
 import { loadHomeScreen } from './homescreen.js';
 import { updateCheck, displayError } from './errors.js';
 
-const BUILD_VERSION = "0.174";
+const BUILD_VERSION = "0.173";
 let usernameTyped = false;
 let passwordTyped = false;
 
@@ -52,7 +52,6 @@ export function loadLoginScreen(container) {
       `;
 
       injectLoginCSS();
-      drawContinents();
 
       const usernameInput = container.querySelector('#username');
       const passwordInput = container.querySelector('#password');
@@ -62,12 +61,18 @@ export function loadLoginScreen(container) {
       const seqText       = container.querySelector('#sequence-text');
       const seqBar        = container.querySelector('#sequence-bar');
       const bg            = container.querySelector('#login-background');
+      const canvas        = container.querySelector('#continents-canvas');
 
-      if (!usernameInput || !passwordInput || !loginBtn || !formPanel || !seqPanel || !seqText || !seqBar || !bg) {
+      if (!usernameInput || !passwordInput || !loginBtn || !formPanel || !seqPanel || !seqText || !seqBar || !bg || !canvas) {
         displayError('Login DOM not ready', 'LoginScreen', 'ERR_FORM_ELEMENTS');
         resolve();
         return;
       }
+
+      // Setup canvas
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      drawContinents(canvas);
 
       // Username typing
       usernameInput.addEventListener('click', async () => {
@@ -192,6 +197,62 @@ function animateKBWithBar(textEl, barEl, phrase) {
   });
 }
 
+// Draw rough continents on canvas
+function drawContinents(canvas) {
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = 'rgba(200,200,200,0.2)'; // faded grey
+
+  // Minimal rough shapes for continents
+  const scaleX = canvas.width / 1920;
+  const scaleY = canvas.height / 1080;
+
+  // Example: rough Americas
+  ctx.beginPath();
+  ctx.moveTo(200*scaleX,100*scaleY);
+  ctx.lineTo(250*scaleX,150*scaleY);
+  ctx.lineTo(230*scaleX,220*scaleY);
+  ctx.lineTo(180*scaleX,200*scaleY);
+  ctx.closePath();
+  ctx.fill();
+
+  // Africa
+  ctx.beginPath();
+  ctx.moveTo(900*scaleX,300*scaleY);
+  ctx.lineTo(950*scaleX,330*scaleY);
+  ctx.lineTo(940*scaleX,400*scaleY);
+  ctx.lineTo(910*scaleX,380*scaleY);
+  ctx.closePath();
+  ctx.fill();
+
+  // Europe
+  ctx.beginPath();
+  ctx.moveTo(880*scaleX,200*scaleY);
+  ctx.lineTo(910*scaleX,180*scaleY);
+  ctx.lineTo(940*scaleX,210*scaleY);
+  ctx.lineTo(910*scaleX,230*scaleY);
+  ctx.closePath();
+  ctx.fill();
+
+  // Asia
+  ctx.beginPath();
+  ctx.moveTo(1100*scaleX,180*scaleY);
+  ctx.lineTo(1300*scaleX,150*scaleY);
+  ctx.lineTo(1350*scaleX,250*scaleY);
+  ctx.lineTo(1150*scaleX,260*scaleY);
+  ctx.closePath();
+  ctx.fill();
+
+  // Australia
+  ctx.beginPath();
+  ctx.moveTo(1500*scaleX,500*scaleY);
+  ctx.lineTo(1550*scaleX,520*scaleY);
+  ctx.lineTo(1520*scaleX,550*scaleY);
+  ctx.lineTo(1480*scaleX,540*scaleY);
+  ctx.closePath();
+  ctx.fill();
+}
+
 // Inject CSS
 function injectLoginCSS() {
   const id = 'loginscreen-styles';
@@ -223,22 +284,21 @@ function injectLoginCSS() {
 
     #login-background{
       height:100vh;width:100vw;
-      background:url('assets/images/world-map.jpg') center center/cover no-repeat;
       display:flex;flex-direction:column;justify-content:center;align-items:center;
       color:var(--text-color);font-family:var(--font-ui);position:relative;overflow:hidden;
-      transition:opacity .3s ease-in-out;
+      transition:opacity .3s ease-in-out; background-color:#000;
     }
 
-    #continents-canvas{position:absolute;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;}
+    #continents-canvas{position:absolute;inset:0;z-index:0;}
 
-    #fade-overlay{position:absolute;bottom:0;left:0;width:100%;height:50%;background:linear-gradient(to top, black, transparent);z-index:1;pointer-events:none;}
+    #fade-overlay{position:absolute;bottom:0;left:0;width:100%;height:50%;background:linear-gradient(to top, black, transparent);z-index:2;pointer-events:none;}
     #grid-overlay{position:absolute;inset:0;background:
         repeating-linear-gradient(to right,transparent,transparent 99px,rgba(255,255,255,.05) 100px),
         repeating-linear-gradient(to bottom,transparent,transparent 99px,rgba(255,255,255,.05) 100px);
-      z-index:0;pointer-events:none;
+      z-index:1;pointer-events:none;
     }
 
-    #login-content{z-index:2;flex-direction:column;justify-content:center;align-items:center;gap:14px;padding:20px;width:90%;max-width:360px;opacity:0;animation:fadeInLogin .8s ease forwards;}
+    #login-content{z-index:3;flex-direction:column;justify-content:center;align-items:center;gap:14px;padding:20px;width:90%;max-width:360px;opacity:0;animation:fadeInLogin .8s ease forwards;}
     @keyframes fadeInLogin{ from{opacity:0;} to{opacity:1;} }
 
     #login-title{max-width:170px;width:70%;height:auto;object-fit:contain;margin-bottom:6px;transition:transform .2s ease,opacity .2s ease;}
@@ -254,47 +314,12 @@ function injectLoginCSS() {
     .glassy-btn.outline{ background:var(--glass-bg);color:rgba(255,255,255,.7); }
     .glassy-btn:disabled{ opacity:.5; cursor:default; }
 
-    #sequence-panel{z-index:3;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:120px;padding:10px;text-align:center;}
+    #sequence-panel{z-index:4;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:120px;padding:10px;text-align:center;}
     #sequence-text{font-family:var(--font-agency);font-size:1rem;color:#aadfff;min-height:1.2em;text-shadow:0 0 4px rgba(0,0,0,.35);}
     #sequence-bar-container{width:200px;height:6px;background:#fff;border-radius:3px;margin-top:4px;}
     #sequence-bar{width:0%;height:100%;background:linear-gradient(90deg,#1E90FF,#00ccff);border-radius:3px;transition:width 0.05s linear;}
 
-    #login-footer{position:absolute;bottom:20px;font-size:.8rem;color:#ddd;text-align:center;z-index:2;line-height:1.4;}
+    #login-footer{position:absolute;bottom:20px;font-size:.8rem;color:#ddd;text-align:center;z-index:3;line-height:1.4;}
   `;
   document.head.appendChild(style);
-}
-
-// Procedural continents
-function drawContinents() {
-  const canvas = document.getElementById('continents-canvas');
-  if (!canvas) return;
-
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  ctx.fillStyle = 'rgba(0, 150, 255, 0.15)';
-  ctx.strokeStyle = 'rgba(0, 150, 255, 0.25)';
-  ctx.lineWidth = 1;
-
-  const continents = [
-    { x:0.05,y:0.3,w:0.15,h:0.25 },
-    { x:0.22,y:0.45,w:0.1,h:0.2 },
-    { x:0.4,y:0.2,w:0.25,h:0.25 },
-    { x:0.7,y:0.35,w:0.2,h:0.2 },
-    { x:0.85,y:0.6,w:0.1,h:0.15 }
-  ];
-
-  for (let c of continents) {
-    const x = c.x*canvas.width;
-    const y = c.y*canvas.height;
-    const w = c.w*canvas.width;
-    const h = c.h*canvas.height;
-    ctx.beginPath();
-    ctx.ellipse(x+w/2,y+h/2,w/2,h/2,0,0,Math.PI*2);
-    ctx.fill();
-    ctx.stroke();
-  }
 }
