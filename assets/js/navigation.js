@@ -1,3 +1,43 @@
+// assets/js/navigation.js
+
+function displayError(message, component, code) {
+  console.error(`[${component} - ${code}]: ${message}`);
+}
+
+export function initNavigation(container) {
+  try {
+    container.innerHTML = `
+      <div id="taskbar">
+        <button id="start-button">Start</button>
+        <div id="task-icons">
+          <div class="task-icon">🌐</div>
+          <div class="task-icon">📂</div>
+          <div class="task-icon">💻</div>
+        </div>
+        <div id="system-tray">
+          <span id="clock">09:41</span>
+        </div>
+      </div>
+
+      <div id="start-menu" class="hidden">
+        <ul>
+          <li>Mission Control</li>
+          <li>Encrypted Terminal</li>
+          <li>Global Map</li>
+          <li>Data Vault</li>
+          <li>Agency Mail</li>
+        </ul>
+      </div>
+    `;
+
+    injectNavigationCSS();
+    initClock();
+    initStartMenu();
+  } catch (err) {
+    displayError(`Failed to initialize navigation: ${err.message}`, 'Navigation', 'ERR_NAVIGATION_INIT');
+  }
+}
+
 function injectNavigationCSS() {
   const styleId = 'navigation-styles';
   if (document.getElementById(styleId)) return;
@@ -11,7 +51,7 @@ function injectNavigationCSS() {
       bottom: 0;
       left: 0;
       width: 100%;
-      height: 60px; /* slightly taller for comfort */
+      height: 60px;
       display: flex;
       align-items: center;
       background: rgba(20, 20, 20, 0.6);
@@ -26,7 +66,7 @@ function injectNavigationCSS() {
     /* Start Button */
     #start-button {
       height: 100%;
-      width: 110px; /* slightly wider for thumb reach */
+      width: 110px;
       margin: 0;
       padding: 0;
       background: rgba(30, 115, 230, 0.8);
@@ -47,6 +87,10 @@ function injectNavigationCSS() {
     #start-button:hover {
       background: rgba(40, 140, 250, 0.9);
       transform: scale(1.02);
+    }
+
+    #start-button:active {
+      transform: scale(0.98);
     }
 
     /* Shine Effect */
@@ -106,8 +150,6 @@ function injectNavigationCSS() {
     /* Start Menu */
     #start-menu {
       position: fixed;
-      bottom: 65px; /* adjusted for taller taskbar */
-      left: 0;
       width: 260px;
       background: rgba(25, 25, 25, 0.85);
       border: 1px solid rgba(255,255,255,0.1);
@@ -115,14 +157,15 @@ function injectNavigationCSS() {
       box-shadow: 0 6px 18px rgba(0,0,0,0.6);
       backdrop-filter: blur(14px) saturate(180%);
       overflow: hidden;
-      transform: translateY(20px);
+      transform: scaleY(0) skewY(-2deg);
+      transform-origin: bottom center;
+      transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.25s ease-in-out;
       opacity: 0;
-      transition: all 0.25s ease-in-out;
       z-index: 999;
     }
 
     #start-menu.show {
-      transform: translateY(0);
+      transform: scaleY(1) skewY(0deg);
       opacity: 1;
     }
 
@@ -146,4 +189,48 @@ function injectNavigationCSS() {
     }
   `;
   document.head.appendChild(styleTag);
+}
+
+function initClock() {
+  function updateClock() {
+    const clock = document.getElementById("clock");
+    if (!clock) return;
+    const now = new Date();
+    clock.textContent = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+  }
+  updateClock();
+  setInterval(updateClock, 60000);
+}
+
+function initStartMenu() {
+  const startButton = document.getElementById("start-button");
+  const startMenu = document.getElementById("start-menu");
+
+  startButton.addEventListener("click", () => {
+    // Shine animation
+    startButton.classList.add("shine");
+    setTimeout(() => startButton.classList.remove("shine"), 400);
+
+    // Position start menu relative to the button
+    const rect = startButton.getBoundingClientRect();
+    startMenu.style.left = rect.left + "px";
+    startMenu.style.bottom = (window.innerHeight - rect.top + 5) + "px"; // slightly above button
+
+    // Toggle start menu with scale + skew animation
+    startMenu.classList.toggle("show");
+
+    // Small bounce effect for start button
+    startButton.style.transition = "transform 0.2s cubic-bezier(0.25, 1, 0.5, 1)";
+    startButton.style.transform = "scale(1.05)";
+    setTimeout(() => {
+      startButton.style.transform = "scale(1)";
+    }, 200);
+  });
+
+  // Close menu on outside click
+  document.addEventListener("click", (e) => {
+    if (!startButton.contains(e.target) && !startMenu.contains(e.target)) {
+      startMenu.classList.remove("show");
+    }
+  });
 }
