@@ -1,31 +1,26 @@
 // assets/js/loginscreen.js
 // Purpose: Manages the login screen UI and animation sequence for TitanOS, simulating a secure authentication process.
 // Dependencies: ./homescreen.js (for post-login transition), ./errors.js (for error handling and status updates).
-// Notes: 
-// - Handles user input simulation (typing animation) with random, human-like delays and a covert-themed loading sequence.
-// - Integrates the Nexus seal logo (nexusseal.PNG) as the centerpiece, with a minimalist redesign and black fade background.
+// Notes:
+// - Handles user input simulation (typing animation) and a covert-themed loading sequence.
+// - Integrates the Nexus seal logo (nexusseal.PNG) as the title.
 // - Optimized for PWA compliance and iOS Safari, targeting ~60fps.
-// - Build version (0.153) is tracked for deployment consistency.
-// - Fix Notes: Adjusted input sizes, enlarged/moved logo, restored original NEXUS styling, added black fade, fixed mobile focus, randomized typing.
-// AI Usage: This file initializes the login interface; modify CSS or animation timings if aesthetic changes are needed.
 
-import { loadHomeScreen } from './homescreen.js'; // Imports home screen loader for post-login transition.
-import { updateCheck, displayError } from './errors.js'; // Imports error handling utilities.
+import { loadHomeScreen } from './homescreen.js';
+import { updateCheck, displayError } from './errors.js';
 
-const BUILD_VERSION = "0.153"; // Defines the current build version for display and tracking.
+const BUILD_VERSION = "0.154"; 
 let usernameTyped = false;
 let passwordTyped = false;
 
 export function loadLoginScreen(container) {
-  // Purpose: Initializes and renders the login screen with interactive elements.
-  // Parameters: container - DOM element to render the login screen into.
-  // Returns: Promise resolving when the login process completes or fails.
   return new Promise((resolve) => {
     try {
-      updateCheck('loginscreen', 'ok'); // Updates component status to 'ok' in errors.js.
+      updateCheck('loginscreen', 'ok');
       container.innerHTML = `
         <div id="login-background">
-          <div id="particle-container"></div>
+          <div id="grid-overlay"></div>
+          <div id="fade-overlay"></div>
           <div id="login-content" class="stage-panel" aria-hidden="false">
             <img id="login-title" src="assets/images/nexusseal.PNG" alt="Nexus Intelligence Agency Seal" loading="lazy">
             <h2 id="login-subtitle">Intelligence Network</h2>
@@ -40,18 +35,17 @@ export function loadLoginScreen(container) {
               </div>
               <div id="login-buttons">
                 <button class="glassy-btn primary" id="login-btn" disabled>Login</button>
+                <button class="glassy-btn outline" disabled>Register</button>
               </div>
             </div>
             <div id="login-monitoring">
-              <span class="nexus-powered">NEXUS</span> System Powered By 
-              <span id="mini-titanos">TitanOS</span>
+              <span class="nexus-powered"><strong>NEXUS</strong> powered by TitanOS</span>
             </div>
           </div>
           <div id="login-sequence" class="stage-panel" aria-hidden="true">
             <div id="radar-loader"></div>
             <div id="loading-text"></div>
           </div>
-          <div id="deployment">Build v${BUILD_VERSION}</div>
           <div id="login-footer">
             <div>Secure Software | All Rights Reserved</div>
             <div>&copy; 2025 | Iconic Developments OS</div>
@@ -62,51 +56,54 @@ export function loadLoginScreen(container) {
       const loginBackground = container.querySelector('#login-background');
       if (!loginBackground) throw new Error('Failed to create #login-background element');
 
-      injectLoginCSS(); // Injects custom CSS for login screen styling.
-      generateParticles(); // Generates animated particles for visual effect.
+      injectLoginCSS();
+      generateParticles();
 
-      // Verifies seal logo load with enhanced error logging.
+      // Seal logo check
       const logoImg = new Image();
-      const logoUrl = 'assets/images/nexusseal.PNG'; // Relative path.
+      const logoUrl = 'assets/images/nexusseal.PNG';
       logoImg.src = logoUrl;
       logoImg.onload = () => {
         const loginTitle = container.querySelector('#login-title');
         if (loginTitle) loginTitle.classList.add('loaded');
       };
-      logoImg.onerror = () => displayError(`Failed to load Nexus seal logo from ${logoUrl}. Check file path or format.`, 'LoginScreen', 'ERR_SEAL_LOAD', true);
+      logoImg.onerror = () => displayError(`Failed to load Nexus seal logo from ${logoUrl}`, 'LoginScreen', 'ERR_SEAL_LOAD', true);
 
       const usernameInput = container.querySelector('#username');
       const passwordInput = container.querySelector('#password');
       const loginBtn = container.querySelector('#login-btn');
 
       if (!usernameInput || !passwordInput || !loginBtn) {
-        displayError('Login form elements not found. Please refresh the page.', 'LoginScreen', 'ERR_FORM_ELEMENTS');
+        displayError('Login form elements not found.', 'LoginScreen', 'ERR_FORM_ELEMENTS');
         resolve();
         return;
       }
 
-      // New Login Mechanics
+      // Username typing
       usernameInput.addEventListener('click', async () => {
         if (!usernameTyped) {
           usernameInput.value = '';
-          await typeText(usernameInput, 'Agent 173', getRandomDelay());
+          await typeText(usernameInput, 'Agent 173');
           usernameTyped = true;
-          passwordInput.removeAttribute('readonly'); // Enable password field without focus
+          passwordInput.removeAttribute('readonly');
+          // Removed passwordInput.focus() to avoid auto keyboard popup
         }
       });
 
+      // Password typing
       passwordInput.addEventListener('click', async () => {
         if (usernameTyped && !passwordTyped) {
           passwordInput.value = '';
-          await typeText(passwordInput, '••••••••', getRandomDelay());
+          await typeText(passwordInput, '••••••••');
           passwordTyped = true;
           loginBtn.removeAttribute('disabled');
         }
       });
 
+      // Login button
       loginBtn.addEventListener('click', async () => {
         if (passwordTyped) {
-          if (navigator.vibrate) navigator.vibrate([50, 30, 50]); // Short haptic feedback on tap.
+          softHaptic(); // subtle tap
           try {
             const formContainer = container.querySelector('#login-content');
             const sequenceContainer = container.querySelector('#login-sequence');
@@ -118,13 +115,12 @@ export function loadLoginScreen(container) {
               resolve();
               return;
             }
-            
-            // Transition with minimal reflow
+
             formContainer.setAttribute('aria-hidden', 'true');
             sequenceContainer.setAttribute('aria-hidden', 'false');
-            if (navigator.vibrate) navigator.vibrate([100, 50, 100]); // Longer vibration
+            softHaptic();
 
-            // Optimized loading sequence
+            // Loading text loop
             const phrases = [
               "Scanning Credentials",
               "Decrypting Access",
@@ -139,7 +135,7 @@ export function loadLoginScreen(container) {
             updateLoadingText();
             const textInterval = setInterval(updateLoadingText, 800);
 
-            await new Promise(resolve => setTimeout(resolve, 4000)); // 4s sequence
+            await new Promise(resolve => setTimeout(resolve, 4000));
 
             clearInterval(textInterval);
             loadingText.textContent = "Access Granted";
@@ -165,38 +161,33 @@ export function loadLoginScreen(container) {
   });
 }
 
-// Purpose: Types text into an element with a random, human-like delay.
-function typeText(element, text, initialDelay) {
+// Typing with random speed + haptic each character
+function typeText(element, text) {
   return new Promise(resolve => {
     let i = 0;
-    const typingInterval = setInterval(() => {
+    function typeChar() {
       if (i < text.length) {
         element.value += text.charAt(i);
+        softHaptic(); // subtle haptic per character
         i++;
-        // Random delay between 50-150ms for human-like typing
-        const randomDelay = getRandomDelay();
-        clearInterval(typingInterval);
-        setTimeout(() => {
-          if (i < text.length) {
-            typingInterval;
-          } else {
-            resolve();
-          }
-        }, randomDelay);
+        const randomDelay = 50 + Math.random() * 120;
+        setTimeout(typeChar, randomDelay);
       } else {
-        clearInterval(typingInterval);
         resolve();
       }
-    }, initialDelay);
+    }
+    typeChar();
   });
 }
 
-// Purpose: Generates a random delay between 50 and 150ms.
-function getRandomDelay() {
-  return Math.floor(Math.random() * (150 - 50 + 1)) + 50;
+// Subtle haptic feedback
+function softHaptic() {
+  if (navigator.vibrate) {
+    navigator.vibrate(10); // very short tap feel
+  }
 }
 
-// Purpose: Injects CSS styles specific to the login screen.
+// Inject CSS
 function injectLoginCSS() {
   const styleId = 'loginscreen-styles';
   if (document.getElementById(styleId)) return;
@@ -205,19 +196,18 @@ function injectLoginCSS() {
   styleTag.id = styleId;
   styleTag.innerHTML = `
     :root {
-      --dark-theme-bg: #0d0d0d;
-      --glass-bg: rgba(0, 0, 0, 0.3);
-      --dark-glass-bg: rgba(0, 0, 0, 0.6);
+      --dark-theme-bg: #000;
+      --glass-bg: rgba(255, 255, 255, 0.1);
+      --input-border-color: #555;
       --text-color: #f2f2f7;
       --secondary-text-color: #8e8e93;
       --accent-color: #1E90FF;
-      --secondary-accent: #800080;
-      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --font-family: Arial, sans-serif;
     }
     #login-background {
       height: 100vh;
       width: 100vw;
-      background: radial-gradient(circle at center, #1a1a1a 0%, #0d0d0d 50%, #000 100%);
+      background: url('assets/images/world-map.jpg') no-repeat center center/cover;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -227,249 +217,87 @@ function injectLoginCSS() {
       position: relative;
       overflow: hidden;
       transition: opacity 0.3s ease-in-out;
-      will-change: opacity;
     }
-    #particle-container {
+    #fade-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 50%;
+      background: linear-gradient(to top, black, transparent);
+      z-index: 2;
+      pointer-events: none;
+    }
+    #grid-overlay {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      pointer-events: none;
+      background: repeating-linear-gradient(to right, transparent, transparent 99px, rgba(255, 255, 255, 0.05) 100px),
+                  repeating-linear-gradient(to bottom, transparent, transparent 99px, rgba(255, 255, 255, 0.05) 100px);
       z-index: 1;
-    }
-    .particle {
-      position: absolute;
-      background: #1E90FF;
-      border-radius: 50%;
-      animation: float 15s infinite ease-in-out;
-      will-change: transform;
-    }
-    @keyframes float {
-      0% { transform: translateY(0) scale(0.8); }
-      50% { transform: translateY(-30px) scale(1.2); }
-      100% { transform: translateY(0) scale(0.8); }
+      pointer-events: none;
     }
     #login-content {
-      z-index: 2;
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      gap: 20px;
-      padding: 30px;
-      background: var(--dark-glass-bg);
-      border-radius: 15px;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(10px);
-      width: 90%;
-      max-width: 350px;
-      transition: opacity 0.3s ease-in-out;
-      will-change: opacity;
-    }
-    .stage-panel[aria-hidden="true"] {
-      opacity: 0;
-      pointer-events: none;
-      display: none;
-    }
-    .stage-panel[aria-hidden="false"] {
-      opacity: 1;
-      pointer-events: auto;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-    }
-    #form-elements {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      width: 100%;
-    }
-    .input-group {
-      display: flex;
-      align-items: center;
-      width: 100%;
-      max-width: 200px; /* Smaller input group width */
-      gap: 10px;
-    }
-    .input-group label {
-      color: var(--text-color);
-      font-weight: bold;
-      white-space: nowrap;
-      flex-shrink: 0;
-      font-size: 0.9rem;
-    }
-    .login-input {
-      padding: 8px 10px; /* Reduced padding */
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 20px; /* Smaller radius */
-      background: var(--glass-bg);
-      color: var(--text-color);
-      outline: none;
-      font-size: 0.9rem; /* Smaller font */
-      width: 100%;
-      box-sizing: border-box;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
-      will-change: border-color, box-shadow;
-    }
-    .login-input::placeholder {
-      color: rgba(255, 255, 255, 0.4);
-    }
-    .login-input:focus {
-      border-color: var(--accent-color);
-      box-shadow: 0 0 10px rgba(30, 144, 255, 0.5);
-    }
-    #login-buttons {
-      display: flex;
-      gap: 10px;
-      margin-top: 10px;
-      width: 100%;
-      max-width: 200px;
-    }
-    .glassy-btn {
-      flex: 1;
-      padding: 10px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 20px;
-      cursor: pointer;
-      font-weight: 600;
-      letter-spacing: 0.2px;
-      transition: background 0.2s ease, color 0.2s ease;
-      will-change: background, color;
-    }
-    .glassy-btn.primary {
-      color: var(--text-color);
-      background: var(--accent-color);
-      border-color: var(--accent-color);
-    }
-    .glassy-btn.primary:hover {
-      background: #36a4ff;
-    }
-    #login-monitoring {
-      margin-top: auto;
-      margin-bottom: 15px;
-      font-size: 0.7rem;
-      color: var(--secondary-text-color);
-      text-align: center;
-      z-index: 2;
-    }
-    .nexus-powered {
-      font-weight: 700;
-      font-size: 0.8rem;
-      background: linear-gradient(to right, #1E90FF, #800080);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-    #mini-titanos {
-      font-weight: 700;
-      font-size: 0.8rem;
-      color: var(--text-color);
-      text-shadow: 0 0 3px rgba(30, 144, 255, 0.3);
-    }
-    #login-title {
-      max-width: 300px; /* Larger seal */
-      height: auto;
-      margin-bottom: 10px; /* Closer to subtitle */
-      z-index: 2;
-      object-fit: contain;
-    }
-    #login-title.loaded {
-      opacity: 1;
-      transition: opacity 0.5s ease-in-out;
-    }
-    #login-subtitle {
-      font-size: 1.2rem;
-      color: var(--secondary-text-color);
-      margin-bottom: 20px;
-      z-index: 2;
-    }
-    #radar-loader {
-      width: 70px;
-      height: 70px;
-      position: relative;
-      z-index: 2;
-    }
-    #radar-loader::before {
-      content: '';
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      border: 2px solid rgba(30, 144, 255, 0.4);
-      border-radius: 50%;
-      animation: radarPulse 2s infinite ease-out;
-      will-change: transform, opacity;
-    }
-    #radar-loader::after {
-      content: '';
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      border: 2px solid var(--accent-color);
-      border-radius: 50%;
-      animation: radarSpin 1.5s linear infinite;
-      will-change: transform;
-    }
-    @keyframes radarPulse {
-      0% { transform: scale(0.5); opacity: 0.6; }
-      100% { transform: scale(1.5); opacity: 0; }
-    }
-    @keyframes radarSpin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    #login-sequence {
-      position: absolute;
-      inset: 0;
+      z-index: 3;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
       gap: 15px;
-      z-index: 2;
-      transition: opacity 0.3s ease-in-out;
-      will-change: opacity;
+      padding: 20px;
+      width: 90%;
+      max-width: 320px;
     }
-    #loading-text {
-      color: var(--text-color);
+    .input-group {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      max-width: 200px;
+      gap: 10px;
+    }
+    .login-input {
+      padding: 6px;
+      border: 1px solid var(--input-border-color);
+      background: #fff;
+      color: #000;
       font-size: 0.9rem;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-      opacity: 0;
-      animation: text-fade-in 0.8s forwards;
-      animation-delay: 0.3s;
+      flex-grow: 1;
+      box-sizing: border-box;
     }
-    @keyframes text-fade-in {
-      to { opacity: 1; }
+    #login-title {
+      max-width: 200px;
+      height: auto;
+      margin-bottom: 2px;
+      object-fit: contain;
     }
-    #login-footer {
-      position: absolute;
-      bottom: 10px;
-      text-align: center;
-      font-size: 0.7rem;
-      color: var(--secondary-text-color);
-      z-index: 2;
+    #login-subtitle {
+      font-size: 1.5rem;
+      color: #fff;
+      margin-bottom: 15px;
+    }
+    .nexus-powered {
+      color: #aaa;
+      font-weight: 500;
+      font-size: 0.9rem;
+      text-transform: none;
     }
   `;
   document.head.appendChild(styleTag);
 }
 
-// Purpose: Generates animated particles for the login screen background.
+// Particles
 function generateParticles() {
   const container = document.getElementById('particle-container');
-  if (!container) {
-    console.warn('Particle container not found');
-    return;
-  }
+  if (!container) return;
 
-  const particleCount = 8; // Reduced for performance optimization.
+  const particleCount = 8;
   for (let i = 0; i < particleCount; i++) {
     const particle = document.createElement('div');
     particle.className = 'particle';
 
-    const size = Math.random() * 2 + 1; // Smaller size for efficiency.
+    const size = Math.random() * 2 + 1;
     const top = Math.random() * 100;
     const left = Math.random() * 100;
     const duration = Math.random() * 10 + 10;
