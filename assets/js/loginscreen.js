@@ -2,7 +2,7 @@
 import { loadHomeScreen } from './homescreen.js';
 import { updateCheck, displayError } from './errors.js';
 
-const BUILD_VERSION = "0.173";
+const BUILD_VERSION = "0.174";
 let usernameTyped = false;
 let passwordTyped = false;
 
@@ -13,7 +13,6 @@ export function loadLoginScreen(container) {
 
       container.innerHTML = `
         <div id="login-background">
-          <canvas id="continents-canvas"></canvas>
           <div id="grid-overlay"></div>
           <div id="fade-overlay"></div>
 
@@ -61,18 +60,12 @@ export function loadLoginScreen(container) {
       const seqText       = container.querySelector('#sequence-text');
       const seqBar        = container.querySelector('#sequence-bar');
       const bg            = container.querySelector('#login-background');
-      const canvas        = container.querySelector('#continents-canvas');
 
-      if (!usernameInput || !passwordInput || !loginBtn || !formPanel || !seqPanel || !seqText || !seqBar || !bg || !canvas) {
+      if (!usernameInput || !passwordInput || !loginBtn || !formPanel || !seqPanel || !seqText || !seqBar || !bg) {
         displayError('Login DOM not ready', 'LoginScreen', 'ERR_FORM_ELEMENTS');
         resolve();
         return;
       }
-
-      // Setup canvas
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      drawContinents(canvas);
 
       // Username typing
       usernameInput.addEventListener('click', async () => {
@@ -197,62 +190,6 @@ function animateKBWithBar(textEl, barEl, phrase) {
   });
 }
 
-// Draw rough continents on canvas
-function drawContinents(canvas) {
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = 'rgba(200,200,200,0.2)'; // faded grey
-
-  // Minimal rough shapes for continents
-  const scaleX = canvas.width / 1920;
-  const scaleY = canvas.height / 1080;
-
-  // Example: rough Americas
-  ctx.beginPath();
-  ctx.moveTo(200*scaleX,100*scaleY);
-  ctx.lineTo(250*scaleX,150*scaleY);
-  ctx.lineTo(230*scaleX,220*scaleY);
-  ctx.lineTo(180*scaleX,200*scaleY);
-  ctx.closePath();
-  ctx.fill();
-
-  // Africa
-  ctx.beginPath();
-  ctx.moveTo(900*scaleX,300*scaleY);
-  ctx.lineTo(950*scaleX,330*scaleY);
-  ctx.lineTo(940*scaleX,400*scaleY);
-  ctx.lineTo(910*scaleX,380*scaleY);
-  ctx.closePath();
-  ctx.fill();
-
-  // Europe
-  ctx.beginPath();
-  ctx.moveTo(880*scaleX,200*scaleY);
-  ctx.lineTo(910*scaleX,180*scaleY);
-  ctx.lineTo(940*scaleX,210*scaleY);
-  ctx.lineTo(910*scaleX,230*scaleY);
-  ctx.closePath();
-  ctx.fill();
-
-  // Asia
-  ctx.beginPath();
-  ctx.moveTo(1100*scaleX,180*scaleY);
-  ctx.lineTo(1300*scaleX,150*scaleY);
-  ctx.lineTo(1350*scaleX,250*scaleY);
-  ctx.lineTo(1150*scaleX,260*scaleY);
-  ctx.closePath();
-  ctx.fill();
-
-  // Australia
-  ctx.beginPath();
-  ctx.moveTo(1500*scaleX,500*scaleY);
-  ctx.lineTo(1550*scaleX,520*scaleY);
-  ctx.lineTo(1520*scaleX,550*scaleY);
-  ctx.lineTo(1480*scaleX,540*scaleY);
-  ctx.closePath();
-  ctx.fill();
-}
-
 // Inject CSS
 function injectLoginCSS() {
   const id = 'loginscreen-styles';
@@ -288,8 +225,6 @@ function injectLoginCSS() {
       color:var(--text-color);font-family:var(--font-ui);position:relative;overflow:hidden;
       transition:opacity .3s ease-in-out; background-color:#000;
     }
-
-    #continents-canvas{position:absolute;inset:0;z-index:0;}
 
     #fade-overlay{position:absolute;bottom:0;left:0;width:100%;height:50%;background:linear-gradient(to top, black, transparent);z-index:2;pointer-events:none;}
     #grid-overlay{position:absolute;inset:0;background:
