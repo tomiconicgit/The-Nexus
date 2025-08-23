@@ -1,11 +1,13 @@
 // assets/js/navigation.js
 
 import { displayError } from './errors.js';
+import { navigateTo } from './router.js';
 
 export function initNavigation(container) {
   try {
     if (!container) throw new Error('Navigation container not provided.');
 
+    // Inject minimal taskbar HTML first
     container.innerHTML = `
       <div id="taskbar">
         <button id="start-button">Start</button>
@@ -15,68 +17,70 @@ export function initNavigation(container) {
           <span id="clock">09:41</span>
         </div>
       </div>
-      <div id="system-tray-panel" class="hidden">
-        <div class="widget-header">
-          <h4>System Status</h4>
-        </div>
-        <div class="widget">
-          <h5>Network Activity</h5>
-          <div class="network-graph"></div>
-        </div>
-        <div class="widget">
-          <h5>Active Transfers</h5>
-          <div class="transfer-item">
-            <span class="file-name">Briefing_001.zip</span>
-            <div class="progress-bar-container">
-              <div class="progress-bar" style="width: 75%;"></div>
-            </div>
-          </div>
-          <div class="transfer-item">
-            <span class="file-name">Intel_Report.enc</span>
-            <div class="progress-bar-container">
-              <div class="progress-bar" style="width: 20%;"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div id="start-menu" class="hidden">
-        <div id="start-menu-top">
-          <div class="user-profile">
-            <i class="fas fa-user-circle"></i>
-            <span class="user-name">Applications</span>
-          </div>
-          <div class="top-controls">
-            <i class="fas fa-cog"></i>
-            <i class="fas fa-power-off"></i>
-          </div>
-        </div>
-        <div class="start-menu-content">
-          <div id="start-menu-app-list">
-            <ul>
-              <li><i class="fas fa-compass"></i> Mission Control</li>
-              <li><i class="fas fa-terminal"></i> Encrypted Terminal</li>
-              <li><i class="fas fa-globe-americas"></i> Global Map</li>
-              <li><i class="fas fa-database"></i> Data Vault</li>
-              <li><i class="fas fa-envelope"></i> Agency Mail</li>
-              <li><i class="fas fa-chart-line"></i> Market Monitor</li>
-              <li><i class="fas fa-shield-alt"></i> Secure Hub</li>
-            </ul>
-          </div>
-          <div id="start-menu-right">
-            <div class="right-panel-header">
-              <i class="fas fa-stream"></i>
-              <span>Recent Activity</span>
-            </div>
-            <ul class="recent-list">
-              <li><i class="far fa-file-alt"></i> Project Chimera Briefing</li>
-              <li><i class="fas fa-lock"></i> Encryption Log #134</li>
-              <li><i class="far fa-map"></i> Classified Sat-Image</li>
-              <li><i class="far fa-envelope"></i> Re: Operation Ghost</li>
-            </ul>
-          </div>
-        </div>
-      </div>
     `;
+
+    // Defer rendering of start menu and system tray panel
+    requestAnimationFrame(() => {
+      const deferredContent = document.createElement('div');
+      deferredContent.innerHTML = `
+        <div id="system-tray-panel" class="hidden">
+          <div class="widget-header">
+            <h4>System Status</h4>
+          </div>
+          <div class="widget system-status-content">
+            <h5>Network Activity</h5>
+            <div class="network-graph"></div>
+            <p class="network-status-text">Network: Idle</p>
+          </div>
+          <div class="widget notification-content hidden">
+            <h5>Notifications</h5>
+            <ul class="notification-list">
+              <li>New mission brief received at 09:30</li>
+              <li>System update available</li>
+              <li>Secure transfer completed</li>
+            </ul>
+          </div>
+        </div>
+        <div id="start-menu" class="hidden">
+          <div id="start-menu-top">
+            <div class="user-profile">
+              <i class="fas fa-user-circle"></i>
+              <span class="user-name">Applications</span>
+            </div>
+            <div class="top-controls">
+              <i class="fas fa-cog"></i>
+              <i class="fas fa-power-off"></i>
+            </div>
+          </div>
+          <div class="start-menu-content">
+            <div id="start-menu-app-list">
+              <ul>
+                <li data-route="/mission-control"><i class="fas fa-compass"></i> Mission Control</li>
+                <li data-route="/encrypted-terminal"><i class="fas fa-terminal"></i> Encrypted Terminal</li>
+                <li data-route="/global-map"><i class="fas fa-globe-americas"></i> Global Map</li>
+                <li data-route="/data-vault"><i class="fas fa-database"></i> Data Vault</li>
+                <li data-route="/agency-mail"><i class="fas fa-envelope"></i> Agency Mail</li>
+                <li data-route="/market-monitor"><i class="fas fa-chart-line"></i> Market Monitor</li>
+                <li data-route="/secure-hub"><i class="fas fa-shield-alt"></i> Secure Hub</li>
+              </ul>
+            </div>
+            <div id="start-menu-right">
+              <div class="right-panel-header">
+                <i class="fas fa-stream"></i>
+                <span>Recent Activity</span>
+              </div>
+              <ul class="recent-list">
+                <li><i class="far fa-file-alt"></i> Project Chimera Briefing</li>
+                <li><i class="fas fa-lock"></i> Encryption Log #134</li>
+                <li><i class="far fa-map"></i> Classified Sat-Image</li>
+                <li><i class="far fa-envelope"></i> Re: Operation Ghost</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      `;
+      container.appendChild(deferredContent);
+    });
 
     injectNavigationCSS();
     initClock();
@@ -115,10 +119,10 @@ function injectNavigationCSS() {
       justify-content: space-between;
       background: var(--taskbar-bg);
       border-top: 1px solid var(--border-color);
-      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.3);
       padding: 0 12px;
       z-index: 900;
       box-sizing: border-box;
+      will-change: transform;
     }
     #start-button {
       height: 48px;
@@ -130,8 +134,8 @@ function injectNavigationCSS() {
       font-weight: bold;
       font-size: 16px;
       cursor: pointer;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-      transition: all 0.2s ease-in-out;
+      transition: background 0.15s ease-in-out, transform 0.15s ease-in-out;
+      will-change: background, transform;
     }
     #start-button:hover {
       background: linear-gradient(to bottom, #3b8cff, #1f4dff);
@@ -140,22 +144,13 @@ function injectNavigationCSS() {
     #start-button:active {
       transform: scale(0.98);
     }
-    #start-button::after {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: -75%;
-      width: 50%;
-      height: 100%;
-      background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-      transform: skewX(-20deg);
-    }
-    #start-button.shine::after {
-      animation: shine 0.4s forwards;
+    #start-button.shine {
+      animation: shine 0.3s ease-in-out;
     }
     @keyframes shine {
-      0% { left: -75%; }
-      100% { left: 125%; }
+      0% { box-shadow: 0 0 10px rgba(255, 255, 255, 0.3); }
+      50% { box-shadow: 0 0 15px rgba(255, 255, 255, 0.5); }
+      100% { box-shadow: 0 0 10px rgba(255, 255, 255, 0.3); }
     }
     #system-tray {
       display: flex;
@@ -169,8 +164,9 @@ function injectNavigationCSS() {
     }
     .tray-icon, .top-controls i, #start-menu-app-list i, .recent-list i {
       font-size: 1.2em;
-      transition: all 0.15s ease-in-out;
+      transition: filter 0.15s ease-in-out;
       cursor: pointer;
+      will-change: filter;
     }
     .tray-icon:hover, .top-controls i:hover {
       filter: brightness(1.3);
@@ -180,11 +176,11 @@ function injectNavigationCSS() {
     }
     #network-status.transferring i {
       color: #34c759;
-      animation: transferPulse 1.5s infinite;
+      animation: transferPulse 1.5s ease-in-out infinite;
     }
     @keyframes transferPulse {
       0% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.2); opacity: 0.8; }
+      50% { transform: scale(1.1); opacity: 0.8; }
       100% { transform: scale(1); opacity: 1; }
     }
     #notifications {
@@ -200,7 +196,6 @@ function injectNavigationCSS() {
       background: #ff3b30;
       border-radius: 50%;
       border: 1px solid var(--taskbar-bg);
-      box-shadow: 0 0 5px #ff3b30;
     }
     #system-tray-panel {
       position: fixed;
@@ -209,14 +204,14 @@ function injectNavigationCSS() {
       width: 280px;
       background: var(--menu-bg);
       border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
       opacity: 0;
       transform: scale(0.95);
       transform-origin: bottom right;
-      transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+      transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
       z-index: 899;
       padding: 15px;
       color: var(--text-color);
+      will-change: opacity, transform;
     }
     #system-tray-panel.show {
       opacity: 1;
@@ -241,6 +236,32 @@ function injectNavigationCSS() {
       background: linear-gradient(to right, rgba(52, 199, 89, 0.3), rgba(52, 199, 89, 0.1));
       background-size: cover;
       opacity: 0.6;
+      transition: background 0.3s ease-in-out;
+    }
+    .network-graph.active {
+      background: linear-gradient(to right, rgba(52, 199, 89, 0.6), rgba(52, 199, 89, 0.3));
+      opacity: 1;
+    }
+    .network-status-text {
+      font-size: 12px;
+      color: var(--text-color);
+      margin-top: 8px;
+    }
+    .notification-content.hidden {
+      display: none;
+    }
+    .notification-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      font-size: 13px;
+    }
+    .notification-list li {
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .notification-list li:last-child {
+      border-bottom: none;
     }
     .transfer-item {
       display: flex;
@@ -269,14 +290,14 @@ function injectNavigationCSS() {
       width: 380px;
       background: var(--menu-bg);
       border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
       opacity: 0;
       transform: translateY(10px);
-      transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+      transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
       z-index: 899;
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      will-change: opacity, transform;
     }
     #start-menu.show {
       opacity: 1;
@@ -317,7 +338,7 @@ function injectNavigationCSS() {
       align-items: center;
       gap: 10px;
       cursor: pointer;
-      transition: color 0.2s ease;
+      transition: color 0.15s ease-in-out;
     }
     .recent-list li:hover {
       color: var(--accent-color);
@@ -350,6 +371,7 @@ function injectNavigationCSS() {
       color: var(--text-color);
       cursor: pointer;
       font-size: 1.1em;
+      transition: color 0.15s ease-in-out;
     }
     .top-controls i:hover {
       color: var(--accent-color);
@@ -367,11 +389,10 @@ function injectNavigationCSS() {
       color: var(--text-color);
       font-size: 15px;
       cursor: pointer;
-      transition: background 0.15s ease, box-shadow 0.15s ease;
+      transition: background 0.15s ease-in-out;
     }
     #start-menu-app-list li:hover {
       background: var(--highlight-bg);
-      box-shadow: inset 4px 0 0 var(--accent-color);
     }
     #start-menu-app-list li i {
       width: 20px;
@@ -388,9 +409,9 @@ function initClock() {
     function updateClock() {
       const now = new Date();
       clock.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      requestAnimationFrame(updateClock);
     }
-    updateClock();
-    setInterval(updateClock, 60000);
+    requestAnimationFrame(updateClock);
   } catch (err) {
     displayError(`Failed to initialize clock: ${err.message}`, 'Navigation', 'ERR_CLOCK_INIT');
   }
@@ -406,14 +427,26 @@ function initStartMenu() {
       e.stopPropagation();
       startMenu.classList.toggle('show');
       startButton.classList.add('shine');
-      setTimeout(() => startButton.classList.remove('shine'), 400);
+      setTimeout(() => startButton.classList.remove('shine'), 300);
+    });
+
+    // Event delegation for start menu items
+    startMenu.addEventListener('click', (e) => {
+      const menuItem = e.target.closest('#start-menu-app-list li');
+      if (menuItem) {
+        const path = menuItem.dataset.route;
+        if (path) {
+          navigateTo(path);
+          startMenu.classList.remove('show');
+        }
+      }
     });
 
     document.addEventListener('click', (e) => {
       if (!startButton.contains(e.target) && !startMenu.contains(e.target)) {
         startMenu.classList.remove('show');
       }
-    });
+    }, { passive: true });
   } catch (err) {
     displayError(`Failed to initialize start menu: ${err.message}`, 'Navigation', 'ERR_STARTMENU_INIT');
   }
@@ -421,22 +454,51 @@ function initStartMenu() {
 
 function initSystemTrayPanel() {
   try {
-    const trayIcons = document.querySelectorAll('#system-tray .tray-icon, #clock');
+    const systemTray = document.getElementById('system-tray');
     const trayPanel = document.getElementById('system-tray-panel');
-    if (!trayPanel || trayIcons.length === 0) throw new Error('System tray panel or icons not found.');
+    const networkStatus = document.getElementById('network-status');
+    const notifications = document.getElementById('notifications');
+    if (!systemTray || !trayPanel || !networkStatus || !notifications) {
+      throw new Error('System tray or panel elements not found.');
+    }
 
-    trayIcons.forEach(icon => {
-      icon.addEventListener('click', (e) => {
-        e.stopPropagation();
-        trayPanel.classList.toggle('show');
-      });
-    });
+    let isNetworkActive = false;
+    systemTray.addEventListener('click', (e) => {
+      const target = e.target.closest('.tray-icon, #clock');
+      if (!target) return;
+      e.stopPropagation();
+
+      const systemStatusContent = trayPanel.querySelector('.system-status-content');
+      const notificationContent = trayPanel.querySelector('.notification-content');
+
+      if (target.id === 'network-status') {
+        isNetworkActive = !isNetworkActive;
+        const networkGraph = trayPanel.querySelector('.network-graph');
+        const statusText = trayPanel.querySelector('.network-status-text');
+        if (networkGraph && statusText) {
+          networkGraph.classList.toggle('active', isNetworkActive);
+          statusText.textContent = `Network: ${isNetworkActive ? 'Active' : 'Idle'}`;
+          networkStatus.classList.toggle('transferring', isNetworkActive);
+        }
+        systemStatusContent.classList.remove('hidden');
+        notificationContent.classList.add('hidden');
+      } else if (target.id === 'notifications') {
+        systemStatusContent.classList.add('hidden');
+        notificationContent.classList.remove('hidden');
+        notifications.classList.remove('unread');
+      } else {
+        systemStatusContent.classList.remove('hidden');
+        notificationContent.classList.add('hidden');
+      }
+
+      trayPanel.classList.toggle('show');
+    }, { passive: true });
 
     document.addEventListener('click', (e) => {
       if (!trayPanel.contains(e.target) && !e.target.closest('#system-tray')) {
         trayPanel.classList.remove('show');
       }
-    });
+    }, { passive: true });
   } catch (err) {
     displayError(`Failed to initialize system tray panel: ${err.message}`, 'Navigation', 'ERR_SYSTEMTRAY_INIT');
   }
