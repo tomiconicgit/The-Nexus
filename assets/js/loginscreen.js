@@ -13,6 +13,7 @@ export function loadLoginScreen(container) {
 
       container.innerHTML = `
         <div id="login-background">
+          <canvas id="continents-canvas"></canvas>
           <div id="grid-overlay"></div>
           <div id="fade-overlay"></div>
 
@@ -51,6 +52,7 @@ export function loadLoginScreen(container) {
       `;
 
       injectLoginCSS();
+      drawContinents();
 
       const usernameInput = container.querySelector('#username');
       const passwordInput = container.querySelector('#password');
@@ -140,15 +142,6 @@ export function loadLoginScreen(container) {
         }
       });
 
-      // Animate continents parallax
-      let angle = 0;
-      function rotateContinents() {
-        angle += 0.02;
-        bg.style.backgroundPosition = `center ${Math.sin(angle)*10}px`;
-        requestAnimationFrame(rotateContinents);
-      }
-      rotateContinents();
-
     } catch (err) {
       updateCheck('loginscreen', 'fail');
       displayError(`Failed to load login screen: ${err.message}`, 'LoginScreen', 'ERR_LOGIN_LOAD');
@@ -229,22 +222,14 @@ function injectLoginCSS() {
     .stage-panel[aria-hidden="false"]{ display:flex; }
 
     #login-background{
-      height:100vh;
-      width:100vw;
-      background:
-        url('assets/images/continents.png') center center/cover no-repeat,
-        url('assets/images/world-map.jpg') center center/cover no-repeat;
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-      align-items:center;
-      color:var(--text-color);
-      font-family:var(--font-ui);
-      position:relative;
-      overflow:hidden;
+      height:100vh;width:100vw;
+      background:url('assets/images/world-map.jpg') center center/cover no-repeat;
+      display:flex;flex-direction:column;justify-content:center;align-items:center;
+      color:var(--text-color);font-family:var(--font-ui);position:relative;overflow:hidden;
       transition:opacity .3s ease-in-out;
-      filter:brightness(1.15) contrast(1.05);
     }
+
+    #continents-canvas{position:absolute;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;}
 
     #fade-overlay{position:absolute;bottom:0;left:0;width:100%;height:50%;background:linear-gradient(to top, black, transparent);z-index:1;pointer-events:none;}
     #grid-overlay{position:absolute;inset:0;background:
@@ -278,3 +263,23 @@ function injectLoginCSS() {
   `;
   document.head.appendChild(style);
 }
+
+// Procedural continents
+function drawContinents() {
+  const canvas = document.getElementById('continents-canvas');
+  if (!canvas) return;
+
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = 'rgba(0, 150, 255, 0.15)';
+  ctx.strokeStyle = 'rgba(0, 150, 255, 0.25)';
+  ctx.lineWidth = 1;
+
+  const continents = [
+    { x: 0.05, y: 0.3, w: 0.15, h: 0.25 }, 
+    { x: 0.22, y: 0.45, w: 0.1, h: 0.2 },  
+    { x: 0.4, y: 0.2, w: 0.25
