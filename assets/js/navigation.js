@@ -27,18 +27,24 @@ export function initNavigation(container) {
           <div class="widget-header">
             <h4>System Status</h4>
           </div>
-          <div class="widget system-status-content">
+          <div class="widget">
             <h5>Network Activity</h5>
             <div class="network-graph"></div>
-            <p class="network-status-text">Network: Idle</p>
           </div>
-          <div class="widget notification-content hidden">
-            <h5>Notifications</h5>
-            <ul class="notification-list">
-              <li>New mission brief received at 09:30</li>
-              <li>System update available</li>
-              <li>Secure transfer completed</li>
-            </ul>
+          <div class="widget">
+            <h5>Active Transfers</h5>
+            <div class="transfer-item">
+              <span class="file-name">Briefing_001.zip</span>
+              <div class="progress-bar-container">
+                <div class="progress-bar" style="width: 75%;"></div>
+              </div>
+            </div>
+            <div class="transfer-item">
+              <span class="file-name">Intel_Report.enc</span>
+              <div class="progress-bar-container">
+                <div class="progress-bar" style="width: 20%;"></div>
+              </div>
+            </div>
           </div>
         </div>
         <div id="start-menu" class="hidden">
@@ -122,7 +128,7 @@ function injectNavigationCSS() {
       padding: 0 12px;
       z-index: 900;
       box-sizing: border-box;
-      will-change: transform;
+      will-change: transform; /* Optimize rendering */
     }
     #start-button {
       height: 48px;
@@ -236,32 +242,6 @@ function injectNavigationCSS() {
       background: linear-gradient(to right, rgba(52, 199, 89, 0.3), rgba(52, 199, 89, 0.1));
       background-size: cover;
       opacity: 0.6;
-      transition: background 0.3s ease-in-out;
-    }
-    .network-graph.active {
-      background: linear-gradient(to right, rgba(52, 199, 89, 0.6), rgba(52, 199, 89, 0.3));
-      opacity: 1;
-    }
-    .network-status-text {
-      font-size: 12px;
-      color: var(--text-color);
-      margin-top: 8px;
-    }
-    .notification-content.hidden {
-      display: none;
-    }
-    .notification-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      font-size: 13px;
-    }
-    .notification-list li {
-      padding: 8px 0;
-      border-bottom: 1px solid var(--border-color);
-    }
-    .notification-list li:last-child {
-      border-bottom: none;
     }
     .transfer-item {
       display: flex;
@@ -456,42 +436,14 @@ function initSystemTrayPanel() {
   try {
     const systemTray = document.getElementById('system-tray');
     const trayPanel = document.getElementById('system-tray-panel');
-    const networkStatus = document.getElementById('network-status');
-    const notifications = document.getElementById('notifications');
-    if (!systemTray || !trayPanel || !networkStatus || !notifications) {
-      throw new Error('System tray or panel elements not found.');
-    }
+    if (!systemTray || !trayPanel) throw new Error('System tray or panel not found.');
 
-    let isNetworkActive = false;
     systemTray.addEventListener('click', (e) => {
-      const target = e.target.closest('.tray-icon, #clock');
-      if (!target) return;
-      e.stopPropagation();
-
-      const systemStatusContent = trayPanel.querySelector('.system-status-content');
-      const notificationContent = trayPanel.querySelector('.notification-content');
-
-      if (target.id === 'network-status') {
-        isNetworkActive = !isNetworkActive;
-        const networkGraph = trayPanel.querySelector('.network-graph');
-        const statusText = trayPanel.querySelector('.network-status-text');
-        if (networkGraph && statusText) {
-          networkGraph.classList.toggle('active', isNetworkActive);
-          statusText.textContent = `Network: ${isNetworkActive ? 'Active' : 'Idle'}`;
-          networkStatus.classList.toggle('transferring', isNetworkActive);
-        }
-        systemStatusContent.classList.remove('hidden');
-        notificationContent.classList.add('hidden');
-      } else if (target.id === 'notifications') {
-        systemStatusContent.classList.add('hidden');
-        notificationContent.classList.remove('hidden');
-        notifications.classList.remove('unread');
-      } else {
-        systemStatusContent.classList.remove('hidden');
-        notificationContent.classList.add('hidden');
+      const icon = e.target.closest('.tray-icon, #clock');
+      if (icon) {
+        e.stopPropagation();
+        trayPanel.classList.toggle('show');
       }
-
-      trayPanel.classList.toggle('show');
     }, { passive: true });
 
     document.addEventListener('click', (e) => {
