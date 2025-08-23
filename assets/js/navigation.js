@@ -8,7 +8,7 @@ export function initNavigation(container) {
   try {
     container.innerHTML = `
       <div id="taskbar">
-        <button id="start-button">◎</button>
+        <button id="start-button">Start</button>
         <div id="task-icons">
           <div class="task-icon">🌐</div>
           <div class="task-icon">📂</div>
@@ -64,22 +64,26 @@ function injectNavigationCSS() {
 
     /* Start Button */
     #start-button {
-      margin-left: 10px;
+      height: 100%;
+      width: 90px;
+      margin: 0;
+      padding: 0;
       background: linear-gradient(145deg, #1a73e8, #185abc);
       border: none;
       color: white;
-      font-size: 18px;
-      padding: 6px 14px;
-      border-radius: 6px;
+      font-size: 16px;
+      font-weight: bold;
+      text-align: center;
       cursor: pointer;
       overflow: hidden;
       position: relative;
-      box-shadow: inset 0 0 4px rgba(255,255,255,0.2), 0 2px 6px rgba(0,0,0,0.5);
-      transition: transform 0.15s ease-in-out;
+      border-right: 1px solid rgba(255,255,255,0.2);
+      box-shadow: inset 0 0 4px rgba(255,255,255,0.15), 0 2px 6px rgba(0,0,0,0.4);
+      transition: background 0.2s ease-in-out;
     }
 
-    #start-button:active {
-      transform: scale(0.96);
+    #start-button:hover {
+      background: linear-gradient(145deg, #2a83f8, #276acc);
     }
 
     /* Shine Effect */
@@ -107,7 +111,7 @@ function injectNavigationCSS() {
     #task-icons {
       display: flex;
       gap: 14px;
-      margin-left: 20px;
+      margin-left: 15px;
     }
 
     .task-icon {
@@ -138,17 +142,17 @@ function injectNavigationCSS() {
     #start-menu {
       position: fixed;
       bottom: 55px;
-      left: 10px;
-      width: 220px;
+      left: 0;
+      width: 240px;
       background: rgba(20, 20, 20, 0.97);
       border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 6px;
+      border-radius: 4px;
       box-shadow: 0 4px 16px rgba(0,0,0,0.6);
       backdrop-filter: blur(8px);
       overflow: hidden;
       transform: translateY(20px);
       opacity: 0;
-      transition: all 0.3s ease-in-out;
+      transition: all 0.25s ease-in-out;
       z-index: 999;
     }
 
