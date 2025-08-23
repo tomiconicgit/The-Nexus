@@ -2,7 +2,7 @@
 import { loadHomeScreen } from './homescreen.js';
 import { updateCheck, displayError } from './errors.js';
 
-const BUILD_VERSION = "0.164";
+const BUILD_VERSION = "0.170";
 let usernameTyped = false;
 let passwordTyped = false;
 
@@ -34,10 +34,12 @@ export function loadLoginScreen(container) {
             </div>
           </div>
 
-          <!-- A.N.N.A. PANEL (hidden until Login) -->
-          <div id="anna-sequence" class="stage-panel" aria-hidden="true">
-            <div id="anna-orb" aria-label="A.N.N.A. processing"></div>
-            <div id="anna-text" role="status" aria-live="polite"></div>
+          <!-- SEQUENCE TEXT PANEL -->
+          <div id="sequence-panel" class="stage-panel" aria-hidden="true">
+            <div id="sequence-text"></div>
+            <div id="sequence-bar-container">
+              <div id="sequence-bar"></div>
+            </div>
           </div>
 
           <div id="login-footer">
@@ -49,25 +51,16 @@ export function loadLoginScreen(container) {
 
       injectLoginCSS();
 
-      // Ensure SEAL stays small & in place
-      const logoImg = new Image();
-      logoImg.src = 'assets/images/nexusseal.PNG';
-      logoImg.onload = () => {
-        const t = container.querySelector('#login-title');
-        if (t) t.classList.add('loaded');
-      };
-      logoImg.onerror = () =>
-        displayError('Failed to load Nexus seal logo', 'LoginScreen', 'ERR_SEAL_LOAD', true);
-
       const usernameInput = container.querySelector('#username');
       const passwordInput = container.querySelector('#password');
       const loginBtn      = container.querySelector('#login-btn');
       const formPanel     = container.querySelector('#login-content');
-      const annaPanel     = container.querySelector('#anna-sequence');
-      const annaText      = container.querySelector('#anna-text');
+      const seqPanel      = container.querySelector('#sequence-panel');
+      const seqText       = container.querySelector('#sequence-text');
+      const seqBar        = container.querySelector('#sequence-bar');
       const bg            = container.querySelector('#login-background');
 
-      if (!usernameInput || !passwordInput || !loginBtn || !formPanel || !annaPanel || !annaText || !bg) {
+      if (!usernameInput || !passwordInput || !loginBtn || !formPanel || !seqPanel || !seqText || !seqBar || !bg) {
         displayError('Login DOM not ready', 'LoginScreen', 'ERR_FORM_ELEMENTS');
         resolve();
         return;
@@ -100,11 +93,10 @@ export function loadLoginScreen(container) {
 
         try {
           formPanel.setAttribute('aria-hidden', 'true');
-          annaPanel.setAttribute('aria-hidden', 'false');
+          seqPanel.setAttribute('aria-hidden', 'false');
 
           const agentID = (usernameInput.value && usernameInput.value.trim()) || 'Agent 173';
 
-          // Phrase + KB count simulation
           const sequences = [
             "Decrypting Credentials",
             "Loading Security Keys",
@@ -114,13 +106,27 @@ export function loadLoginScreen(container) {
           ];
 
           for (let seq of sequences) {
-            await animateKBSequence(annaText, seq);
-            await wait(500); // small pause between sequences
+            await animateKBWithBar(seqText, seqBar, seq);
+            await wait(400);
           }
 
-          annaText.textContent = `Welcome, ${agentID}`;
-          await wait(1600);
+          // Welcome text with fade left to right
+          seqText.innerHTML = `<span id="welcome-text">Welcome, ${agentID}</span>`;
+          const welcomeEl = container.querySelector('#welcome-text');
+          welcomeEl.style.opacity = 0;
+          welcomeEl.style.background = 'rgba(0,0,0,0.25)';
+          welcomeEl.style.padding = '4px 8px';
+          welcomeEl.style.borderRadius = '4px';
+          welcomeEl.style.display = 'inline-block';
+          welcomeEl.style.transition = 'opacity 1.5s ease, transform 1.5s ease';
+          welcomeEl.style.transform = 'translateX(-30px)';
 
+          requestAnimationFrame(() => {
+            welcomeEl.style.opacity = 1;
+            welcomeEl.style.transform = 'translateX(0)';
+          });
+
+          await wait(1600);
           bg.style.transition = 'opacity 0.45s ease-in-out';
           bg.style.opacity = '0';
           await wait(460);
@@ -159,8 +165,8 @@ function typeText(el, text) {
 function softHaptic() { if (navigator.vibrate) navigator.vibrate(10); }
 function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-// Animate KB counter for each sequence
-function animateKBSequence(el, phrase) {
+// Animate KB count + progress bar
+function animateKBWithBar(textEl, barEl, phrase) {
   return new Promise((res) => {
     const targetKB = Math.floor(100 + Math.random() * 900); // 100-1000 KB
     let kb = 0;
@@ -169,10 +175,15 @@ function animateKBSequence(el, phrase) {
     const interval = setInterval(() => {
       kb += Math.floor(Math.random() * speed);
       if (kb >= targetKB) kb = targetKB;
-      el.textContent = `${phrase} ... ${kb}KB`;
+
+      textEl.textContent = `${phrase} ... ${kb}KB`;
+      const pct = (kb / targetKB) * 100;
+      barEl.style.width = pct + '%';
+
       if (kb >= targetKB) {
         clearInterval(interval);
-        setTimeout(res, 250); // small pause at the end
+        barEl.style.width = '0%';
+        setTimeout(res, 250);
       }
     }, 35);
   });
@@ -205,14 +216,8 @@ function injectLoginCSS() {
       transition:opacity .3s ease-in-out;touch-action:manipulation;-webkit-user-select:none;
     }
 
-    #fade-overlay{
-      position:absolute;bottom:0;left:0;width:100%;height:50%;
-      background:linear-gradient(to top, black, transparent);
-      z-index:1;pointer-events:none;
-    }
-    #grid-overlay{
-      position:absolute;inset:0;
-      background:
+    #fade-overlay{position:absolute;bottom:0;left:0;width:100%;height:50%;background:linear-gradient(to top, black, transparent);z-index:1;pointer-events:none;}
+    #grid-overlay{position:absolute;inset:0;background:
         repeating-linear-gradient(to right,transparent,transparent 99px,rgba(255,255,255,.05) 100px),
         repeating-linear-gradient(to bottom,transparent,transparent 99px,rgba(255,255,255,.05) 100px);
       z-index:0;pointer-events:none;
@@ -232,36 +237,11 @@ function injectLoginCSS() {
     .glassy-btn.outline{ background:var(--glass-bg);color:rgba(255,255,255,.7); }
     .glassy-btn:disabled{ opacity:.5; cursor:default; }
 
-    /* --- A.N.N.A. PANEL --- */
-    #anna-sequence{z-index:3;flex-direction:column;align-items:center;justify-content:center;gap:14px;min-height:180px;padding:10px;text-align:center;}
-    #anna-orb{
-      position:relative;width:90px;height:90px;border-radius:50%;
-      background:conic-gradient(from 0deg,#0099ff,#00ccff,#0066ff,#0099ff);
-      animation: anna-rotate 3.6s linear infinite, anna-breathe 2s ease-in-out infinite;
-      box-shadow:0 0 20px rgba(0,180,255,.5), inset 0 0 12px rgba(255,255,255,.06);
-      -webkit-mask: radial-gradient(circle at 50% 50%, transparent 55%, black 56%);
-              mask: radial-gradient(circle at 50% 50%, transparent 55%, black 56%);
-    }
-    #anna-orb::before{
-      content:"";position:absolute;inset:12%;border-radius:50%;
-      background:conic-gradient(from 90deg,#00cfff,#0066ff,#0099ff,#00ccff);
-      filter:blur(6px);opacity:.9;
-      animation: anna-swirl 2.8s linear infinite reverse;
-      -webkit-mask: radial-gradient(circle at 50% 50%, black 60%, transparent 62%);
-              mask: radial-gradient(circle at 50% 50%, black 60%, transparent 62%);
-    }
-    #anna-orb::after{
-      content:"";position:absolute;inset:-5%;border-radius:50%;
-      background:radial-gradient(closest-side, rgba(0,200,255,.2), rgba(0,200,255,0) 70%);
-      filter:blur(4px);opacity:.6;
-      animation: anna-ripple 2.4s ease-in-out infinite;
-    }
-    #anna-text{font-family:var(--font-agency);font-size:.95rem;color:#aadfff;min-height:1.2em;text-shadow:0 0 4px rgba(0,0,0,.35);}
-
-    @keyframes anna-rotate{ to{ transform: rotate(360deg);} }
-    @keyframes anna-breathe{0%,100%{transform:scale(1);}50%{transform:scale(1.06);}}
-    @keyframes anna-swirl{0%{transform:rotate(0deg) scale(1);}50%{transform:rotate(180deg) scale(1.02);}100%{transform:rotate(360deg) scale(1);}}
-    @keyframes anna-ripple{0%,100%{transform:scale(1);opacity:.55;}50%{transform:scale(1.05);opacity:.75;}}
+    /* --- Sequence Panel --- */
+    #sequence-panel{z-index:3;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:120px;padding:10px;text-align:center;}
+    #sequence-text{font-family:var(--font-agency);font-size:1rem;color:#aadfff;min-height:1.2em;text-shadow:0 0 4px rgba(0,0,0,.35);}
+    #sequence-bar-container{width:200px;height:6px;background:#fff;border-radius:3px;margin-top:4px;}
+    #sequence-bar{width:0%;height:100%;background:linear-gradient(90deg,#1E90FF,#00ccff);border-radius:3px;transition:width 0.05s linear;}
 
     #login-footer{position:absolute;bottom:20px;font-size:.8rem;color:#ddd;text-align:center;z-index:2;line-height:1.4;}
   `;
