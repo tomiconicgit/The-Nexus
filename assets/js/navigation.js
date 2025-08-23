@@ -51,19 +51,18 @@ function injectNavigationCSS() {
   const styleTag = document.createElement('style');
   styleTag.id = styleId;
   styleTag.innerHTML = `
-    /* General Styles for new UI */
     :root {
-      --taskbar-bg: rgba(255, 255, 255, 0.05); /* Made a tad darker */
-      --menu-bg: rgba(255, 255, 255, 0.05); /* Made a tad darker */
-      --top-section-bg: rgba(0, 0, 0, 0.2);  /* New variable for a darker top section */
-      --highlight-bg: rgba(255, 255, 255, 0.1); /* Darker highlight color */
+      --taskbar-bg: rgba(20, 20, 20, 0.6);
+      --menu-bg: rgba(25, 25, 25, 0.85);
+      --top-section-bg: rgba(0, 0, 0, 0.2);
+      --highlight-bg: rgba(255, 255, 255, 0.1);
       --blue-highlight-bg: #2979ff;
       --text-color: #f2f2f7;
       --icon-color: #fff;
       --border-color: rgba(255, 255, 255, 0.2);
       --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
-    
+
     #taskbar {
       position: fixed;
       bottom: 0;
@@ -74,16 +73,15 @@ function injectNavigationCSS() {
       align-items: center;
       background: var(--taskbar-bg);
       border-top: 1px solid var(--border-color);
-      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.3);
-      font-family: var(--font-family);
+      box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(12px) saturate(180%);
+      -webkit-backdrop-filter: blur(12px) saturate(180%);
       z-index: 900;
-      backdrop-filter: blur(15px);
-      -webkit-backdrop-filter: blur(15px);
     }
+
     #start-button {
       height: 100%;
       width: 110px;
-      /* 3D button styling */
       background: linear-gradient(to bottom, #4090ff, #2979ff);
       border: none;
       color: var(--text-color);
@@ -91,22 +89,38 @@ function injectNavigationCSS() {
       font-weight: bold;
       text-align: center;
       cursor: pointer;
-      border-radius: 0;
-      box-shadow: 
-        inset 0 1px 0 rgba(255, 255, 255, 0.2), 
-        0 4px 6px rgba(0, 0, 0, 0.4);
+      border-radius: 10px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 4px 6px rgba(0,0,0,0.4);
+      position: relative;
+      overflow: hidden;
       transition: all 0.2s ease-in-out;
     }
     #start-button:hover {
       background: linear-gradient(to bottom, #50a0ff, #36a4ff);
+      transform: scale(1.02);
     }
     #start-button:active {
-      transform: translateY(2px);
-      box-shadow: 
-        inset 0 1px 0 rgba(255, 255, 255, 0.2), 
-        0 2px 3px rgba(0, 0, 0, 0.4);
+      transform: scale(0.98);
     }
-    
+    /* Shine Effect */
+    #start-button::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -75%;
+      width: 50%;
+      height: 100%;
+      background: linear-gradient(120deg, transparent, rgba(255,255,255,0.6), transparent);
+      transform: skewX(-20deg);
+    }
+    #start-button.shine::after {
+      animation: shine 0.4s forwards;
+    }
+    @keyframes shine {
+      0% { left: -75%; }
+      100% { left: 125%; }
+    }
+
     #start-menu {
       position: fixed;
       bottom: 60px;
@@ -115,12 +129,12 @@ function injectNavigationCSS() {
       background: var(--menu-bg);
       border: 1px solid var(--border-color);
       border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
       opacity: 0;
-      transform: translateY(10px);
-      transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+      transform: scaleY(0.8) skewY(-2deg);
+      transform-origin: bottom center;
+      transition: transform 0.35s cubic-bezier(0.25,1,0.5,1), opacity 0.25s ease-in-out;
       z-index: 899;
-      padding: 0;
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -129,9 +143,10 @@ function injectNavigationCSS() {
     }
     #start-menu.show {
       opacity: 1;
-      transform: translateY(0);
+      transform: scaleY(1) skewY(0deg);
     }
-    
+
+    /* Top section */
     #start-menu-top {
       display: flex;
       justify-content: space-between;
@@ -161,7 +176,7 @@ function injectNavigationCSS() {
     .top-controls i:hover {
       color: var(--blue-highlight-bg);
     }
-    
+
     #start-menu-app-list {
       padding: 10px 0;
     }
@@ -201,7 +216,16 @@ function initStartMenu() {
 
     startButton.addEventListener('click', () => {
       startMenu.classList.toggle('show');
-      startButton.style.transition = 'transform 0.2s ease-in-out';
+      startButton.classList.add('shine');
+      setTimeout(() => startButton.classList.remove('shine'), 400);
+
+      // Position menu relative to button
+      const rect = startButton.getBoundingClientRect();
+      startMenu.style.left = rect.left + 'px';
+      startMenu.style.bottom = (window.innerHeight - rect.top + 5) + 'px';
+
+      // Bounce effect
+      startButton.style.transition = 'transform 0.2s cubic-bezier(0.25,1,0.5,1)';
       startButton.style.transform = 'scale(1.05)';
       setTimeout(() => {
         startButton.style.transform = 'scale(1)';
