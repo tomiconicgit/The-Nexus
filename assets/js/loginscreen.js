@@ -2,7 +2,7 @@
 import { loadHomeScreen } from './homescreen.js';
 import { updateCheck, displayError } from './errors.js';
 
-const BUILD_VERSION = "0.172";
+const BUILD_VERSION = "0.173";
 let usernameTyped = false;
 let passwordTyped = false;
 
@@ -67,6 +67,9 @@ export function loadLoginScreen(container) {
         return;
       }
 
+      // Animate world map subtly
+      animateBackground(bg);
+
       // Username typing
       usernameInput.addEventListener('click', async () => {
         if (!usernameTyped) {
@@ -97,7 +100,6 @@ export function loadLoginScreen(container) {
           seqPanel.setAttribute('aria-hidden', 'false');
 
           const agentID = (usernameInput.value && usernameInput.value.trim()) || 'Agent 173';
-
           const sequences = [
             "Decrypting Credentials",
             "Loading Security Keys",
@@ -111,7 +113,7 @@ export function loadLoginScreen(container) {
             await wait(400);
           }
 
-          // Welcome text with fade left to right
+          // Welcome text fade
           seqText.innerHTML = `<span id="welcome-text">Welcome, ${agentID}</span>`;
           const welcomeEl = container.querySelector('#welcome-text');
           welcomeEl.style.opacity = 0;
@@ -190,6 +192,17 @@ function animateKBWithBar(textEl, barEl, phrase) {
   });
 }
 
+// Background subtle animation
+function animateBackground(bgEl) {
+  let scale = 1;
+  let direction = 1;
+  setInterval(() => {
+    scale += 0.0008 * direction;
+    if (scale >= 1.015 || scale <= 1) direction *= -1;
+    bgEl.style.transform = `scale(${scale})`;
+  }, 30);
+}
+
 // Inject CSS
 function injectLoginCSS() {
   const id = 'loginscreen-styles';
@@ -213,7 +226,6 @@ function injectLoginCSS() {
       --font-ui:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
       --font-agency:'Courier New',Courier,monospace;
     }
-
     html, body { touch-action: manipulation; -webkit-text-size-adjust: 100%; user-select: none; }
 
     .stage-panel[aria-hidden="true"]{ display:none; }
@@ -221,16 +233,17 @@ function injectLoginCSS() {
 
     #login-background{
       height:100vh;width:100vw;
-      background:url('assets/images/world-map.jpg') no-repeat center center/cover;
+      background: url('assets/images/world-map.jpg') no-repeat center center/cover;
       display:flex;flex-direction:column;justify-content:center;align-items:center;
       color:var(--text-color);font-family:var(--font-ui);position:relative;overflow:hidden;
       transition:opacity .3s ease-in-out;
+      filter:brightness(1.15) contrast(1.05);
     }
 
-    #fade-overlay{position:absolute;bottom:0;left:0;width:100%;height:50%;background:linear-gradient(to top, black, transparent);z-index:1;pointer-events:none;}
-    #grid-overlay{position:absolute;inset:0;background:
-        repeating-linear-gradient(to right,transparent,transparent 99px,rgba(255,255,255,.05) 100px),
-        repeating-linear-gradient(to bottom,transparent,transparent 99px,rgba(255,255,255,.05) 100px);
+    #fade-overlay{position:absolute;bottom:0;left:0;width:100%;height:35%;background:linear-gradient(to top, rgba(0,0,0,.5), transparent);z-index:1;pointer-events:none;}
+    #grid-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:
+      repeating-linear-gradient(to right,transparent,transparent 99px,rgba(255,255,255,.03) 100px),
+      repeating-linear-gradient(to bottom,transparent,transparent 99px,rgba(255,255,255,.03) 100px);
       z-index:0;pointer-events:none;
     }
 
@@ -245,17 +258,4 @@ function injectLoginCSS() {
     .input-group label{color:var(--text-color);font-weight:bold;width:70px;text-align:right;font-size:16px;font-family:var(--font-agency);flex-shrink:0;}
     .login-input{font-size:16px;padding:6px;border:1px solid var(--input-border-color);background:#fff;color:#000;width:160px;box-sizing:border-box;touch-action:manipulation;-webkit-user-select:none;-webkit-touch-callout:none;}
     #login-buttons{display:flex;justify-content:center;gap:10px;margin-top:12px;width:100%;max-width:300px;margin-left:auto;margin-right:auto;}
-    .glassy-btn{font-family:var(--font-agency);padding:10px;border:1px solid rgba(255,255,255,.1);border-radius:8px;cursor:pointer;font-weight:bold;width:100%;max-width:140px;transition:background .2s ease,color .2s ease;}
-    .glassy-btn.primary{ color:var(--text-color);background:var(--accent-color);border-color:var(--accent-color); }
-    .glassy-btn.outline{ background:var(--glass-bg);color:rgba(255,255,255,.7); }
-    .glassy-btn:disabled{ opacity:.5; cursor:default; }
-
-    #sequence-panel{z-index:3;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:120px;padding:10px;text-align:center;}
-    #sequence-text{font-family:var(--font-agency);font-size:1rem;color:#aadfff;min-height:1.2em;text-shadow:0 0 4px rgba(0,0,0,.35);}
-    #sequence-bar-container{width:200px;height:6px;background:#fff;border-radius:3px;margin-top:4px;}
-    #sequence-bar{width:0%;height:100%;background:linear-gradient(90deg,#1E90FF,#00ccff);border-radius:3px;transition:width 0.05s linear;}
-
-    #login-footer{position:absolute;bottom:20px;font-size:.8rem;color:#ddd;text-align:center;z-index:2;line-height:1.4;}
-  `;
-  document.head.appendChild(style);
-}
+    .glassy-btn{font-family:var(--font-agency);padding:10px;border:1px solid rgba(255,255,255,.1);border-radius:8px;cursor:pointer;font-weight:bold;width:100%;max-width:140px;transition:background .2s ease,color .2s
