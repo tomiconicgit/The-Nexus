@@ -61,7 +61,7 @@ export function loadLoginScreen(container) {
 
       // Verifies seal logo load with error handling.
       const logoImg = new Image();
-      logoImg.src = '/assets/images/nexusseal.png'; // Case-sensitive; ensure file matches (PNG vs. PNG).
+      logoImg.src = 'assets/images/nexusseal.png'; // Case-sensitive; ensure file matches (PNG vs. PNG).
       logoImg.onload = () => {
         const loginTitle = container.querySelector('#login-title');
         if (loginTitle) loginTitle.classList.add('loaded');
