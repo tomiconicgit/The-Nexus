@@ -16,7 +16,6 @@ export function loadLoginScreen(container) {
           <div id="grid-overlay"></div>
           <div id="fade-overlay"></div>
 
-          <!-- LOGIN PANEL -->
           <div id="login-content" class="stage-panel" aria-hidden="false">
             <img id="login-title" src="assets/images/nexusseal.PNG" alt="Nexus Intelligence Agency Seal" loading="lazy">
             <div id="form-elements">
@@ -35,7 +34,6 @@ export function loadLoginScreen(container) {
             </div>
           </div>
 
-          <!-- SEQUENCE PANEL -->
           <div id="sequence-panel" class="stage-panel" aria-hidden="true">
             <div id="sequence-text"></div>
             <div id="sequence-bar-container">
@@ -60,12 +58,17 @@ export function loadLoginScreen(container) {
       const seqText       = container.querySelector('#sequence-text');
       const seqBar        = container.querySelector('#sequence-bar');
       const bg            = container.querySelector('#login-background');
+      const loginTitle    = container.querySelector('#login-title');
 
-      if (!usernameInput || !passwordInput || !loginBtn || !formPanel || !seqPanel || !seqText || !seqBar || !bg) {
+      if (!usernameInput || !passwordInput || !loginBtn || !formPanel || !seqPanel || !seqText || !seqBar || !bg || !loginTitle) {
         displayError('Login DOM not ready', 'LoginScreen', 'ERR_FORM_ELEMENTS');
         resolve();
         return;
       }
+
+      // Add fade-in for title and form
+      loginTitle.style.opacity = '1';
+      formPanel.style.opacity = '1';
 
       // Username typing
       usernameInput.addEventListener('click', async () => {
@@ -226,6 +229,19 @@ function injectLoginCSS() {
       transition:opacity .3s ease-in-out; background-color:#000;
     }
 
+    /* New continents CSS using a pseudo-element with an inline SVG mask */
+    #login-background::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 1; /* Place it between the grid and the login panel */
+      background-color: #000;
+      -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 500'%3E%3Cpath fill='%23fff' d='M835 150Q850 170 820 190T770 190T750 200T720 230T690 260T660 290T630 310T610 320T580 330T540 330T510 320T480 300T450 280T420 260T390 250T360 250T330 260T300 280T270 300T240 310T210 310T180 300T150 280T120 250T90 220T60 190T40 170T30 150Q20 130 50 120T100 110T150 120T200 140T250 160T300 170T350 170T400 160T450 140T500 120T550 110T600 110T650 120T700 140T750 160T800 170T835 150Z'/%3E%3Cpath fill='%23fff' d='M250 150Q270 160 280 170T290 180T290 190T280 200T260 210T240 220T220 230T200 240T180 240T160 230T140 220T120 210T100 200T80 190T60 180T40 170T20 160T10 150Q0 140 20 130T60 120T100 110T140 100T180 100T220 110T250 120T270 130T280 140T280 150Q280 160 260 160T250 150Z'/%3E%3Cpath fill='%23fff' d='M400 300Q420 310 430 320T440 330T440 340T430 350T410 360T390 370T370 380T350 390T330 390T310 380T290 370T270 360T250 350T230 340T210 330T190 320T170 310T150 300T130 290T110 280T90 270T70 260T50 250T30 240T10 230Q0 220 20 210T60 200T100 190T140 180T180 170T220 160T260 150T300 140T340 130T380 120T420 110T460 100T500 90T540 80T580 70T620 60T660 50T700 40T740 30T780 20T820 10T860 0T900 0T940 10T980 20T1000 30Q1000 40 980 50T940 60T900 70T860 80T820 90T780 100T740 110T700 120T660 130T620 140T580 150T540 160T500 170T460 180T420 190T400 200Q400 210 420 220T460 230T500 240T540 250T580 260T620 270T660 280T700 290T740 300T780 310T820 320T860 330T900 340T940 350T980 360T1000 370Q1000 380 980 390T940 400T900 410T860 420T820 430T780 440T740 450T700 460T660 470T620 480T580 490T540 500T500 500T460 490T420 480T380 470T340 460T300 450T260 440T220 430T180 420T140 410T100 400T60 390T20 380T0 370Q0 360 20 350T60 340T100 330T140 320T180 310T220 300T250 290Q250 280 230 270T190 260T150 250T110 240T70 230T30 220T0 210Q0 200 20 190T60 180T100 170T140 160T180 150T220 140T250 130T270 120T280 110T280 100T270 90T260 80T250 70T240 60T230 50T220 40T210 30T200 20T190 10T180 0T170 0T160 10T150 20T140 30T130 40T120 50T110 60T100 70T90 80T80 90T70 100T60 110T50 120T40 130T30 140T20 150T10 160T0 170T0 180Q0 190 20 200T60 210T100 220T140 230T180 240T220 250T260 260T300 270T340 280T380 290T400 300Z'/%3E%3C/svg%3E");
+      -webkit-mask-size: cover;
+      -webkit-mask-repeat: no-repeat;
+      -webkit-mask-position: center;
+    }
+
     #fade-overlay{position:absolute;bottom:0;left:0;width:100%;height:50%;background:linear-gradient(to top, black, transparent);z-index:2;pointer-events:none;}
     #grid-overlay{position:absolute;inset:0;background:
         repeating-linear-gradient(to right,transparent,transparent 99px,rgba(255,255,255,.05) 100px),
@@ -236,7 +252,7 @@ function injectLoginCSS() {
     #login-content{z-index:3;flex-direction:column;justify-content:center;align-items:center;gap:14px;padding:20px;width:90%;max-width:360px;opacity:0;animation:fadeInLogin .8s ease forwards;}
     @keyframes fadeInLogin{ from{opacity:0;} to{opacity:1;} }
 
-    #login-title{max-width:170px;width:70%;height:auto;object-fit:contain;margin-bottom:6px;transition:transform .2s ease,opacity .2s ease;}
+    #login-title{max-width:170px;width:70%;height:auto;object-fit:contain;margin-bottom:6px;transition:opacity .8s ease, transform .2s ease;}
     #login-title.loaded{ opacity:1; transform:none; }
 
     #form-elements{display:flex;flex-direction:column;align-items:center;gap:14px;width:100%;}
