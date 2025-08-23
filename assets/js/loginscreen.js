@@ -62,7 +62,7 @@ export function loadLoginScreen(container) {
 
       // Verifies seal logo load with enhanced error logging.
       const logoImg = new Image();
-      const logoUrl = '/assets/images/nexusseal.PNG'; // Explicit URL for debugging, updated to match file.
+      const logoUrl = 'assets/images/nexusseal.PNG'; // Explicit URL for debugging, updated to match file.
       logoImg.src = logoUrl;
       logoImg.onload = () => {
         const loginTitle = container.querySelector('#login-title');
