@@ -6,7 +6,7 @@
 // - Integrates the Nexus seal logo (nexusseal.PNG) as the title, with error handling for load failures.
 // - Optimized for PWA compliance and iOS Safari, targeting ~60fps.
 // - Build version (0.153) is tracked for deployment consistency.
-// - Fix Notes: Updated to address ERR_SEAL_LOAD by logging failed URL and ensuring case-sensitive path (nexusseal.PNG).
+// - Fix Notes: Updated to address ERR_SEAL_LOAD by using relative path (assets/images/nexusseal.PNG); added object-fit for image display.
 // AI Usage: This file initializes the login interface; modify CSS or animation timings if aesthetic changes are needed.
 
 import { loadHomeScreen } from './homescreen.js'; // Imports home screen loader for post-login transition.
@@ -27,7 +27,7 @@ export function loadLoginScreen(container) {
           <div id="bottom-background"></div>
           <div id="particle-container"></div>
           <div id="login-content" class="stage-panel" aria-hidden="false">
-            <img id="login-title" src="/assets/images/nexusseal.PNG" alt="Nexus Intelligence Agency Seal" loading="lazy">
+            <img id="login-title" src="assets/images/nexusseal.PNG" alt="Nexus Intelligence Agency Seal" loading="lazy">
             <h2 id="login-subtitle">Intelligence Network</h2>
             <div id="form-elements">
               <input type="text" id="username" placeholder="Username" autocomplete="off">
@@ -62,7 +62,7 @@ export function loadLoginScreen(container) {
 
       // Verifies seal logo load with enhanced error logging.
       const logoImg = new Image();
-      const logoUrl = 'assets/images/nexusseal.PNG'; // Explicit URL for debugging, updated to match file.
+      const logoUrl = 'assets/images/nexusseal.PNG'; // Relative path, no leading /.
       logoImg.src = logoUrl;
       logoImg.onload = () => {
         const loginTitle = container.querySelector('#login-title');
@@ -198,7 +198,7 @@ function injectLoginCSS() {
       left: 0;
       width: 100%;
       height: 50vh;
-      background-image: url('/assets/images/IMG_8860.jpeg');
+      background-image: url('assets/images/IMG_8860.jpeg');
       background-size: cover;
       background-position: center;
       filter: brightness(0.5) contrast(1.2);
@@ -361,6 +361,7 @@ function injectLoginCSS() {
       height: auto;
       margin-bottom: 10px;
       z-index: 2;
+      object-fit: contain; /* Ensures image fits within dimensions */
     }
     #login-title.loaded {
       opacity: 1;
