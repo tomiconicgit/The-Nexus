@@ -2,10 +2,10 @@
 // Purpose: Manages the login screen UI and animation sequence for TitanOS, simulating a secure authentication process.
 // Dependencies: ./homescreen.js (for post-login transition), ./errors.js (for error handling and status updates).
 // Notes:
-// - Handles user input simulation (typing animation) and a covert-themed loading sequence.
+// - Handles user input simulation (typing animation) and a covert-themed loading sequence without keyboard input.
 // - Integrates the Nexus seal logo (nexusseal.PNG) as the title.
 // - Optimized for PWA compliance and iOS Safari, targeting ~60fps.
-// - Step 1 Fix Notes: Removed "OPERATIVE ID" and "PASSWORD" labels, centered/shortened inputs to 200px, moved buttons below with 200px width and curved corners, restored NEXUS gradient and TitanOS font, moved footer above fade.
+// - Step 2 Fix Notes: Resized/attached buttons to password box (100px each), updated NEXUS gradient to agency vibe (#1C2526 to #C0C0C0), prevented keyboard on input clicks, ensured no zoom/scrolling.
 
 import { loadHomeScreen } from './homescreen.js';
 import { updateCheck, displayError } from './errors.js';
@@ -85,7 +85,7 @@ export function loadLoginScreen(container) {
           usernameInput.value = '';
           await typeText(usernameInput, 'Agent 173');
           usernameTyped = true;
-          passwordInput.removeAttribute('readonly');
+          passwordInput.removeAttribute('readonly'); // Enable without focus
         }
       });
 
@@ -216,6 +216,11 @@ function injectLoginCSS() {
       position: relative;
       overflow: hidden;
       transition: opacity 0.3s ease-in-out;
+      touch-action: none; /* Prevent scrolling */
+      -webkit-user-select: none; /* Prevent selection */
+    }
+    meta[name=viewport] {
+      content: "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"; /* Prevent zoom */
     }
     #fade-overlay {
       position: absolute;
@@ -251,9 +256,9 @@ function injectLoginCSS() {
     }
     .input-group {
       display: flex;
-      justify-content: center; /* Center the inputs */
+      justify-content: center;
       width: 100%;
-      margin: 0 auto; /* Center horizontally */
+      margin: 0 auto;
     }
     .login-input {
       padding: 6px;
@@ -261,28 +266,29 @@ function injectLoginCSS() {
       background: #fff;
       color: #000;
       font-size: 0.9rem;
-      width: 200px; /* Shortened length */
+      width: 200px;
       box-sizing: border-box;
     }
     #login-buttons {
       display: flex;
-      justify-content: center; /* Center the buttons */
+      justify-content: center;
       gap: 10px;
-      margin-top: 15px; /* Space below inputs */
-      width: 100%;
+      margin-top: -5px; /* Attach to password box */
+      width: 200px; /* Match input length */
+      position: relative; /* For attachment */
     }
     .glassy-btn {
-      padding: 12px; /* Slightly bigger */
+      padding: 12px;
       border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 10px; /* Curved corners */
-      border-top-left-radius: 0; /* Straight top */
-      border-top-right-radius: 0; /* Straight top */
-      border-bottom-left-radius: 10px; /* Curved bottom */
-      border-bottom-right-radius: 10px; /* Curved bottom */
+      border-radius: 10px;
+      border-top-left-radius: 0;
+      border-top-right-radius: 0;
+      border-bottom-left-radius: 10px;
+      border-bottom-right-radius: 10px;
       cursor: pointer;
       font-weight: 600;
       letter-spacing: 0.2px;
-      width: 200px; /* Match input length */
+      width: 100px; /* Resized to 100px each */
       transition: background 0.2s ease, color 0.2s ease;
       will-change: background, color;
     }
@@ -320,7 +326,7 @@ function injectLoginCSS() {
     .nexus-powered {
       font-weight: 700;
       font-size: 0.9rem;
-      background: linear-gradient(to right, #1E90FF, #800080); /* Gradient for NEXUS */
+      background: linear-gradient(to right, #1C2526, #C0C0C0); /* Agency/authority vibe */
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
@@ -329,7 +335,7 @@ function injectLoginCSS() {
       font-weight: 700;
       font-size: 0.9rem;
       color: var(--text-color);
-      text-shadow: 0 0 3px rgba(30, 144, 255, 0.3); /* Match TitanOS logo */
+      text-shadow: 0 0 3px rgba(30, 144, 255, 0.3);
     }
     #login-footer {
       position: absolute;
@@ -337,7 +343,7 @@ function injectLoginCSS() {
       font-size: 0.8rem;
       color: #ddd;
       text-align: center;
-      z-index: 2; /* Above fade-overlay */
+      z-index: 2;
       line-height: 1.4;
     }
   `;
