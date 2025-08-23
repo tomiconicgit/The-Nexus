@@ -1,18 +1,13 @@
 // assets/js/errors.js
 
-// Status tracking for all components (including planned modules)
+// Status tracking for active components
 const status = {
   bootscreen: 'unknown',
   loginscreen: 'unknown',
   homescreen: 'unknown',
-  worldmap: 'unknown',
-  missioncards: 'unknown',
-  activemissions: 'unknown',
-  newscards: 'unknown',
-  useraccount: 'unknown',
-  currency: 'unknown',
   router: 'unknown',
-  map: 'unknown',
+  navigation: 'unknown',
+  header: 'unknown',
   user: 'unknown',
   stats: 'unknown',
   nim: 'unknown',
@@ -46,15 +41,13 @@ export function initErrorSystem(container) {
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.9);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
     display: none;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     z-index: 9999;
     color: #f2f2f7;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: var(--font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif);
     overflow-y: auto;
     padding: 20px;
     box-sizing: border-box;
@@ -77,14 +70,6 @@ export function initErrorSystem(container) {
     const target = event.target;
     if (target.tagName === 'BUTTON' && target.disabled) {
       displayError('This action is currently unavailable.', 'UserAction', 'ERR_ACTION');
-      event.preventDefault();
-    }
-  });
-
-  // Authorization check for mission cards
-  document.addEventListener('click', (event) => {
-    if (event.target.closest('.app-card') && !isUserAuthorized()) {
-      displayError('Access to this mission denied.', 'MissionAccess', 'ERR_AUTH');
       event.preventDefault();
     }
   });
@@ -243,7 +228,8 @@ function checkBootErrors() {
     '/manifest.json',
     '/assets/js/bootscreen.js',
     '/assets/js/router.js',
-    '/assets/js/performance.js'
+    '/assets/js/navigation.js',
+    '/assets/js/homescreen.js'
   ];
   criticalFiles.forEach(file => {
     fetch(file, { method: 'HEAD' })
@@ -279,16 +265,14 @@ function injectErrorCSS() {
   styleTag.innerHTML = `
     .error-popup {
       background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(15px);
-      -webkit-backdrop-filter: blur(15px);
       border: 1px solid rgba(255, 255, 255, 0.2);
       border-radius: 15px;
       padding: 20px;
-      max-width: 90%;
-      width: 400px;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.05);
+      max-width: 380px; /* Optimized for iPhone 15 Pro Max */
+      width: 90%;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
       color: #f2f2f7;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: var(--font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif);
       text-align: left;
       animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
@@ -299,7 +283,7 @@ function injectErrorCSS() {
       margin-bottom: 15px;
     }
     .error-title {
-      font-size: 1.6em;
+      font-size: 1.4em; /* Adjusted for mobile */
       font-weight: 700;
       color: #ff4b4b;
       margin: 0;
@@ -323,7 +307,7 @@ function injectErrorCSS() {
     }
     .error-details p {
       margin: 5px 0;
-      font-size: 0.9em;
+      font-size: 0.85em; /* Adjusted for mobile */
     }
     .error-details strong {
       color: #34c759;
@@ -335,12 +319,12 @@ function injectErrorCSS() {
       justify-content: center;
     }
     .error-copy-btn, .error-retry-btn {
-      padding: 10px 20px;
+      padding: 8px 16px; /* Adjusted for mobile */
       background: #007bff;
       border: none;
       border-radius: 8px;
       color: #f2f2f7;
-      font-size: 1em;
+      font-size: 0.9em;
       cursor: pointer;
       transition: background 0.3s;
     }
