@@ -31,8 +31,8 @@ export function loadLoginScreen(container) {
             </div>
           </div>
           <div id="login-sequence" class="stage-panel" aria-hidden="true">
-            <div id="sphere-loader"></div>
-            <div id="loading-text">Decrypting Intelligence Data..</div>
+            <div id="radar-loader"></div>
+            <div id="loading-text"></div>
           </div>
           <div id="deployment">Deployment v${DEPLOYMENT_VERSION}</div>
           <div id="login-footer">
@@ -51,7 +51,7 @@ export function loadLoginScreen(container) {
       const loginBtn = container.querySelector('#login-btn');
       if (!loginBtn) {
         displayError('Login button not found. Please refresh the page.', 'LoginScreen', 'ERR_LOGIN_BTN');
-        resolve(); // Resolve with error state
+        resolve();
         return;
       }
 
@@ -61,44 +61,64 @@ export function loadLoginScreen(container) {
           const formContainer = container.querySelector('#login-content');
           const sequenceContainer = container.querySelector('#login-sequence');
           const bg = loginBackground;
+          const loadingText = container.querySelector('#loading-text');
 
-          if (!formContainer || !sequenceContainer || !bg) {
+          if (!formContainer || !sequenceContainer || !bg || !loadingText) {
             displayError('Login sequence elements not found.', 'LoginScreen', 'ERR_LOGIN_SEQ');
             resolve();
             return;
           }
 
-          // Simulate typing animation
+          // Simulate human-like typing animation with varied pacing
           await new Promise(resolve => {
             const usernameInput = container.querySelector('#username');
             const passwordInput = container.querySelector('#password');
             const usernameText = 'AgentSmith';
             const passwordText = 'SecurePass123';
             let i = 0;
-            const typeDelay = 80;
             const type = () => {
               if (i < usernameText.length) {
                 usernameInput.value += usernameText.charAt(i);
                 i++;
-                requestAnimationFrame(type);
+                const delay = Math.random() * 200 + 100; // 100-300ms for realism
+                setTimeout(type, delay);
               } else if (i < usernameText.length + passwordText.length) {
                 passwordInput.value += passwordText.charAt(i - usernameText.length);
                 i++;
-                requestAnimationFrame(type);
+                const delay = Math.random() * 250 + 150; // 150-400ms for realism
+                setTimeout(type, delay);
               } else {
                 resolve();
               }
             };
-            requestAnimationFrame(type);
+            type();
           });
 
           // Hide form and show sequence with vibration
           formContainer.setAttribute('aria-hidden', 'true');
           sequenceContainer.setAttribute('aria-hidden', 'false');
-          if (navigator.vibrate) navigator.vibrate([100, 50, 100]); // Longer vibration for sequence start
+          if (navigator.vibrate) navigator.vibrate([100, 50, 100]); // Longer vibration
 
-          // Wait for loading sequence (3.5s)
-          await new Promise(resolve => setTimeout(resolve, 3500));
+          // Covert-themed loading sequence with rotating phrases
+          const phrases = [
+            "Scanning Credentials",
+            "Decrypting Access",
+            "Verifying Identity",
+            "Establishing Secure Link"
+          ];
+          let phraseIndex = 0;
+          const updateLoadingText = () => {
+            loadingText.textContent = phrases[phraseIndex];
+            phraseIndex = (phraseIndex + 1) % phrases.length;
+          };
+          updateLoadingText();
+          const textInterval = setInterval(updateLoadingText, 800);
+
+          // Wait for loading sequence (4s total)
+          await new Promise(resolve => setTimeout(resolve, 4000));
+
+          clearInterval(textInterval);
+          loadingText.textContent = "Access Granted";
 
           // Fade out login screen
           bg.style.transition = 'opacity 0.3s ease-in-out';
@@ -107,19 +127,16 @@ export function loadLoginScreen(container) {
 
           bg.remove();
           await loadHomeScreen(container);
-          resolve(); // Resolve only after successful login
+          resolve();
         } catch (err) {
           displayError(`Login sequence failed: ${err.message}`, 'LoginScreen', 'ERR_LOGIN_FAIL');
-          resolve(); // Resolve with error state
+          resolve();
         }
       });
-
-      // Do not resolve the outer promise until login is complete
-      // Resolution is handled inside the loginBtn event listener
     } catch (err) {
       updateCheck('loginscreen', 'fail');
       displayError(`Failed to load login screen: ${err.message}`, 'LoginScreen', 'ERR_LOGIN_LOAD');
-      resolve(); // Resolve with error state
+      resolve();
     }
   });
 }
@@ -333,16 +350,37 @@ function injectLoginCSS() {
       margin-bottom: 15px;
       z-index: 2;
     }
-    #sphere-loader {
-      width: 40px;
-      height: 40px;
-      border: 3px solid rgba(255, 255, 255, 0.2);
-      border-top: 3px solid var(--accent-color);
+    #radar-loader {
+      width: 60px;
+      height: 60px;
+      position: relative;
+      z-index: 2;
+    }
+    #radar-loader::before {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border: 2px solid rgba(30, 144, 255, 0.3);
       border-radius: 50%;
-      animation: spin 0.8s linear infinite;
+      animation: radarPulse 2s infinite ease-out;
+      will-change: transform, opacity;
+    }
+    #radar-loader::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border: 2px solid var(--accent-color);
+      border-radius: 50%;
+      animation: radarSpin 1.5s linear infinite;
       will-change: transform;
     }
-    @keyframes spin {
+    @keyframes radarPulse {
+      0% { transform: scale(0.5); opacity: 0.5; }
+      100% { transform: scale(1.5); opacity: 0; }
+    }
+    @keyframes radarSpin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
