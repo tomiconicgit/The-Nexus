@@ -3,10 +3,10 @@
 // Dependencies: ./homescreen.js (for post-login transition), ./errors.js (for error handling and status updates).
 // Notes: 
 // - Handles user input simulation (typing animation) and a covert-themed loading sequence.
-// - Integrates the Nexus seal logo (nexusseal.png) as the title, with error handling for load failures.
+// - Integrates the Nexus seal logo (nexusseal.PNG) as the title, with error handling for load failures.
 // - Optimized for PWA compliance and iOS Safari, targeting ~60fps.
 // - Build version (0.153) is tracked for deployment consistency.
-// - Fix Notes: Updated to address ERR_SEAL_LOAD by logging failed URL and ensuring case-sensitive path.
+// - Fix Notes: Updated to address ERR_SEAL_LOAD by logging failed URL and ensuring case-sensitive path (nexusseal.PNG).
 // AI Usage: This file initializes the login interface; modify CSS or animation timings if aesthetic changes are needed.
 
 import { loadHomeScreen } from './homescreen.js'; // Imports home screen loader for post-login transition.
@@ -27,7 +27,7 @@ export function loadLoginScreen(container) {
           <div id="bottom-background"></div>
           <div id="particle-container"></div>
           <div id="login-content" class="stage-panel" aria-hidden="false">
-            <img id="login-title" src="/assets/images/nexusseal.png" alt="Nexus Intelligence Agency Seal" loading="lazy">
+            <img id="login-title" src="/assets/images/nexusseal.PNG" alt="Nexus Intelligence Agency Seal" loading="lazy">
             <h2 id="login-subtitle">Intelligence Network</h2>
             <div id="form-elements">
               <input type="text" id="username" placeholder="Username" autocomplete="off">
@@ -62,7 +62,7 @@ export function loadLoginScreen(container) {
 
       // Verifies seal logo load with enhanced error logging.
       const logoImg = new Image();
-      const logoUrl = '/assets/images/nexusseal.png'; // Explicit URL for debugging.
+      const logoUrl = '/assets/images/nexusseal.PNG'; // Explicit URL for debugging, updated to match file.
       logoImg.src = logoUrl;
       logoImg.onload = () => {
         const loginTitle = container.querySelector('#login-title');
