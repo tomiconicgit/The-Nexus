@@ -20,6 +20,31 @@ export function initNavigation(container) {
         </div>
       </div>
 
+      <div id="system-tray-panel" class="hidden">
+        <div class="widget-header">
+            <h4>System Status</h4>
+        </div>
+        <div class="widget">
+            <h5>Network Activity</h5>
+            <div class="network-graph"></div>
+        </div>
+        <div class="widget">
+            <h5>Active Transfers</h5>
+            <div class="transfer-item">
+                <span class="file-name">Briefing_001.zip</span>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" style="width: 75%;"></div>
+                </div>
+            </div>
+            <div class="transfer-item">
+                <span class="file-name">Intel_Report.enc</span>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" style="width: 20%;"></div>
+                </div>
+            </div>
+        </div>
+      </div>
+
       <div id="start-menu" class="hidden">
         <div id="start-menu-top">
           <div class="user-profile">
@@ -31,16 +56,30 @@ export function initNavigation(container) {
             <i class="fas fa-power-off"></i>
           </div>
         </div>
-        <div id="start-menu-app-list">
-          <ul>
-            <li><i class="fas fa-compass"></i> Mission Control</li>
-            <li><i class="fas fa-terminal"></i> Encrypted Terminal</li>
-            <li><i class="fas fa-globe-americas"></i> Global Map</li>
-            <li><i class="fas fa-database"></i> Data Vault</li>
-            <li><i class="fas fa-envelope"></i> Agency Mail</li>
-            <li><i class="fas fa-chart-line"></i> Market Monitor</li>
-            <li><i class="fas fa-shield-alt"></i> Secure Hub</li>
-          </ul>
+        <div class="start-menu-content">
+          <div id="start-menu-app-list">
+            <ul>
+              <li><i class="fas fa-compass"></i> Mission Control</li>
+              <li><i class="fas fa-terminal"></i> Encrypted Terminal</li>
+              <li><i class="fas fa-globe-americas"></i> Global Map</li>
+              <li><i class="fas fa-database"></i> Data Vault</li>
+              <li><i class="fas fa-envelope"></i> Agency Mail</li>
+              <li><i class="fas fa-chart-line"></i> Market Monitor</li>
+              <li><i class="fas fa-shield-alt"></i> Secure Hub</li>
+            </ul>
+          </div>
+          <div id="start-menu-right">
+            <div class="right-panel-header">
+              <i class="fas fa-stream"></i>
+              <span>Recent Activity</span>
+            </div>
+            <ul class="recent-list">
+              <li><i class="far fa-file-alt"></i> Project Chimera Briefing</li>
+              <li><i class="fas fa-lock"></i> Encryption Log #134</li>
+              <li><i class="far fa-map"></i> Classified Sat-Image </li>
+              <li><i class="far fa-envelope"></i> Re: Operation Ghost</li>
+            </ul>
+          </div>
         </div>
       </div>
     `;
@@ -48,6 +87,7 @@ export function initNavigation(container) {
     injectNavigationCSS();
     initClock();
     initStartMenu();
+    initSystemTrayPanel();
   } catch (err) {
     displayError(`Failed to initialize navigation: ${err.message}`, 'Navigation', 'ERR_NAVIGATION_INIT', true);
   }
@@ -96,6 +136,7 @@ function injectNavigationCSS() {
       -webkit-backdrop-filter: blur(15px) saturate(180%);
       padding: 0 12px;
       z-index: 900;
+      box-sizing: border-box;
     }
 
     /* --- Start Button --- */
@@ -163,7 +204,6 @@ function injectNavigationCSS() {
       margin-left: 6px;
     }
 
-    /* Dynamic Network Icon for file transfer */
     #network-status.transferring i {
       color: #34c759;
       animation: transferPulse 1.5s infinite;
@@ -174,7 +214,6 @@ function injectNavigationCSS() {
       100% { transform: scale(1); opacity: 1; }
     }
 
-    /* Notifications Bell */
     #notifications {
       position: relative;
     }
@@ -191,12 +230,76 @@ function injectNavigationCSS() {
       box-shadow: 0 0 5px #ff3b30;
     }
 
+    /* --- System Tray Panel --- */
+    #system-tray-panel {
+      position: fixed;
+      bottom: 70px;
+      right: 10px;
+      width: 300px;
+      background: var(--menu-bg);
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+      backdrop-filter: blur(18px) saturate(180%);
+      -webkit-backdrop-filter: blur(18px) saturate(180%);
+      opacity: 0;
+      transform: scale(0.95);
+      transform-origin: bottom right;
+      transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+      z-index: 899;
+      padding: 15px;
+      color: var(--text-color);
+    }
+    #system-tray-panel.show {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .widget-header {
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 10px;
+      margin-bottom: 15px;
+    }
+    .widget {
+      margin-bottom: 20px;
+    }
+    .widget h5 {
+      margin: 0 0 8px 0;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--accent-color);
+    }
+    .network-graph {
+      height: 60px;
+      background: url('path/to/network-graph.png');
+      background-size: cover;
+      opacity: 0.6;
+    }
+    .transfer-item {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 10px;
+    }
+    .file-name {
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+    .progress-bar-container {
+      height: 5px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      background: var(--accent-color);
+      transition: width 0.3s ease-in-out;
+    }
+
     /* --- Start Menu --- */
     #start-menu {
       position: fixed;
       bottom: 60px;
       left: 10px;
-      width: 280px;
+      width: 500px; /* Increased width for two columns */
       background: var(--menu-bg);
       border-radius: 12px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
@@ -214,6 +317,51 @@ function injectNavigationCSS() {
     #start-menu.show {
       opacity: 1;
       transform: scaleY(1) skewY(0deg);
+    }
+    /* New: Two-column layout */
+    .start-menu-content {
+      display: flex;
+      flex-grow: 1;
+      padding-bottom: 10px;
+    }
+    #start-menu-app-list {
+      flex: 1;
+      padding: 8px 0;
+    }
+    #start-menu-right {
+      flex: 1;
+      border-left: 1px solid var(--border-color);
+      background: rgba(0,0,0,0.25);
+      padding: 10px 15px;
+    }
+    .right-panel-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
+      color: var(--accent-color);
+      font-weight: 600;
+    }
+    .recent-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      font-size: 14px;
+    }
+    .recent-list li {
+      padding: 8px 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: color 0.2s ease;
+    }
+    .recent-list li:hover {
+      color: var(--accent-color);
+    }
+    .recent-list li i {
+      width: 18px;
+      text-align: center;
     }
 
     /* --- Menu Top Section --- */
@@ -249,9 +397,6 @@ function injectNavigationCSS() {
     }
 
     /* --- App List --- */
-    #start-menu-app-list {
-      padding: 8px 0;
-    }
     #start-menu-app-list ul {
       list-style: none;
       margin: 0;
@@ -296,7 +441,8 @@ function initStartMenu() {
     const startMenu = document.getElementById('start-menu');
     if (!startButton || !startMenu) throw new Error('Start button or menu not found.');
 
-    startButton.addEventListener('click', () => {
+    startButton.addEventListener('click', (e) => {
+      e.stopPropagation();
       startMenu.classList.toggle('show');
       startButton.classList.add('shine');
       setTimeout(() => startButton.classList.remove('shine'), 400);
@@ -318,4 +464,22 @@ function initStartMenu() {
   } catch (err) {
     displayError(`Failed to initialize start menu: ${err.message}`, 'Navigation', 'ERR_STARTMENU_INIT');
   }
+}
+
+function initSystemTrayPanel() {
+  const trayIcons = document.querySelectorAll('#system-tray .tray-icon, #clock');
+  const trayPanel = document.getElementById('system-tray-panel');
+
+  trayIcons.forEach(icon => {
+    icon.addEventListener('click', (e) => {
+      e.stopPropagation();
+      trayPanel.classList.toggle('show');
+    });
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!trayPanel.contains(e.target) && !e.target.closest('#system-tray')) {
+      trayPanel.classList.remove('show');
+    }
+  });
 }
