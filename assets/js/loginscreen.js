@@ -5,7 +5,7 @@
 // - Handles user input simulation (typing animation) and a covert-themed loading sequence without keyboard input.
 // - Integrates the Nexus seal logo (nexusseal.PNG) as the title.
 // - Optimized for PWA compliance and iOS Safari, targeting ~60fps.
-// - Step 5 Fix Notes: Moved username box right to align above password box, reinforced zoom prevention, removed NEXUS software text.
+// - Step 5 Fix Notes: Moved username box to align above password box with adjusted margin, expanded buttons to 220px total width, reinforced zoom prevention, removed NEXUS software text.
 
 import { loadHomeScreen } from './homescreen.js';
 import { updateCheck, displayError } from './errors.js';
@@ -25,7 +25,7 @@ export function loadLoginScreen(container) {
           <div id="login-content" class="stage-panel" aria-hidden="false">
             <img id="login-title" src="assets/images/nexusseal.PNG" alt="Nexus Intelligence Agency Seal" loading="lazy">
             <div id="form-elements" style="margin-top: 10px;">
-              <div class="input-group" style="margin-left: 20px;"> <!-- Shift right to align above password -->
+              <div class="input-group" style="margin-left: 30px;"> <!-- Adjusted to align above password input -->
                 <label for="username">ID</label>
                 <input type="text" id="username" autocomplete="off" class="login-input" readonly onfocus="this.blur()">
               </div>
@@ -278,7 +278,7 @@ function injectLoginCSS() {
       justify-content: center;
       gap: 10px;
       margin-top: 15px; /* Moved below inputs */
-      width: 200px; /* Match total width from ID to password end */
+      width: 220px; /* Expanded horizontally */
     }
     .glassy-btn {
       padding: 12px;
@@ -287,7 +287,7 @@ function injectLoginCSS() {
       cursor: pointer;
       font-weight: 600;
       letter-spacing: 0.2px;
-      width: 100px; /* Resized to 100px each, total 200px */
+      width: 110px; /* Expanded to 110px each, total 220px */
       transition: background 0.2s ease, color 0.2s ease;
       will-change: background, color;
     }
@@ -321,7 +321,7 @@ function injectLoginCSS() {
       display: none; /* Already removed */
     }
     #login-monitoring {
-      display: none; /* Remove NEXUS software text */
+      display: none; /* Already removed */
     }
     #login-footer {
       position: absolute;
