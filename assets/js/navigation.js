@@ -11,28 +11,71 @@ export function initNavigation(container) {
     container.innerHTML = `
       <div id="taskbar">
         <button id="start-button">Start</button>
-        <div id="task-icons">
-          <div class="task-icon">🌐</div>
-          <div class="task-icon">📂</div>
-          <div class="task-icon">💻</div>
-        </div>
-        <div id="system-tray">
-          <span id="clock">09:41</span>
-        </div>
       </div>
       <div id="start-menu" class="hidden">
-        <ul>
-          <li>Mission Control</li>
-          <li>Encrypted Terminal</li>
-          <li>Global Map</li>
-          <li>Data Vault</li>
-          <li>Agency Mail</li>
-        </ul>
+        <div class="menu-section">
+          <h3>Visible Section</h3>
+          <div class="menu-items-container blue-section">
+            <div class="menu-item-icon">
+              <i class="fas fa-wifi"></i>
+              <span class="icon-text">100%</span>
+            </div>
+            <div class="menu-item-icon">
+              <i class="fas fa-battery-full"></i>
+            </div>
+            <div class="menu-item-icon">
+              <i class="fas fa-user-circle"></i>
+            </div>
+            <span class="menu-item-text">Tue 10:36 AM</span>
+          </div>
+        </div>
+        <div class="menu-section">
+          <h3>Hidden Section</h3>
+          <div class="menu-items-container">
+            <div class="menu-item-icon">
+              <i class="fas fa-volume-up"></i>
+            </div>
+            <div class="menu-item-icon">
+              <i class="fas fa-moon"></i>
+            </div>
+            <div class="menu-item-icon">
+              <i class="fas fa-thumbtack"></i>
+            </div>
+            <div class="menu-item-icon">
+              <i class="fas fa-cloud"></i>
+            </div>
+            <div class="menu-item-icon">
+              <i class="fas fa-keyboard"></i>
+            </div>
+            <div class="menu-item-icon">
+              <i class="fas fa-bell"></i>
+            </div>
+            <div class="menu-item-icon">
+              <i class="fas fa-user-circle"></i>
+            </div>
+          </div>
+        </div>
+        <div class="menu-section">
+          <h3>Always-Hidden Section</h3>
+          <div class="menu-items-container">
+            <div class="menu-item-icon">
+              <i class="fas fa-thumbtack"></i>
+            </div>
+            <div class="menu-item-icon">
+              <i class="fas fa-lock"></i>
+            </div>
+            <div class="menu-item-icon">
+              <i class="fas fa-moon"></i>
+            </div>
+            <div class="menu-item-icon">
+              <i class="fas fa-search"></i>
+            </div>
+          </div>
+        </div>
       </div>
     `;
 
     injectNavigationCSS();
-    initClock();
     initStartMenu();
   } catch (err) {
     displayError(`Failed to initialize navigation: ${err.message}`, 'Navigation', 'ERR_NAVIGATION_INIT', true);
@@ -46,6 +89,18 @@ function injectNavigationCSS() {
   const styleTag = document.createElement('style');
   styleTag.id = styleId;
   styleTag.innerHTML = `
+    /* General Styles for new UI */
+    :root {
+      --taskbar-bg: rgba(30, 30, 30, 0.8);
+      --menu-bg: rgba(40, 40, 40, 0.9);
+      --section-bg: rgba(60, 60, 60, 0.5);
+      --blue-highlight-bg: #2979ff;
+      --text-color: #f2f2f7;
+      --icon-color: #fff;
+      --border-color: rgba(255, 255, 255, 0.1);
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    
     #taskbar {
       position: fixed;
       bottom: 0;
@@ -54,114 +109,96 @@ function injectNavigationCSS() {
       height: 60px;
       display: flex;
       align-items: center;
-      background: rgba(20, 20, 20, 0.9); /* Solid background, no backdrop-filter */
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      background: var(--taskbar-bg);
+      border-top: 1px solid var(--border-color);
       box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.3);
-      font-family: var(--font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif);
-      z-index: 900; /* Below header (z-index: 1000) */
+      font-family: var(--font-family);
+      z-index: 900;
     }
     #start-button {
       height: 100%;
       width: 110px;
-      margin: 0;
-      padding: 0;
-      background: rgba(30, 144, 255, 0.8); /* Adjusted to match --accent-color */
+      background: var(--blue-highlight-bg);
       border: none;
-      color: var(--text-color, #f2f2f7);
+      color: var(--text-color);
       font-size: 16px;
       font-weight: bold;
       text-align: center;
       cursor: pointer;
-      border-right: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 10px 0 0 0;
+      border-radius: 0;
       transition: background 0.2s ease-in-out, transform 0.15s ease;
     }
     #start-button:hover {
-      background: rgba(40, 160, 255, 0.9);
-      transform: scale(1.02);
+      background: #4090ff;
     }
     #start-button:active {
       transform: scale(0.98);
     }
-    #task-icons {
-      display: flex;
-      gap: 14px;
-      margin-left: 15px;
-    }
-    .task-icon {
-      width: 28px;
-      height: 28px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background 0.2s ease-in-out, transform 0.15s ease;
-    }
-    .task-icon:hover {
-      background: rgba(255, 255, 255, 0.2);
-      transform: scale(1.1);
-    }
-    #system-tray {
-      margin-left: auto;
-      margin-right: 15px;
-      color: var(--text-color, #f2f2f7);
-      font-size: 14px;
-    }
+    
     #start-menu {
       position: fixed;
       bottom: 60px;
-      left: 0;
-      width: 260px;
-      background: rgba(25, 25, 25, 0.9); /* Solid background, no backdrop-filter */
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      left: 10px; /* Adjusted position to be on the left */
+      width: 380px;
+      background: var(--menu-bg);
+      border: 1px solid var(--border-color);
       border-radius: 12px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
       opacity: 0;
       transform: translateY(10px);
       transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
-      z-index: 899; /* Below taskbar */
+      z-index: 899;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
     }
     #start-menu.show {
       opacity: 1;
       transform: translateY(0);
     }
-    #start-menu ul {
-      list-style: none;
-      margin: 0;
-      padding: 10px 0;
+    
+    .menu-section {
+      display: flex;
+      flex-direction: column;
     }
-    #start-menu li {
-      padding: 12px 18px;
-      color: var(--text-color, #f2f2f7);
-      font-size: 15px;
-      cursor: pointer;
-      transition: background 0.2s ease-in-out;
+    .menu-section h3 {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--secondary-text-color, #8e8e93);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .menu-items-container {
+      background: var(--section-bg);
       border-radius: 8px;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
-    #start-menu li:hover {
-      background: rgba(255, 255, 255, 0.1);
+    .blue-section {
+      background: var(--blue-highlight-bg);
+    }
+    .menu-item-icon {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--icon-color);
+    }
+    .menu-item-icon .icon-text {
+        font-size: 12px;
+        margin-left: 4px;
+    }
+    .menu-item-text {
+      color: var(--text-color);
+      font-size: 14px;
+      margin-left: auto;
     }
   `;
   document.head.appendChild(styleTag);
-}
-
-function initClock() {
-  try {
-    const clock = document.getElementById('clock');
-    if (!clock) {
-      throw new Error('Clock element not found.');
-    }
-    function updateClock() {
-      const now = new Date();
-      clock.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    }
-    updateClock();
-    setInterval(updateClock, 60000);
-  } catch (err) {
-    displayError(`Failed to initialize clock: ${err.message}`, 'Navigation', 'ERR_CLOCK_INIT');
-  }
 }
 
 function initStartMenu() {
@@ -190,3 +227,5 @@ function initStartMenu() {
     displayError(`Failed to initialize start menu: ${err.message}`, 'Navigation', 'ERR_STARTMENU_INIT');
   }
 }
+
+// Function calls for the clock and app icons were removed
