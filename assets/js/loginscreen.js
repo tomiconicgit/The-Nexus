@@ -5,14 +5,14 @@
 // - Handles user input simulation (typing animation) and a covert-themed loading sequence without keyboard input.
 // - Integrates the Nexus seal logo (nexusseal.PNG) as the title.
 // - Optimized for PWA compliance and iOS Safari, targeting ~60fps.
-// - Step 6 Fix Notes: Matched button font to 'Courier New', added animated status text "Awaiting credentials...", updated login to trigger terminal animation with agency phrases.
 
 import { loadHomeScreen } from './homescreen.js';
 import { updateCheck, displayError } from './errors.js';
 
-const BUILD_VERSION = "0.155"; 
+const BUILD_VERSION = "0.156"; 
 let usernameTyped = false;
 let passwordTyped = false;
+let idleBlinkInterval = null;
 
 export function loadLoginScreen(container) {
   return new Promise((resolve) => {
@@ -37,7 +37,7 @@ export function loadLoginScreen(container) {
                 <button class="glassy-btn primary" id="login-btn" disabled>Login</button>
                 <button class="glassy-btn outline" disabled>Register</button>
               </div>
-              <div id="status-text"></div> <!-- Added for terminal animation -->
+              <div id="idle-status">Awaiting Credentials<span id="blink-dots">...</span></div>
             </div>
           </div>
           <div id="login-sequence" class="stage-panel" aria-hidden="true">
@@ -57,6 +57,16 @@ export function loadLoginScreen(container) {
       injectLoginCSS();
       generateParticles();
 
+      // Blinking dots for idle status
+      const blinkDots = container.querySelector('#blink-dots');
+      if (blinkDots) {
+        let visible = true;
+        idleBlinkInterval = setInterval(() => {
+          blinkDots.style.visibility = visible ? "hidden" : "visible";
+          visible = !visible;
+        }, 500);
+      }
+
       // Seal logo check
       const logoImg = new Image();
       const logoUrl = 'assets/images/nexusseal.PNG';
@@ -70,18 +80,13 @@ export function loadLoginScreen(container) {
       const usernameInput = container.querySelector('#username');
       const passwordInput = container.querySelector('#password');
       const loginBtn = container.querySelector('#login-btn');
-      const statusText = container.querySelector('#status-text');
+      const idleStatus = container.querySelector('#idle-status');
 
-      if (!usernameInput || !passwordInput || !loginBtn || !statusText) {
-        displayError('Login form or status elements not found.', 'LoginScreen', 'ERR_FORM_ELEMENTS');
+      if (!usernameInput || !passwordInput || !loginBtn) {
+        displayError('Login form elements not found.', 'LoginScreen', 'ERR_FORM_ELEMENTS');
         resolve();
         return;
       }
-
-      // Initial status text animation
-      typeText(statusText, 'Awaiting credentials...').then(() => {
-        setInterval(() => typeText(statusText, 'Awaiting credentials...'), 5000); // Repeat animation
-      });
 
       // Username typing
       usernameInput.addEventListener('click', async () => {
@@ -119,23 +124,36 @@ export function loadLoginScreen(container) {
               return;
             }
 
+            // Stop idle blinking
+            if (idleBlinkInterval) clearInterval(idleBlinkInterval);
+            if (idleStatus) idleStatus.style.display = "none";
+
             formContainer.setAttribute('aria-hidden', 'true');
             sequenceContainer.setAttribute('aria-hidden', 'false');
             softHaptic();
 
-            // Terminal animation phrases
+            // Loading text loop
             const phrases = [
-              "Scanning Credentials",
-              "Decrypting Access",
-              "Verifying Identity",
-              "Loading TitanOS",
-              "Establishing Secure Link",
-              "Access Granted"
+              "Checking Credentials",
+              "Decrypting Secure Key",
+              "Scanning Biometrics",
+              "Establishing Encrypted Tunnel",
+              "Authorising Clearance",
+              "Loading TitanOS Modules",
+              "Finalising Access"
             ];
-            for (let phrase of phrases) {
-              await typeText(loadingText, phrase);
-              await new Promise(resolve => setTimeout(resolve, 1000)); // Pause between phrases
-            }
+            let phraseIndex = 0;
+            const updateLoadingText = () => {
+              loadingText.textContent = phrases[phraseIndex];
+              phraseIndex = (phraseIndex + 1) % phrases.length;
+            };
+            updateLoadingText();
+            const textInterval = setInterval(updateLoadingText, 1000);
+
+            await new Promise(resolve => setTimeout(resolve, 6000));
+
+            clearInterval(textInterval);
+            loadingText.textContent = "Access Granted";
 
             bg.style.transition = 'opacity 0.3s ease-in-out';
             bg.style.opacity = '0';
@@ -162,10 +180,9 @@ export function loadLoginScreen(container) {
 function typeText(element, text) {
   return new Promise(resolve => {
     let i = 0;
-    element.textContent = ''; // Clear text before typing
     function typeChar() {
       if (i < text.length) {
-        element.textContent += text.charAt(i);
+        element.value += text.charAt(i);
         softHaptic(); // subtle haptic per character
         i++;
         const randomDelay = 50 + Math.random() * 120;
@@ -283,6 +300,7 @@ function injectLoginCSS() {
       font-size: 0.9rem;
       width: 150px;
       box-sizing: border-box;
+      font-family: 'Courier New', Courier, monospace;
     }
     #login-buttons {
       display: flex;
@@ -299,13 +317,13 @@ function injectLoginCSS() {
       border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 8px;
       cursor: pointer;
-      font-weight: 600;
+      font-weight: bold;
       letter-spacing: 0.2px;
       width: 100%;
       max-width: 140px;
       transition: background 0.2s ease, color 0.2s ease;
       will-change: background, color;
-      font-family: 'Courier New', Courier, monospace; /* Match ID/Password font */
+      font-family: 'Courier New', Courier, monospace; /* match ID/PW font */
     }
     .glassy-btn.primary {
       color: var(--text-color);
@@ -327,18 +345,18 @@ function injectLoginCSS() {
       opacity: 0.5;
       cursor: default;
     }
+    #idle-status {
+      margin-top: 10px;
+      font-size: 0.8rem;
+      color: var(--secondary-text-color);
+      font-family: 'Courier New', Courier, monospace;
+      text-align: center;
+    }
     #login-title {
       max-width: 200px;
       height: auto;
       margin-bottom: 2px;
       object-fit: contain;
-    }
-    #status-text {
-      color: var(--text-color);
-      font-family: 'Courier New', Courier, monospace; /* Match terminal style */
-      font-size: 0.9rem;
-      margin-top: 10px;
-      text-align: center;
     }
     #login-footer {
       position: absolute;
