@@ -1,188 +1,3 @@
-// assets/js/loginscreen.js
-// Purpose: Manages the login screen UI and animation sequence for TitanOS, simulating a secure authentication process.
-// Dependencies: ./homescreen.js (for post-login transition), ./errors.js (for error handling and status updates).
-// Notes:
-// - Handles user input simulation (typing animation) and a covert-themed loading sequence without keyboard input.
-// - Integrates the Nexus seal logo (nexusseal.PNG) as the title.
-// - Optimized for PWA compliance and iOS Safari, targeting ~60fps.
-// - Step 5 Fix Notes: Restored vertical stacking of username and password boxes, aligned white boxes inline vertically, retained button expansion to 220px, reinforced zoom prevention, removed NEXUS software text.
-
-import { loadHomeScreen } from './homescreen.js';
-import { updateCheck, displayError } from './errors.js';
-
-const BUILD_VERSION = "0.154"; 
-let usernameTyped = false;
-let passwordTyped = false;
-
-export function loadLoginScreen(container) {
-  return new Promise((resolve) => {
-    try {
-      updateCheck('loginscreen', 'ok');
-      container.innerHTML = `
-        <div id="login-background">
-          <div id="grid-overlay"></div>
-          <div id="fade-overlay"></div>
-          <div id="login-content" class="stage-panel" aria-hidden="false">
-            <img id="login-title" src="assets/images/nexusseal.PNG" alt="Nexus Intelligence Agency Seal" loading="lazy">
-            <div id="form-elements" style="margin-top: 10px; text-align: center;">
-              <div class="input-group">
-                <label for="username">ID</label>
-                <input type="text" id="username" autocomplete="off" class="login-input" readonly onfocus="this.blur()">
-              </div>
-              <div class="input-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" autocomplete="off" class="login-input" readonly onfocus="this.blur()">
-              </div>
-              <div id="login-buttons">
-                <button class="glassy-btn primary" id="login-btn" disabled>Login</button>
-                <button class="glassy-btn outline" disabled>Register</button>
-              </div>
-            </div>
-          </div>
-          <div id="login-sequence" class="stage-panel" aria-hidden="true">
-            <div id="radar-loader"></div>
-            <div id="loading-text"></div>
-          </div>
-          <div id="login-footer">
-            <div>Secure Software | All Rights Reserved</div>
-            <div>&copy; 2025 | Iconic Developments OS</div>
-          </div>
-        </div>
-      `;
-
-      const loginBackground = container.querySelector('#login-background');
-      if (!loginBackground) throw new Error('Failed to create #login-background element');
-
-      injectLoginCSS();
-      generateParticles();
-
-      // Seal logo check
-      const logoImg = new Image();
-      const logoUrl = 'assets/images/nexusseal.PNG';
-      logoImg.src = logoUrl;
-      logoImg.onload = () => {
-        const loginTitle = container.querySelector('#login-title');
-        if (loginTitle) loginTitle.classList.add('loaded');
-      };
-      logoImg.onerror = () => displayError(`Failed to load Nexus seal logo from ${logoUrl}`, 'LoginScreen', 'ERR_SEAL_LOAD', true);
-
-      const usernameInput = container.querySelector('#username');
-      const passwordInput = container.querySelector('#password');
-      const loginBtn = container.querySelector('#login-btn');
-
-      if (!usernameInput || !passwordInput || !loginBtn) {
-        displayError('Login form elements not found.', 'LoginScreen', 'ERR_FORM_ELEMENTS');
-        resolve();
-        return;
-      }
-
-      // Username typing
-      usernameInput.addEventListener('click', async () => {
-        if (!usernameTyped) {
-          usernameInput.value = '';
-          await typeText(usernameInput, 'Agent 173');
-          usernameTyped = true;
-          passwordInput.removeAttribute('readonly');
-        }
-      });
-
-      // Password typing
-      passwordInput.addEventListener('click', async () => {
-        if (usernameTyped && !passwordTyped) {
-          passwordInput.value = '';
-          await typeText(passwordInput, '••••••••');
-          passwordTyped = true;
-          loginBtn.removeAttribute('disabled');
-        }
-      });
-
-      // Login button
-      loginBtn.addEventListener('click', async () => {
-        if (passwordTyped) {
-          softHaptic(); // subtle tap
-          try {
-            const formContainer = container.querySelector('#login-content');
-            const sequenceContainer = container.querySelector('#login-sequence');
-            const bg = loginBackground;
-            const loadingText = container.querySelector('#loading-text');
-
-            if (!formContainer || !sequenceContainer || !bg || !loadingText) {
-              displayError('Login sequence elements not found.', 'LoginScreen', 'ERR_LOGIN_SEQ');
-              resolve();
-              return;
-            }
-
-            formContainer.setAttribute('aria-hidden', 'true');
-            sequenceContainer.setAttribute('aria-hidden', 'false');
-            softHaptic();
-
-            // Loading text loop
-            const phrases = [
-              "Scanning Credentials",
-              "Decrypting Access",
-              "Verifying Identity",
-              "Establishing Secure Link"
-            ];
-            let phraseIndex = 0;
-            const updateLoadingText = () => {
-              loadingText.textContent = phrases[phraseIndex];
-              phraseIndex = (phraseIndex + 1) % phrases.length;
-            };
-            updateLoadingText();
-            const textInterval = setInterval(updateLoadingText, 800);
-
-            await new Promise(resolve => setTimeout(resolve, 4000));
-
-            clearInterval(textInterval);
-            loadingText.textContent = "Access Granted";
-
-            bg.style.transition = 'opacity 0.3s ease-in-out';
-            bg.style.opacity = '0';
-            await new Promise(resolve => setTimeout(resolve, 300));
-
-            bg.remove();
-            await loadHomeScreen(container);
-            resolve();
-          } catch (err) {
-            displayError(`Login sequence failed: ${err.message}`, 'LoginScreen', 'ERR_LOGIN_FAIL');
-            resolve();
-          }
-        }
-      });
-    } catch (err) {
-      updateCheck('loginscreen', 'fail');
-      displayError(`Failed to load login screen: ${err.message}`, 'LoginScreen', 'ERR_LOGIN_LOAD');
-      resolve();
-    }
-  });
-}
-
-// Typing with random speed + haptic each character
-function typeText(element, text) {
-  return new Promise(resolve => {
-    let i = 0;
-    function typeChar() {
-      if (i < text.length) {
-        element.value += text.charAt(i);
-        softHaptic(); // subtle haptic per character
-        i++;
-        const randomDelay = 50 + Math.random() * 120;
-        setTimeout(typeChar, randomDelay);
-      } else {
-        resolve();
-      }
-    }
-    typeChar();
-  });
-}
-
-// Subtle haptic feedback
-function softHaptic() {
-  if (navigator.vibrate) {
-    navigator.vibrate(10); // very short tap feel
-  }
-}
-
 // Inject CSS
 function injectLoginCSS() {
   const styleId = 'loginscreen-styles';
@@ -213,11 +28,11 @@ function injectLoginCSS() {
       position: relative;
       overflow: hidden;
       transition: opacity 0.3s ease-in-out;
-      touch-action: manipulation; /* Prevent zoom/scroll with better control */
-      -webkit-user-select: none; /* Prevent selection */
+      touch-action: manipulation;
+      -webkit-user-select: none;
     }
     meta[name=viewport] {
-      content: "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"; /* Prevent zoom */
+      content: "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no";
     }
     #fade-overlay {
       position: absolute;
@@ -252,7 +67,7 @@ function injectLoginCSS() {
       max-width: 320px;
     }
     #form-elements {
-      display: flex; /* Using flexbox for form elements */
+      display: flex;
       flex-direction: column;
       align-items: center;
       gap: 10px;
@@ -261,18 +76,17 @@ function injectLoginCSS() {
     .input-group {
       display: flex;
       align-items: center;
-      width: 100%;
-      max-width: 250px;
+      width: 220px; /* Aligned with buttons */
       gap: 10px;
     }
     .input-group label {
       color: var(--text-color);
       font-weight: bold;
-      width: 80px; /* Fixed width for labels to align inputs */
+      width: 80px;
       text-align: right;
       flex-shrink: 0;
       font-size: 0.9rem;
-      font-family: 'Courier New', Courier, monospace; /* Agency/code font */
+      font-family: 'Courier New', Courier, monospace;
     }
     .login-input {
       padding: 6px;
@@ -280,7 +94,7 @@ function injectLoginCSS() {
       background: #fff;
       color: #000;
       font-size: 0.9rem;
-      flex-grow: 1; /* Allows input to take up remaining space */
+      flex-grow: 1;
       box-sizing: border-box;
     }
     #login-buttons {
@@ -344,6 +158,32 @@ function injectLoginCSS() {
     }
   `;
   document.head.appendChild(styleTag);
+}
+
+// Typing with random speed + haptic each character
+function typeText(element, text) {
+  return new Promise(resolve => {
+    let i = 0;
+    function typeChar() {
+      if (i < text.length) {
+        element.value += text.charAt(i);
+        softHaptic(); // subtle haptic per character
+        i++;
+        const randomDelay = 50 + Math.random() * 120;
+        setTimeout(typeChar, randomDelay);
+      } else {
+        resolve();
+      }
+    }
+    typeChar();
+  });
+}
+
+// Subtle haptic feedback
+function softHaptic() {
+  if (navigator.vibrate) {
+    navigator.vibrate(10); // very short tap feel
+  }
 }
 
 // Particles
