@@ -51,7 +51,7 @@ export function loadLoginScreen(container) {
       const loginBtn = container.querySelector('#login-btn');
       if (!loginBtn) {
         displayError('Login button not found. Please refresh the page.', 'LoginScreen', 'ERR_LOGIN_BTN');
-        resolve();
+        resolve(); // Resolve with error state
         return;
       }
 
@@ -75,7 +75,7 @@ export function loadLoginScreen(container) {
             const usernameText = 'AgentSmith';
             const passwordText = 'SecurePass123';
             let i = 0;
-            const typeDelay = 80; // Optimized for speed
+            const typeDelay = 80;
             const type = () => {
               if (i < usernameText.length) {
                 usernameInput.value += usernameText.charAt(i);
@@ -97,28 +97,29 @@ export function loadLoginScreen(container) {
           sequenceContainer.setAttribute('aria-hidden', 'false');
           if (navigator.vibrate) navigator.vibrate([100, 50, 100]); // Longer vibration for sequence start
 
-          // Wait for loading sequence (3.5s, optimized)
+          // Wait for loading sequence (3.5s)
           await new Promise(resolve => setTimeout(resolve, 3500));
 
           // Fade out login screen
-          bg.style.transition = 'opacity 0.3s ease-in-out'; // Faster fade
+          bg.style.transition = 'opacity 0.3s ease-in-out';
           bg.style.opacity = '0';
           await new Promise(resolve => setTimeout(resolve, 300));
 
           bg.remove();
           await loadHomeScreen(container);
-          resolve();
+          resolve(); // Resolve only after successful login
         } catch (err) {
           displayError(`Login sequence failed: ${err.message}`, 'LoginScreen', 'ERR_LOGIN_FAIL');
-          resolve();
+          resolve(); // Resolve with error state
         }
       });
 
-      resolve();
+      // Do not resolve the outer promise until login is complete
+      // Resolution is handled inside the loginBtn event listener
     } catch (err) {
       updateCheck('loginscreen', 'fail');
       displayError(`Failed to load login screen: ${err.message}`, 'LoginScreen', 'ERR_LOGIN_LOAD');
-      resolve();
+      resolve(); // Resolve with error state
     }
   });
 }
@@ -132,12 +133,12 @@ function injectLoginCSS() {
   styleTag.innerHTML = `
     :root {
       --dark-theme-bg: #0d0d0d;
-      --glass-bg: rgba(0, 0, 0, 0.3); /* Darker for covert vibe */
+      --glass-bg: rgba(0, 0, 0, 0.3);
       --dark-glass-bg: rgba(0, 0, 0, 0.6);
       --text-color: #f2f2f7;
       --secondary-text-color: #8e8e93;
-      --accent-color: #1E90FF; /* Neon blue from photo */
-      --secondary-accent: #800080; /* Purple from photo */
+      --accent-color: #1E90FF;
+      --secondary-accent: #800080;
       --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
     #login-background {
@@ -164,7 +165,7 @@ function injectLoginCSS() {
       background-image: url('/assets/images/IMG_8860.jpeg');
       background-size: cover;
       background-position: center;
-      filter: brightness(0.5) contrast(1.2); /* Enhanced covert feel */
+      filter: brightness(0.5) contrast(1.2);
       z-index: 0;
     }
     #top-background::after {
@@ -196,7 +197,7 @@ function injectLoginCSS() {
     }
     .particle {
       position: absolute;
-      background: linear-gradient(45deg, #1E90FF, #800080); /* Neon gradient */
+      background: linear-gradient(45deg, #1E90FF, #800080);
       border-radius: 50%;
       animation: float 15s infinite ease-in-out;
       will-change: transform;
@@ -396,7 +397,7 @@ function generateParticles() {
     return;
   }
 
-  const particleCount = 12; // Reduced for performance
+  const particleCount = 12;
   for (let i = 0; i < particleCount; i++) {
     const particle = document.createElement('div');
     particle.className = 'particle';
