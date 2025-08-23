@@ -19,6 +19,10 @@ const urlsToCache = [
   '/assets/images/icon-192-maskable.png',
   '/assets/images/icon-512-maskable.png',
   '/assets/images/network-graph.png',
+  '/assets/images/placeholder.jpg',
+  '/assets/images/covert-bg.webp',
+  '/assets/images/IMG_8860.jpeg',
+  '/assets/images/nexusseal.png', // Added seal logo
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css'
 ];
 
