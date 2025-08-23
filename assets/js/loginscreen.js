@@ -2,7 +2,7 @@
 import { loadHomeScreen } from './homescreen.js';
 import { updateCheck, displayError } from './errors.js';
 
-const BUILD_VERSION = "0.171";
+const BUILD_VERSION = "0.172";
 let usernameTyped = false;
 let passwordTyped = false;
 
@@ -22,11 +22,11 @@ export function loadLoginScreen(container) {
             <div id="form-elements">
               <div class="input-group">
                 <label for="username">ID</label>
-                <input type="text" id="username" autocomplete="off" class="login-input" readonly>
+                <input type="text" id="username" autocomplete="off" class="login-input" readonly tabindex="-1">
               </div>
               <div class="input-group">
                 <label for="password">Password</label>
-                <input type="password" id="password" autocomplete="off" class="login-input" readonly>
+                <input type="password" id="password" autocomplete="off" class="login-input" readonly tabindex="-1">
               </div>
               <div id="login-buttons">
                 <button class="glassy-btn primary" id="login-btn" disabled>Login</button>
@@ -195,7 +195,6 @@ function injectLoginCSS() {
   const id = 'loginscreen-styles';
   if (document.getElementById(id)) return;
 
-  // Meta viewport for no zoom
   if (!document.querySelector('meta[name=viewport]')) {
     const meta = document.createElement('meta');
     meta.name = 'viewport';
@@ -215,6 +214,8 @@ function injectLoginCSS() {
       --font-agency:'Courier New',Courier,monospace;
     }
 
+    html, body { touch-action: manipulation; -webkit-text-size-adjust: 100%; user-select: none; }
+
     .stage-panel[aria-hidden="true"]{ display:none; }
     .stage-panel[aria-hidden="false"]{ display:flex; }
 
@@ -223,7 +224,7 @@ function injectLoginCSS() {
       background:url('assets/images/world-map.jpg') no-repeat center center/cover;
       display:flex;flex-direction:column;justify-content:center;align-items:center;
       color:var(--text-color);font-family:var(--font-ui);position:relative;overflow:hidden;
-      transition:opacity .3s ease-in-out;touch-action:manipulation;-webkit-user-select:none;
+      transition:opacity .3s ease-in-out;
     }
 
     #fade-overlay{position:absolute;bottom:0;left:0;width:100%;height:50%;background:linear-gradient(to top, black, transparent);z-index:1;pointer-events:none;}
@@ -241,8 +242,8 @@ function injectLoginCSS() {
 
     #form-elements{display:flex;flex-direction:column;align-items:center;gap:14px;width:100%;}
     .input-group{display:flex;justify-content:center;align-items:center;width:100%;max-width:300px;margin:0 auto;gap:10px;}
-    .input-group label{color:var(--text-color);font-weight:bold;width:70px;text-align:right;font-size:.9rem;font-family:var(--font-agency);flex-shrink:0;}
-    .login-input{padding:6px;border:1px solid var(--input-border-color);background:#fff;color:#000;font-size:.9rem;width:160px;box-sizing:border-box;touch-action:manipulation;-webkit-user-select:none;-webkit-touch-callout:none;}
+    .input-group label{color:var(--text-color);font-weight:bold;width:70px;text-align:right;font-size:16px;font-family:var(--font-agency);flex-shrink:0;}
+    .login-input{font-size:16px;padding:6px;border:1px solid var(--input-border-color);background:#fff;color:#000;width:160px;box-sizing:border-box;touch-action:manipulation;-webkit-user-select:none;-webkit-touch-callout:none;}
     #login-buttons{display:flex;justify-content:center;gap:10px;margin-top:12px;width:100%;max-width:300px;margin-left:auto;margin-right:auto;}
     .glassy-btn{font-family:var(--font-agency);padding:10px;border:1px solid rgba(255,255,255,.1);border-radius:8px;cursor:pointer;font-weight:bold;width:100%;max-width:140px;transition:background .2s ease,color .2s ease;}
     .glassy-btn.primary{ color:var(--text-color);background:var(--accent-color);border-color:var(--accent-color); }
