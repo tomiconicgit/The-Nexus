@@ -7,27 +7,19 @@ const urlsToCache = [
   '/manifest.json',
   '/assets/js/errors.js',
   '/assets/js/homescreen.js',
-  '/assets/js/map.js',
-  '/assets/js/missioncards.js',
-  '/assets/js/activemissions.js',
   '/assets/js/header.js',
   '/assets/js/navigation.js',
   '/assets/js/bootscreen.js',
   '/assets/js/loginscreen.js',
-  '/assets/js/performance.js',
   '/assets/js/router.js',
   '/assets/js/webgl-utils.js',
-  'https://unpkg.com/leaflet@1.7.1/dist/leaflet.js',
-  'https://unpkg.com/leaflet@1.7.1/dist/leaflet.css',
-  'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
-  'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
-  'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
-  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
   '/assets/images/icon-180.png',
   '/assets/images/icon-192.png',
   '/assets/images/icon-512.png',
   '/assets/images/icon-192-maskable.png',
-  '/assets/images/icon-512-maskable.png'
+  '/assets/images/icon-512-maskable.png',
+  '/assets/images/network-graph.png',
+  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css'
 ];
 
 self.addEventListener('install', event => {
