@@ -1,9 +1,6 @@
 // assets/js/homescreen.js
 
 import { displayError } from './errors.js';
-import { initMap } from './map.js';
-import { initMissionCards } from './missioncards.js';
-import { initActiveMissions } from './activemissions.js';
 import { initHeader } from './header.js';
 import { initNavigation } from './navigation.js';
 
@@ -24,18 +21,19 @@ export async function loadHomeScreen(container) {
       <div id="home-screen">
         <div id="header-container"></div>
         <div id="main-content">
-          <div id="map-container"></div>
-          <div id="mission-cards-container"></div>
-          <div class="section-container"></div>
+          <div class="desktop-content">
+            <div class="desktop-icon">Mission Control</div>
+            <div class="desktop-icon">Encrypted Terminal</div>
+            <div class="desktop-icon">Agency Mail</div>
+            <div class="desktop-icon">Data Vault</div>
+            <div class="desktop-icon">Market Monitor</div>
+          </div>
         </div>
         <div id="navigation-container"></div>
       </div>
     `;
 
     initHeader(container.querySelector('#header-container'));
-    initMap(container.querySelector('#map-container'));
-    initMissionCards(container.querySelector('#mission-cards-container'));
-    initActiveMissions(container.querySelector('.section-container'));
     initNavigation(container.querySelector('#navigation-container'));
 
     const mainContent = container.querySelector('#main-content');
@@ -71,7 +69,6 @@ function injectHomeCSS() {
       width: 0;
       height: 0;
     }
-    
     :root {
       --text-color: #f2f2f7;
       --secondary-text-color: #8e8e93;
@@ -79,7 +76,6 @@ function injectHomeCSS() {
       --secondary-accent: #f0a040;
       --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
-    
     body {
       margin: 0;
       padding: 0;
@@ -87,16 +83,15 @@ function injectHomeCSS() {
       color: var(--text-color);
       height: 100vh;
       overflow: hidden;
-      background: #000;
+      background: linear-gradient(145deg, #0d0d0d, #1a1a2e);
     }
-
     #homescreen-background {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: #000;
+      background: linear-gradient(145deg, #0d0d0d, #1a1a2e);
       z-index: -2;
     }
     #home-screen {
@@ -105,17 +100,35 @@ function injectHomeCSS() {
       display: flex;
       flex-direction: column;
       position: relative;
-      z-index: 0;
     }
     #main-content {
       flex: 1;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
-      padding-bottom: 120px;
+      padding-bottom: 60px;
       z-index: 1;
     }
-    #header-container {
-      z-index: 1000; /* Ensure header is above map */
+    .desktop-content {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+    .desktop-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 80px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      color: var(--text-color);
+      font-size: 14px;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.2s ease-in-out;
+    }
+    .desktop-icon:hover {
+      background: rgba(255, 255, 255, 0.2);
     }
   `;
   document.head.appendChild(styleTag);
