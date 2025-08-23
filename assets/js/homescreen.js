@@ -62,7 +62,7 @@ export async function loadHomeScreen(container) {
 
     // Verify background image load
     const img = new Image();
-    img.src = '/assets/images/covert-bg.webp';
+    img.src = 'assets/images/covert-bg.webp';
     img.onload = () => {
       background.classList.add('loaded');
     };
