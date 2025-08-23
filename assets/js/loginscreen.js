@@ -5,7 +5,7 @@
 // - Handles user input simulation (typing animation) and a covert-themed loading sequence without keyboard input.
 // - Integrates the Nexus seal logo (nexusseal.PNG) as the title.
 // - Optimized for PWA compliance and iOS Safari, targeting ~60fps.
-// - Step 5 Fix Notes: Aligned username and password boxes side by side with vertical inline alignment using flexbox, retained button expansion to 220px, reinforced zoom prevention, removed NEXUS software text.
+// - Step 5 Fix Notes: Restored vertical stacking of username and password boxes, aligned white boxes inline vertically, retained button expansion to 220px, reinforced zoom prevention, removed NEXUS software text.
 
 import { loadHomeScreen } from './homescreen.js';
 import { updateCheck, displayError } from './errors.js';
@@ -24,16 +24,14 @@ export function loadLoginScreen(container) {
           <div id="fade-overlay"></div>
           <div id="login-content" class="stage-panel" aria-hidden="false">
             <img id="login-title" src="assets/images/nexusseal.PNG" alt="Nexus Intelligence Agency Seal" loading="lazy">
-            <div id="form-elements" style="margin-top: 10px;">
-              <div class="input-row"> <!-- New wrapper for side-by-side layout -->
-                <div class="input-group">
-                  <label for="username">ID</label>
-                  <input type="text" id="username" autocomplete="off" class="login-input" readonly onfocus="this.blur()">
-                </div>
-                <div class="input-group">
-                  <label for="password">Password</label>
-                  <input type="password" id="password" autocomplete="off" class="login-input" readonly onfocus="this.blur()">
-                </div>
+            <div id="form-elements" style="margin-top: 10px; text-align: center;">
+              <div class="input-group">
+                <label for="username">ID</label>
+                <input type="text" id="username" autocomplete="off" class="login-input" readonly onfocus="this.blur()">
+              </div>
+              <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" autocomplete="off" class="login-input" readonly onfocus="this.blur()">
               </div>
               <div id="login-buttons">
                 <button class="glassy-btn primary" id="login-btn" disabled>Login</button>
@@ -253,16 +251,14 @@ function injectLoginCSS() {
       width: 90%;
       max-width: 320px;
     }
-    .input-row {
-      display: flex;
-      flex-direction: row; /* Side-by-side layout */
-      align-items: center; /* Vertical alignment */
-      justify-content: center; /* Center horizontally */
-      gap: 20px; /* Space between inputs */
+    #form-elements {
+      text-align: center; /* Center align inputs */
     }
     .input-group {
       display: flex;
       align-items: center;
+      justify-content: center; /* Ensure consistent centering */
+      width: 100%;
     }
     .input-group label {
       color: var(--text-color);
@@ -279,6 +275,7 @@ function injectLoginCSS() {
       font-size: 0.9rem;
       width: 180px; /* Matching size */
       box-sizing: border-box;
+      display: inline-block; /* Ensure inline alignment */
     }
     #login-buttons {
       display: flex;
