@@ -13,6 +13,9 @@ const urlsToCache = [
   '/assets/js/loginscreen.js',
   '/assets/js/router.js',
   '/assets/js/webgl-utils.js',
+  '/assets/js/map.js', // Added map.js
+  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js', // Add Leaflet
+  'https://unpkg.com/esri-leaflet@3.0.12/dist/esri-leaflet.js', // Add Esri Leaflet
   '/assets/images/icon-180.png',
   '/assets/images/icon-192.png',
   '/assets/images/icon-512.png',
@@ -22,7 +25,7 @@ const urlsToCache = [
   '/assets/images/placeholder.jpg',
   '/assets/images/covert-bg.webp',
   '/assets/images/IMG_8860.jpeg',
-  '/assets/images/nexusseal.png', // Added seal logo
+  '/assets/images/nexusseal.png',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css'
 ];
 
