@@ -1,0 +1,6 @@
+{
+  "appId": "com.iconic.nexus",
+  "appName": "Nexus PWA",
+  "webDir": "nexus",
+  "bundledWebRuntime": false
+}
