@@ -4,11 +4,15 @@ import { displayError } from './errors.js';
 import { initHeader } from './header.js';
 import { initNavigation } from './navigation.js';
 
+/**
+ * Loads the home screen UI and initializes all components,
+ * including the new dynamic canvas background.
+ */
 export async function loadHomeScreen(container) {
   try {
     injectHomeCSS();
 
-    // Ensure viewport meta
+    // Ensure viewport meta for mobile devices
     let viewportMeta = document.querySelector('meta[name="viewport"]');
     if (!viewportMeta) {
       viewportMeta = document.createElement('meta');
@@ -34,29 +38,12 @@ export async function loadHomeScreen(container) {
     initHeader(container.querySelector('#header-container'));
     initNavigation(container.querySelector('#navigation-container'));
 
-    // --- Generate wallpaper via code ---
-    const background = container.querySelector('#homescreen-background');
-    if (!background) throw new Error('Homescreen background element not found.');
+    // --- Generate and animate wallpaper via code ---
+    const backgroundContainer = container.querySelector('#homescreen-background');
+    if (!backgroundContainer) throw new Error('Homescreen background element not found.');
 
-    const wallpaperURL = generateAgencyWallpaper({
-      width: Math.max(window.innerWidth, 1280),
-      height: Math.max(window.innerHeight, 720),
-      dpr: Math.min(window.devicePixelRatio || 1, 2),
-      baseFrom: '#0b0c10',
-      baseTo: '#141a2a',
-      accent: '#34c759',
-      gridSize: 56,
-      gridOpacity: 0.06,
-      vignette: 0.45,
-      noiseOpacity: 0.035,
-      emblemOpacity: 0.10,
-      emblemText: 'NEXUS',
-      emblemSubtext: 'Powered by TitanOS'
-    });
-
-    background.style.backgroundImage = `url(${wallpaperURL})`;
-    background.setAttribute('loading', 'lazy');
-    background.classList.add('loaded');
+    // Call the new function to create the dynamic, animated background
+    createNexusBackground(backgroundContainer);
 
     // Scroll header effect
     const mainContent = container.querySelector('#main-content');
@@ -83,6 +70,9 @@ export async function loadHomeScreen(container) {
   }
 }
 
+/**
+ * Injects core CSS styles for the home screen layout.
+ */
 function injectHomeCSS() {
   const styleId = 'homescreen-styles';
   if (document.getElementById(styleId)) return;
@@ -111,12 +101,13 @@ function injectHomeCSS() {
       top: 0; left: 0;
       width: 100%; height: 100%;
       z-index: -2;
-      background-size: cover;
-      background-position: center;
-      opacity: 0.9;
-      transition: opacity .4s ease;
+      /* background-image and other static properties removed */
     }
-    #homescreen-background.loaded { opacity: 1; }
+    #homescreen-background canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
     #home-screen {
       width: 100%; height: 100vh;
       display: flex; flex-direction: column;
@@ -156,81 +147,112 @@ function injectHomeCSS() {
   document.head.appendChild(styleTag);
 }
 
-// --- CODE-GENERATED WALLPAPER ---
-function generateAgencyWallpaper(opts = {}) {
-  const {
-    width = 1920, height = 1080, dpr = 1,
-    baseFrom = '#0b0c10', baseTo = '#141a2a',
-    accent = '#34c759', gridSize = 56, gridOpacity = 0.06,
-    vignette = 0.45, noiseOpacity = 0.035,
-    emblemOpacity = 0.10, emblemText = 'NEXUS', emblemSubtext = 'Powered by TitanOS'
-  } = opts;
+// -------------------------------------------------------------------
+// NEW CODE FOR DYNAMIC BACKGROUND
+// -------------------------------------------------------------------
 
-  const W = Math.round(width * dpr);
-  const H = Math.round(height * dpr);
-  const c = document.createElement('canvas'); c.width = W; c.height = H;
-  const ctx = c.getContext('2d');
+/**
+ * Creates and manages a dynamic, animated desktop background for the NEXUS game.
+ * The background features a subtle particle system, connecting lines, and a pulsating logo.
+ * @param {HTMLElement} container The DOM element to render the canvas into.
+ */
+function createNexusBackground(container) {
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  container.appendChild(canvas);
 
-  // Base gradient
-  const g = ctx.createLinearGradient(0, 0, W, H);
-  g.addColorStop(0, baseFrom); g.addColorStop(1, baseTo);
-  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  let width = container.clientWidth;
+  let height = container.clientHeight;
+  let particles = [];
+  const particleCount = 75;
+  const nexusLogo = 'NEXUS';
+  const logoFontSize = Math.min(Math.max(16, width / 12), 30); // Dynamic font size
 
-  // Soft accent radial glow
-  const glowCx = W * 0.72, glowCy = H * 0.28, glowR = Math.max(W,H)*0.6;
-  const rg = ctx.createRadialGradient(glowCx, glowCy, 0, glowCx, glowCy, glowR);
-  rg.addColorStop(0, hexToRGBA(accent, 0.08)); rg.addColorStop(1,'rgba(0,0,0,0)');
-  ctx.fillStyle = rg; ctx.fillRect(0, 0, W, H);
+  function setSize() {
+    width = container.clientWidth;
+    height = container.clientHeight;
+    canvas.width = width;
+    canvas.height = height;
+    particles = [];
+    for (let i = 0; i < particleCount; i++) {
+      particles.push(new Particle());
+    }
+  }
+  setSize();
+  window.addEventListener('resize', setSize);
 
-  // Subtle grid
-  ctx.save();
-  ctx.globalAlpha = gridOpacity;
-  ctx.strokeStyle = 'rgba(255,255,255,0.45)';
-  ctx.lineWidth = Math.max(1, Math.round(dpr));
-  const step = Math.max(24*dpr, gridSize*dpr);
-  for(let x=0.5*dpr; x<W; x+=step){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
-  for(let y=0.5*dpr; y<H; y+=step){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
-  ctx.restore();
+  class Particle {
+    constructor() {
+      this.x = Math.random() * width;
+      this.y = Math.random() * height;
+      this.vx = (Math.random() - 0.5) * 0.5;
+      this.vy = (Math.random() - 0.5) * 0.5;
+      this.radius = Math.random() * 1.5 + 0.5;
+      this.alpha = Math.random() * 0.5 + 0.2;
+    }
 
-  // Emblem rings
-  ctx.save();
-  ctx.globalAlpha = emblemOpacity; ctx.strokeStyle='rgba(255,255,255,0.25)'; ctx.lineWidth=2*dpr;
-  const cx = W/2, cy = H/2; const baseR = Math.min(W,H)*0.22;
-  for(let i=0;i<3;i++){ ctx.beginPath(); ctx.arc(cx,cy,baseR+i*26*dpr,0,Math.PI*2); ctx.stroke(); }
-  ctx.beginPath(); ctx.moveTo(cx-baseR,cy); ctx.lineTo(cx+baseR,cy); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(cx,cy-baseR); ctx.lineTo(cx,cy+baseR); ctx.stroke();
-  ctx.restore();
+    update() {
+      this.x += this.vx;
+      this.y += this.vy;
+      // Bounce off walls
+      if (this.x < 0 || this.x > width) this.vx *= -1;
+      if (this.y < 0 || this.y > height) this.vy *= -1;
+    }
 
-  // Emblem text
-  ctx.save();
-  ctx.fillStyle='rgba(255,255,255,0.75)'; ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.font = `${Math.round(28*dpr)}px -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif`;
-  ctx.fillText(emblemText,cx,cy-6*dpr);
-  ctx.fillStyle='rgba(255,255,255,0.45)';
-  ctx.font = `${Math.round(13*dpr)}px -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif`;
-  ctx.fillText(emblemSubtext,cx,cy+16*dpr);
-  ctx.restore();
-
-  // Vignette
-  const vg = ctx.createRadialGradient(cx,cy,Math.min(W,H)*0.1,cx,cy,Math.max(W,H)*0.75);
-  vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,`rgba(0,0,0,${vignette})`);
-  ctx.fillStyle=vg; ctx.fillRect(0,0,W,H);
-
-  // Fine noise
-  if(noiseOpacity>0){
-    const n=196; const nc=document.createElement('canvas'); nc.width=n; nc.height=n;
-    const nctx=nc.getContext('2d'); const nimg=nctx.createImageData(n,n);
-    for(let i=0;i<n*n*4;i+=4){ const v=200+(Math.random()*55)|0; nimg.data[i]=v; nimg.data[i+1]=v; nimg.data[i+2]=v; nimg.data[i+3]=255; }
-    nctx.putImageData(nimg,0,0); const pattern=ctx.createPattern(nc,'repeat');
-    ctx.save(); ctx.globalAlpha=noiseOpacity; ctx.fillStyle=pattern; ctx.fillRect(0,0,W,H); ctx.restore();
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
+      ctx.fill();
+    }
   }
 
-  try { return c.toDataURL('image/webp',0.9); }
-  catch{ return c.toDataURL('image/png'); }
-
-  function hexToRGBA(hex,a=1){
-    const h=hex.replace('#',''); const bigint=parseInt(h.length===3?h.split('').map(x=>x+x).join(''):h,16);
-    const r=(bigint>>16)&255, g=(bigint>>8)&255, b=bigint&255;
-    return `rgba(${r},${g},${b},${a})`;
+  function drawLines() {
+    ctx.beginPath();
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < 100) {
+          const opacity = 1 - (distance / 100);
+          ctx.strokeStyle = `rgba(52, 199, 89, ${opacity * 0.7})`;
+          ctx.lineWidth = 1;
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+        }
+      }
+    }
+    ctx.stroke();
   }
+
+  function drawLogo() {
+    const time = Date.now() * 0.001;
+    const pulseAlpha = Math.sin(time * 2) * 0.2 + 0.5;
+    ctx.textAlign = 'center';
+    ctx.font = `bold ${logoFontSize}px 'Courier New', Courier, monospace`;
+    ctx.fillStyle = `rgba(255, 255, 255, ${pulseAlpha})`;
+    ctx.fillText(nexusLogo, width / 2, height / 2 - logoFontSize);
+  }
+
+  function animate() {
+    // Clear canvas and draw background gradient
+    const gradient = ctx.createLinearGradient(0, 0, 0, height);
+    gradient.addColorStop(0, '#0b0c10');
+    gradient.addColorStop(1, '#141a2a');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
+
+    drawLines();
+    particles.forEach(p => {
+      p.update();
+      p.draw();
+    });
+    drawLogo();
+
+    requestAnimationFrame(animate);
+  }
+
+  // Initial call to start the animation
+  animate();
 }
