@@ -5,7 +5,7 @@
 // - Handles user input simulation (typing animation) and a covert-themed loading sequence without keyboard input.
 // - Integrates the Nexus seal logo (nexusseal.PNG) as the title.
 // - Optimized for PWA compliance and iOS Safari, targeting ~60fps.
-// - Step 15 Fix Notes: Removed singlekey.wav, implemented Web Audio for a quick click sound per character typed, retained 1.5s delay, blinking cursor, and random typing speed.
+// - Step 17 Fix Notes: Prevented iPhone keyboard and zoom on password/username inputs by blurring focus and reinforcing CSS, retained 1.5s delay, blinking cursor, random typing speed, and iPhone/mouth click sound.
 
 import { loadHomeScreen } from './homescreen.js';
 import { updateCheck, displayError } from './errors.js';
@@ -34,20 +34,25 @@ function playKeypress() {
   }
 
   const now = audioCtx.currentTime;
-  const duration = 0.02; // 20ms for a quick click
+  const duration = 0.015; // 15ms for a quick click
 
-  const osc = audioCtx.createOscillator();
-  osc.type = "square";
-  osc.frequency.setValueAtTime(1500, now); // High-frequency click
+  // Noise burst for initial sharp click (mimics iPhone/mouth click)
+  const noiseBufferSize = audioCtx.sampleRate * duration;
+  const noiseBuffer = audioCtx.createBuffer(1, noiseBufferSize, audioCtx.sampleRate);
+  const noiseData = noiseBuffer.getChannelData(0);
+  for (let i = 0; i < noiseBufferSize; i++) {
+    noiseData[i] = Math.random() * 2 - 1; // White noise
+  }
+  const noise = audioCtx.createBufferSource();
+  noise.buffer = noiseBuffer;
 
-  const gain = audioCtx.createGain();
-  gain.gain.setValueAtTime(0.3, now); // Initial gain
-  gain.gain.exponentialRampToValueAtTime(0.001, now + duration); // Quick decay
-
-  osc.connect(gain);
-  gain.connect(audioCtx.destination);
-  osc.start(now);
-  osc.stop(now + duration);
+  const noiseGain = audioCtx.createGain();
+  noiseGain.gain.setValueAtTime(0.35, now); // Sharp initial click
+  noiseGain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+  noise.connect(noiseGain);
+  noiseGain.connect(audioCtx.destination);
+  noise.start(now);
+  noise.stop(now + duration);
 }
 
 export function loadLoginScreen(container) {
@@ -64,11 +69,11 @@ export function loadLoginScreen(container) {
             <div id="form-elements">
               <div class="input-group">
                 <label for="username">ID</label>
-                <input type="text" id="username" autocomplete="off" class="login-input" readonly tabindex="-1">
+                <input type="text" id="username" autocomplete="off" class="login-input" readonly tabindex="-1" onfocus="this.blur()">
               </div>
               <div class="input-group">
                 <label for="password">Password</label>
-                <input type="password" id="password" autocomplete="off" class="login-input" readonly tabindex="-1">
+                <input type="password" id="password" autocomplete="off" class="login-input" readonly tabindex="-1" onfocus="this.blur()">
               </div>
               <div id="login-buttons">
                 <button class="glassy-btn primary" id="login-btn" disabled>Login</button>
@@ -117,6 +122,7 @@ export function loadLoginScreen(container) {
       usernameInput.addEventListener('click', async () => {
         playClick();
         if (!usernameTyped) {
+          usernameInput.blur(); // Prevent keyboard focus
           usernameInput.value = '';
           let blinkInterval = setInterval(() => {
             usernameInput.value = usernameInput.value === '|' ? '' : '|';
@@ -134,6 +140,7 @@ export function loadLoginScreen(container) {
       passwordInput.addEventListener('click', async () => {
         playClick();
         if (usernameTyped && !passwordTyped) {
+          passwordInput.blur(); // Prevent keyboard focus
           passwordInput.value = '';
           let blinkInterval = setInterval(() => {
             passwordInput.value = passwordInput.value === '|' ? '' : '|';
@@ -330,7 +337,7 @@ function injectLoginCSS() {
     #form-elements{display:flex;flex-direction:column;align-items:center;gap:14px;width:100%;}
     .input-group{display:flex;justify-content:center;align-items:center;width:100%;max-width:300px;margin:0 auto;gap:10px;}
     .input-group label{color:var(--text-color);font-weight:bold;width:70px;text-align:right;font-size:16px;font-family:var(--font-agency);flex-shrink:0;}
-    .login-input{font-size:16px;padding:6px;border:1px solid var(--input-border-color);background:#fff;color:#000;width:160px;box-sizing:border-box;touch-action:manipulation;-webkit-user-select:none;-webkit-touch-callout:none;}
+    .login-input{font-size:16px;padding:6px;border:1px solid var(--input-border-color);background:#fff;color:#000;width:160px;box-sizing:border-box;touch-action:manipulation;-webkit-user-select:none;-webkit-touch-callout:none;outline:none !important;}
     #login-buttons{display:flex;justify-content:center;gap:10px;margin-top:12px;width:100%;max-width:300px;margin-left:auto;margin-right:auto;}
     .glassy-btn{font-family:var(--font-agency);padding:10px;border:1px solid rgba(255,255,255,.1);border-radius:8px;cursor:pointer;font-weight:bold;width:100%;max-width:140px;transition:background .2s ease,color .2s ease;}
     .glassy-btn.primary{ color:var(--text-color);background:var(--accent-color);border-color:var(--accent-color); }
