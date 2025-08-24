@@ -1,14 +1,15 @@
 // assets/js/homescreen.js
-// Purpose: Manages the home screen UI for TitanOS, including background, header, and navigation integration.
-// Dependencies: ./errors.js (for error handling), ./header.js, ./navigation.js.
+// Purpose: Manages the home screen UI for TitanOS, including background, header, navigation, and map integration.
+// Dependencies: ./errors.js (for error handling), ./header.js, ./navigation.js, ./map.js.
 // Notes:
-// - Simulates a desktop-like environment with a dynamic wallpaper and responsive layout.
+// - Simulates a desktop-like environment with a dynamic wallpaper, responsive layout, and integrated map.
 // - Optimized for PWA compliance and iOS Safari, targeting ~60fps.
-// - Step 22 Fix Notes: Enhanced generateAgencyWallpaper with a more polished background featuring a cosmic gradient, hexagonal grid, animated emblem, light streaks, and refined effects.
+// - Step 24 Notes: Added map integration above main content.
 
 import { displayError } from './errors.js';
 import { initHeader } from './header.js';
 import { initNavigation } from './navigation.js';
+import { initMap } from './map.js';
 
 export async function loadHomeScreen(container) {
   try {
@@ -28,6 +29,7 @@ export async function loadHomeScreen(container) {
       <div id="homescreen-background"></div>
       <div id="home-screen">
         <div id="header-container"></div>
+        <div id="map-container"></div>
         <div id="main-content">
           <div class="desktop-content">
           </div>
@@ -36,9 +38,10 @@ export async function loadHomeScreen(container) {
       </div>
     `;
 
-    // Init header and navigation
+    // Init header, navigation, and map
     initHeader(container.querySelector('#header-container'));
     initNavigation(container.querySelector('#navigation-container'));
+    initMap(container);
 
     // --- Generate enhanced wallpaper ---
     const background = container.querySelector('#homescreen-background');
@@ -48,7 +51,7 @@ export async function loadHomeScreen(container) {
       width: Math.max(window.innerWidth, 1280),
       height: Math.max(window.innerHeight, 720),
       dpr: Math.min(window.devicePixelRatio || 1, 2),
-      baseColors: ['#0a0e1a', '#1a2a3d', '#2d4060', '#3a5578'], // Cosmic gradient
+      baseColors: ['#0a0e1a', '#1a2a3d', '#2d4060', '#3a5578'],
       accent: '#34c759',
       gridType: 'hexagon',
       gridSize: 64,
@@ -131,10 +134,24 @@ function injectHomeCSS() {
       position: relative;
       opacity: 0;
     }
+    #map-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 0;
+      padding-top: 80%; /* 5:4 aspect ratio */
+      z-index: 0;
+      background: rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
     #main-content {
       flex: 1;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
+      padding-top: 80%; /* Offset for map */
       padding-bottom: 60px;
       z-index: 1;
     }
