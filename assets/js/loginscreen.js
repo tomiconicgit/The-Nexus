@@ -2,38 +2,53 @@
 import { loadHomeScreen } from './homescreen.js';
 import { updateCheck, displayError } from './errors.js';
 
-const BUILD_VERSION = "0.174";
+const BUILD_VERSION = "0.175";
 let usernameTyped = false;
 let passwordTyped = false;
 
-// Function to play a synthesized click sound using Web Audio API
-function playClickSound() {
-  const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-  if (!audioContext) {
-    console.error('Web Audio API is not supported in this browser.');
-    return;
+let audioCtx;
+function playClick() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   }
 
-  const oscillator = audioContext.createOscillator();
-  const gainNode = audioContext.createGain();
+  const duration = 0.08; // ~80ms
+  const now = audioCtx.currentTime;
 
-  // Set the type of tone and frequency for a sharper click
-  oscillator.type = 'sine';
-  oscillator.frequency.value = 800; 
+  // White noise burst (click press)
+  const bufferSize = audioCtx.sampleRate * duration;
+  const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) {
+    data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufferSize, 2);
+  }
+  const noise = audioCtx.createBufferSource();
+  noise.buffer = buffer;
 
-  // Connect the nodes
-  oscillator.connect(gainNode);
-  gainNode.connect(audioContext.destination);
+  const noiseGain = audioCtx.createGain();
+  noiseGain.gain.setValueAtTime(0.4, now);
+  noiseGain.gain.exponentialRampToValueAtTime(0.01, now + duration);
 
-  // Define the sound's volume envelope using an exponential curve for a more natural pop
-  const now = audioContext.currentTime;
-  gainNode.gain.setValueAtTime(0, now);
-  gainNode.gain.linearRampToValueAtTime(0.5, now + 0.001); // Very fast attack
-  gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.05);   // Fast, natural decay
+  noise.connect(noiseGain);
+  noiseGain.connect(audioCtx.destination);
 
-  // Start and stop the oscillator
-  oscillator.start(now);
-  oscillator.stop(now + 0.06);
+  // Short square wave pop (click release)
+  const osc = audioCtx.createOscillator();
+  osc.type = "square";
+  osc.frequency.setValueAtTime(2000, now);
+
+  const oscGain = audioCtx.createGain();
+  oscGain.gain.setValueAtTime(0.3, now);
+  oscGain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+  osc.connect(oscGain);
+  oscGain.connect(audioCtx.destination);
+
+  noise.start(now);
+  noise.stop(now + duration);
+
+  osc.start(now);
+  osc.stop(now + duration);
 }
 
 export function loadLoginScreen(container) {
@@ -95,12 +110,13 @@ export function loadLoginScreen(container) {
         return;
       }
 
-      // Add fade-in for title and form
+      // Fade-in for title and form
       loginTitle.style.opacity = '1';
       formPanel.style.opacity = '1';
 
       // Username typing
       usernameInput.addEventListener('click', async () => {
+        playClick();
         if (!usernameTyped) {
           usernameInput.value = '';
           await typeText(usernameInput, 'Agent 173');
@@ -111,6 +127,7 @@ export function loadLoginScreen(container) {
 
       // Password typing
       passwordInput.addEventListener('click', async () => {
+        playClick();
         if (usernameTyped && !passwordTyped) {
           passwordInput.value = '';
           await typeText(passwordInput, '••••••••');
@@ -121,6 +138,7 @@ export function loadLoginScreen(container) {
 
       // LOGIN sequence
       loginBtn.addEventListener('click', async () => {
+        playClick();
         if (!passwordTyped) return;
         softHaptic();
 
@@ -143,7 +161,7 @@ export function loadLoginScreen(container) {
             await wait(400);
           }
 
-          // Welcome text with fade left to right
+          // Welcome text with fade
           seqText.innerHTML = `<span id="welcome-text">Welcome, ${agentID}</span>`;
           const welcomeEl = container.querySelector('#welcome-text');
           welcomeEl.style.opacity = 0;
@@ -194,11 +212,8 @@ function typeText(el, text) {
   });
 }
 
-// Haptic feedback and sound
-function softHaptic() { 
-  if (navigator.vibrate) navigator.vibrate(10); 
-  playClickSound();
-}
+// Haptic feedback
+function softHaptic() { if (navigator.vibrate) navigator.vibrate(10); }
 function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 // KB simulation + progress bar
@@ -266,7 +281,6 @@ function injectLoginCSS() {
         linear-gradient(to bottom, var(--login-bg-color) 0%, transparent 40%);
     }
 
-    /* Hex Grid Overlay (Bottom Layer) */
     #hex-grid-overlay {
       content: '';
       position: absolute;
@@ -279,14 +293,9 @@ function injectLoginCSS() {
       animation: hex-pan 45s linear infinite;
     }
     
-    /* Animation for the hex grid */
     @keyframes hex-pan {
-      0% {
-        background-position: 0 0, 0 0, 0 0;
-      }
-      100% {
-        background-position: 0 100px, 0 100px, 0 866px;
-      }
+      0% { background-position: 0 0, 0 0, 0 0; }
+      100% { background-position: 0 100px, 0 100px, 0 866px; }
     }
 
     #login-content{z-index:2;flex-direction:column;justify-content:center;align-items:center;gap:14px;padding:20px;width:90%;max-width:360px;opacity:0;animation:fadeInLogin .8s ease forwards;}
@@ -299,7 +308,7 @@ function injectLoginCSS() {
     .input-group{display:flex;justify-content:center;align-items:center;width:100%;max-width:300px;margin:0 auto;gap:10px;}
     .input-group label{color:var(--text-color);font-weight:bold;width:70px;text-align:right;font-size:16px;font-family:var(--font-agency);flex-shrink:0;}
     .login-input{font-size:16px;padding:6px;border:1px solid var(--input-border-color);background:#fff;color:#000;width:160px;box-sizing:border-box;touch-action:manipulation;-webkit-user-select:none;-webkit-touch-callout:none;}
-    #login-buttons{display:flex;justify-content:center;gap:10px;margin-top:12px;width:100%;max-width:140px;margin-left:auto;margin-right:auto;}
+    #login-buttons{display:flex;justify-content:center;gap:10px;margin-top:12px;width:100%;max-width:300px;margin-left:auto;margin-right:auto;}
     .glassy-btn{font-family:var(--font-agency);padding:10px;border:1px solid rgba(255,255,255,.1);border-radius:8px;cursor:pointer;font-weight:bold;width:100%;max-width:140px;transition:background .2s ease,color .2s ease;}
     .glassy-btn.primary{ color:var(--text-color);background:var(--accent-color);border-color:var(--accent-color); }
     .glassy-btn.outline{ background:var(--glass-bg);color:rgba(255,255,255,.7); }
