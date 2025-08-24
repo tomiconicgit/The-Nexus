@@ -5,7 +5,7 @@
 // - Handles user input simulation (typing animation) and a covert-themed loading sequence without keyboard input.
 // - Integrates the Nexus seal logo (nexusseal.PNG) as the title.
 // - Optimized for PWA compliance and iOS Safari, targeting ~60fps.
-// - Step 11 Fix Notes: Replaced keyboard press audio with Web Audio API synthesis for each character typed, retained 300ms typing delay.
+// - Step 13 Fix Notes: Enhanced playKeypress() with noise burst and damped sine wave for realistic keyboard sound, increased typing delay to 1.5s, added blinking cursor during delay.
 
 import { loadHomeScreen } from './homescreen.js';
 import { updateCheck, displayError } from './errors.js';
@@ -16,7 +16,7 @@ let passwordTyped = false;
 
 let audioCtx;
 let clickAudio = new Audio('assets/sounds/mouseclicksingle.wav'); // Preload mouse click
-clickAudio.preload = 'audio';
+clickAudio.preload = 'auto';
 
 function playClick() {
   try {
@@ -33,23 +33,40 @@ function playKeypress() {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   }
 
-  const duration = 0.04; // ~40ms for a quick key press
   const now = audioCtx.currentTime;
 
-  // Square wave for keyboard click
+  // Noise burst for initial click (10ms)
+  const noiseDuration = 0.01;
+  const noiseBufferSize = audioCtx.sampleRate * noiseDuration;
+  const noiseBuffer = audioCtx.createBuffer(1, noiseBufferSize, audioCtx.sampleRate);
+  const noiseData = noiseBuffer.getChannelData(0);
+  for (let i = 0; i < noiseBufferSize; i++) {
+    noiseData[i] = Math.random() * 2 - 1; // White noise
+  }
+  const noise = audioCtx.createBufferSource();
+  noise.buffer = noiseBuffer;
+
+  const noiseGain = audioCtx.createGain();
+  noiseGain.gain.setValueAtTime(0.4, now); // Sharp initial click
+  noiseGain.gain.exponentialRampToValueAtTime(0.001, now + noiseDuration);
+  noise.connect(noiseGain);
+  noiseGain.connect(audioCtx.destination);
+  noise.start(now);
+  noise.stop(now + noiseDuration);
+
+  // Damped sine wave for mechanical decay (60ms)
+  const oscDuration = 0.06;
   const osc = audioCtx.createOscillator();
-  osc.type = "square";
-  osc.frequency.setValueAtTime(800, now); // Mid-range frequency for key click
+  osc.type = "sine";
+  osc.frequency.setValueAtTime(1000, now); // Mid-range resonance
 
   const oscGain = audioCtx.createGain();
-  oscGain.gain.setValueAtTime(0.3, now); // Initial gain
-  oscGain.gain.exponentialRampToValueAtTime(0.001, now + duration); // Quick decay
-
+  oscGain.gain.setValueAtTime(0.2, now + noiseDuration); // Start after noise
+  oscGain.gain.exponentialRampToValueAtTime(0.001, now + noiseDuration + oscDuration);
   osc.connect(oscGain);
   oscGain.connect(audioCtx.destination);
-
-  osc.start(now);
-  osc.stop(now + duration);
+  osc.start(now + noiseDuration);
+  osc.stop(now + noiseDuration + oscDuration);
 }
 
 export function loadLoginScreen(container) {
@@ -115,24 +132,34 @@ export function loadLoginScreen(container) {
       loginTitle.style.opacity = '1';
       formPanel.style.opacity = '1';
 
-      // Username typing with delay
+      // Username typing with 1.5s delay and blinking cursor
       usernameInput.addEventListener('click', async () => {
         playClick();
         if (!usernameTyped) {
           usernameInput.value = '';
-          await new Promise(resolve => setTimeout(resolve, 300)); // 300ms delay
+          let blinkInterval = setInterval(() => {
+            usernameInput.value = usernameInput.value === '|' ? '' : '|';
+          }, 500); // Blink every 500ms
+          await new Promise(resolve => setTimeout(resolve, 1500)); // 1.5s delay
+          clearInterval(blinkInterval); // Stop blinking
+          usernameInput.value = ''; // Clear cursor
           await typeText(usernameInput, 'Agent 173');
           usernameTyped = true;
           passwordInput.removeAttribute('readonly');
         }
       });
 
-      // Password typing with delay
+      // Password typing with 1.5s delay and blinking cursor
       passwordInput.addEventListener('click', async () => {
         playClick();
         if (usernameTyped && !passwordTyped) {
           passwordInput.value = '';
-          await new Promise(resolve => setTimeout(resolve, 300)); // 300ms delay
+          let blinkInterval = setInterval(() => {
+            passwordInput.value = passwordInput.value === '|' ? '' : '|';
+          }, 500); // Blink every 500ms
+          await new Promise(resolve => setTimeout(resolve, 1500)); // 1.5s delay
+          clearInterval(blinkInterval); // Stop blinking
+          passwordInput.value = ''; // Clear cursor
           await typeText(passwordInput, '••••••••');
           passwordTyped = true;
           loginBtn.removeAttribute('disabled');
