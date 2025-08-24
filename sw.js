@@ -13,9 +13,11 @@ const urlsToCache = [
   '/assets/js/loginscreen.js',
   '/assets/js/router.js',
   '/assets/js/webgl-utils.js',
-  '/assets/js/map.js', // Added map.js
-  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js', // Add Leaflet
-  'https://unpkg.com/esri-leaflet@3.0.12/dist/esri-leaflet.js', // Add Esri Leaflet
+  '/assets/js/map.js',
+  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
+  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css', // Added Leaflet CSS
+  'https://tile.openstreetmap.org/{z}/{x}/{y}.png', // OSM tiles (cached range needed)
+  'https://tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', // HOT tiles
   '/assets/images/icon-180.png',
   '/assets/images/icon-192.png',
   '/assets/images/icon-512.png',
@@ -29,6 +31,8 @@ const urlsToCache = [
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css'
 ];
 
+// Note: Caching all OSM tiles is impractical due to infinite combinations.
+// Use a range or dynamic fetch for offline; update this based on map bounds.
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
@@ -37,7 +41,19 @@ self.addEventListener('install', event => {
 
 self.addEventListener('fetch', event => {
   event.respondWith(
-    caches.match(event.request).then(response => response || fetch(event.request))
+    caches.match(event.request).then(response => {
+      if (response) return response;
+      // Dynamic fetch for OSM tiles
+      if (event.request.url.includes('tile.openstreetmap.org') || event.request.url.includes('tile.openstreetmap.fr')) {
+        return fetch(event.request).then(networkResponse => {
+          return caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, networkResponse.clone());
+            return networkResponse;
+          });
+        });
+      }
+      return fetch(event.request);
+    })
   );
 });
 
