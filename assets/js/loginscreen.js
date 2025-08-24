@@ -5,7 +5,7 @@
 // - Handles user input simulation (typing animation) and a covert-themed loading sequence without keyboard input.
 // - Integrates the Nexus seal logo (nexusseal.PNG) as the title.
 // - Optimized for PWA compliance and iOS Safari, targeting ~60fps.
-// - Step 13 Fix Notes: Enhanced playKeypress() with noise burst and damped sine wave for realistic keyboard sound, increased typing delay to 1.5s, added blinking cursor during delay.
+// - Step 14 Fix Notes: Replaced Web Audio keypress with assets/sounds/singlekey.wav for instant playback per character, introduced random typing speed (50-300ms) for human-like input.
 
 import { loadHomeScreen } from './homescreen.js';
 import { updateCheck, displayError } from './errors.js';
@@ -17,6 +17,8 @@ let passwordTyped = false;
 let audioCtx;
 let clickAudio = new Audio('assets/sounds/mouseclicksingle.wav'); // Preload mouse click
 clickAudio.preload = 'auto';
+let keypressAudio = new Audio('assets/sounds/singlekey.wav'); // Preload key press
+keypressAudio.preload = 'auto';
 
 function playClick() {
   try {
@@ -29,44 +31,13 @@ function playClick() {
 }
 
 function playKeypress() {
-  if (!audioCtx) {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  try {
+    keypressAudio.currentTime = 0; // Reset to start for instant playback
+    keypressAudio.play();
+  } catch (err) {
+    console.warn('Failed to play key press audio, falling back to vibration:', err);
+    if (navigator.vibrate) navigator.vibrate(5);
   }
-
-  const now = audioCtx.currentTime;
-
-  // Noise burst for initial click (10ms)
-  const noiseDuration = 0.01;
-  const noiseBufferSize = audioCtx.sampleRate * noiseDuration;
-  const noiseBuffer = audioCtx.createBuffer(1, noiseBufferSize, audioCtx.sampleRate);
-  const noiseData = noiseBuffer.getChannelData(0);
-  for (let i = 0; i < noiseBufferSize; i++) {
-    noiseData[i] = Math.random() * 2 - 1; // White noise
-  }
-  const noise = audioCtx.createBufferSource();
-  noise.buffer = noiseBuffer;
-
-  const noiseGain = audioCtx.createGain();
-  noiseGain.gain.setValueAtTime(0.4, now); // Sharp initial click
-  noiseGain.gain.exponentialRampToValueAtTime(0.001, now + noiseDuration);
-  noise.connect(noiseGain);
-  noiseGain.connect(audioCtx.destination);
-  noise.start(now);
-  noise.stop(now + noiseDuration);
-
-  // Damped sine wave for mechanical decay (60ms)
-  const oscDuration = 0.06;
-  const osc = audioCtx.createOscillator();
-  osc.type = "sine";
-  osc.frequency.setValueAtTime(1000, now); // Mid-range resonance
-
-  const oscGain = audioCtx.createGain();
-  oscGain.gain.setValueAtTime(0.2, now + noiseDuration); // Start after noise
-  oscGain.gain.exponentialRampToValueAtTime(0.001, now + noiseDuration + oscDuration);
-  osc.connect(oscGain);
-  oscGain.connect(audioCtx.destination);
-  osc.start(now + noiseDuration);
-  osc.stop(now + noiseDuration + oscDuration);
 }
 
 export function loadLoginScreen(container) {
@@ -228,7 +199,7 @@ export function loadLoginScreen(container) {
   });
 }
 
-// Typing animation function with Web Audio keypress
+// Typing animation function with random speed and keypress sound
 function typeText(el, text) {
   return new Promise((res) => {
     let i = 0;
@@ -236,10 +207,11 @@ function typeText(el, text) {
     (function typeChar() {
       if (i < text.length) {
         el.value += text.charAt(i);
-        playKeypress(); // Play synthesized keypress sound
+        playKeypress(); // Play preloaded keypress sound
         softHaptic();
         i++;
-        setTimeout(typeChar, 50 + Math.random() * 120);
+        const randomDelay = Math.floor(Math.random() * 251) + 50; // Random 50-300ms
+        setTimeout(typeChar, randomDelay);
       } else res();
     })();
   });
