@@ -2,39 +2,44 @@
 import { loadHomeScreen } from './homescreen.js';
 import { updateCheck, displayError } from './errors.js';
 
-const BUILD_VERSION = "0.175";
+const BUILD_VERSION = "0.174";
 let usernameTyped = false;
 let passwordTyped = false;
 
-let audioCtx;
-let clickBuffer = null;
-
-// Initialize Web Audio context + preload click sound
-async function initAudio() {
-  try {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const response = await fetch("assets/sounds/mouseclicksingle.wav");
-    const arrayBuffer = await response.arrayBuffer();
-    clickBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-  } catch (err) {
-    console.error("Audio init failed:", err);
+// Function to play a synthesized click sound using Web Audio API
+function playClickSound() {
+  const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  if (!audioContext) {
+    console.error('Web Audio API is not supported in this browser.');
+    return;
   }
-}
 
-// Play click sound
-function playClick() {
-  if (!clickBuffer || !audioCtx) return;
-  const source = audioCtx.createBufferSource();
-  source.buffer = clickBuffer;
-  source.connect(audioCtx.destination);
-  source.start(0);
+  const oscillator = audioContext.createOscillator();
+  const gainNode = audioContext.createGain();
+
+  // Set the type of tone and frequency for a sharper click
+  oscillator.type = 'sine';
+  oscillator.frequency.value = 800; 
+
+  // Connect the nodes
+  oscillator.connect(gainNode);
+  gainNode.connect(audioContext.destination);
+
+  // Define the sound's volume envelope using an exponential curve for a more natural pop
+  const now = audioContext.currentTime;
+  gainNode.gain.setValueAtTime(0, now);
+  gainNode.gain.linearRampToValueAtTime(0.5, now + 0.001); // Very fast attack
+  gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.05);   // Fast, natural decay
+
+  // Start and stop the oscillator
+  oscillator.start(now);
+  oscillator.stop(now + 0.06);
 }
 
 export function loadLoginScreen(container) {
   return new Promise((resolve) => {
     try {
       updateCheck('loginscreen', 'ok');
-      initAudio(); // preload audio
 
       container.innerHTML = `
         <div id="login-background">
@@ -90,13 +95,12 @@ export function loadLoginScreen(container) {
         return;
       }
 
-      // Fade in
+      // Add fade-in for title and form
       loginTitle.style.opacity = '1';
       formPanel.style.opacity = '1';
 
       // Username typing
       usernameInput.addEventListener('click', async () => {
-        playClick();
         if (!usernameTyped) {
           usernameInput.value = '';
           await typeText(usernameInput, 'Agent 173');
@@ -107,7 +111,6 @@ export function loadLoginScreen(container) {
 
       // Password typing
       passwordInput.addEventListener('click', async () => {
-        playClick();
         if (usernameTyped && !passwordTyped) {
           passwordInput.value = '';
           await typeText(passwordInput, '••••••••');
@@ -118,7 +121,6 @@ export function loadLoginScreen(container) {
 
       // LOGIN sequence
       loginBtn.addEventListener('click', async () => {
-        playClick();
         if (!passwordTyped) return;
         softHaptic();
 
@@ -141,7 +143,7 @@ export function loadLoginScreen(container) {
             await wait(400);
           }
 
-          // Welcome text fade
+          // Welcome text with fade left to right
           seqText.innerHTML = `<span id="welcome-text">Welcome, ${agentID}</span>`;
           const welcomeEl = container.querySelector('#welcome-text');
           welcomeEl.style.opacity = 0;
@@ -192,8 +194,11 @@ function typeText(el, text) {
   });
 }
 
-// Haptic feedback
-function softHaptic() { if (navigator.vibrate) navigator.vibrate(10); }
+// Haptic feedback and sound
+function softHaptic() { 
+  if (navigator.vibrate) navigator.vibrate(10); 
+  playClickSound();
+}
 function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 // KB simulation + progress bar
@@ -261,6 +266,7 @@ function injectLoginCSS() {
         linear-gradient(to bottom, var(--login-bg-color) 0%, transparent 40%);
     }
 
+    /* Hex Grid Overlay (Bottom Layer) */
     #hex-grid-overlay {
       content: '';
       position: absolute;
@@ -273,20 +279,27 @@ function injectLoginCSS() {
       animation: hex-pan 45s linear infinite;
     }
     
+    /* Animation for the hex grid */
     @keyframes hex-pan {
-      0% { background-position: 0 0, 0 0, 0 0; }
-      100% { background-position: 0 100px, 0 100px, 0 866px; }
+      0% {
+        background-position: 0 0, 0 0, 0 0;
+      }
+      100% {
+        background-position: 0 100px, 0 100px, 0 866px;
+      }
     }
 
     #login-content{z-index:2;flex-direction:column;justify-content:center;align-items:center;gap:14px;padding:20px;width:90%;max-width:360px;opacity:0;animation:fadeInLogin .8s ease forwards;}
     @keyframes fadeInLogin{ from{opacity:0;} to{opacity:1;} }
 
     #login-title{max-width:170px;width:70%;height:auto;object-fit:contain;margin-bottom:6px;transition:opacity .8s ease, transform .2s ease;}
+    #login-title.loaded{ opacity:1; transform:none; }
+
     #form-elements{display:flex;flex-direction:column;align-items:center;gap:14px;width:100%;}
     .input-group{display:flex;justify-content:center;align-items:center;width:100%;max-width:300px;margin:0 auto;gap:10px;}
     .input-group label{color:var(--text-color);font-weight:bold;width:70px;text-align:right;font-size:16px;font-family:var(--font-agency);flex-shrink:0;}
-    .login-input{font-size:16px;padding:6px;border:1px solid var(--input-border-color);background:#fff;color:#000;width:160px;box-sizing:border-box;}
-    #login-buttons{display:flex;justify-content:center;gap:10px;margin-top:12px;width:100%;max-width:300px;margin-left:auto;margin-right:auto;}
+    .login-input{font-size:16px;padding:6px;border:1px solid var(--input-border-color);background:#fff;color:#000;width:160px;box-sizing:border-box;touch-action:manipulation;-webkit-user-select:none;-webkit-touch-callout:none;}
+    #login-buttons{display:flex;justify-content:center;gap:10px;margin-top:12px;width:100%;max-width:140px;margin-left:auto;margin-right:auto;}
     .glassy-btn{font-family:var(--font-agency);padding:10px;border:1px solid rgba(255,255,255,.1);border-radius:8px;cursor:pointer;font-weight:bold;width:100%;max-width:140px;transition:background .2s ease,color .2s ease;}
     .glassy-btn.primary{ color:var(--text-color);background:var(--accent-color);border-color:var(--accent-color); }
     .glassy-btn.outline{ background:var(--glass-bg);color:rgba(255,255,255,.7); }
