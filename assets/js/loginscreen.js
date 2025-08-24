@@ -1,8 +1,16 @@
 // assets/js/loginscreen.js
+// Purpose: Manages the login screen UI and animation sequence for TitanOS, simulating a secure authentication process.
+// Dependencies: ./homescreen.js (for post-login transition), ./errors.js (for error handling and status updates).
+// Notes:
+// - Handles user input simulation (typing animation) and a covert-themed loading sequence without keyboard input.
+// - Integrates the Nexus seal logo (nexusseal.PNG) as the title.
+// - Optimized for PWA compliance and iOS Safari, targeting ~60fps.
+// - Step 7 Fix Notes: Enhanced Web Audio API in playClick() to simulate a more distinct mouse click in/out sound for username, password, and login button presses.
+
 import { loadHomeScreen } from './homescreen.js';
 import { updateCheck, displayError } from './errors.js';
 
-const BUILD_VERSION = "0.175";
+const BUILD_VERSION = "0.175"; 
 let usernameTyped = false;
 let passwordTyped = false;
 
@@ -15,40 +23,55 @@ function playClick() {
   const duration = 0.08; // ~80ms
   const now = audioCtx.currentTime;
 
-  // White noise burst (click press)
+  // White noise burst (click press - "in" sound)
   const bufferSize = audioCtx.sampleRate * duration;
   const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
   const data = buffer.getChannelData(0);
   for (let i = 0; i < bufferSize; i++) {
-    data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufferSize, 2);
+    data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufferSize, 2); // Sharper attack
   }
   const noise = audioCtx.createBufferSource();
   noise.buffer = buffer;
 
   const noiseGain = audioCtx.createGain();
-  noiseGain.gain.setValueAtTime(0.4, now);
-  noiseGain.gain.exponentialRampToValueAtTime(0.01, now + duration);
+  noiseGain.gain.setValueAtTime(0.6, now); // Increased gain for crisp press
+  noiseGain.gain.exponentialRampToValueAtTime(0.01, now + duration / 2); // Faster decay
 
   noise.connect(noiseGain);
   noiseGain.connect(audioCtx.destination);
 
-  // Short square wave pop (click release)
-  const osc = audioCtx.createOscillator();
-  osc.type = "square";
-  osc.frequency.setValueAtTime(2000, now);
+  // First square wave (click press reinforcement)
+  const oscPress = audioCtx.createOscillator();
+  oscPress.type = "square";
+  oscPress.frequency.setValueAtTime(1500, now); // Slightly lower for press feel
 
-  const oscGain = audioCtx.createGain();
-  oscGain.gain.setValueAtTime(0.3, now);
-  oscGain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+  const oscPressGain = audioCtx.createGain();
+  oscPressGain.gain.setValueAtTime(0.4, now);
+  oscPressGain.gain.exponentialRampToValueAtTime(0.001, now + duration / 2);
 
-  osc.connect(oscGain);
-  oscGain.connect(audioCtx.destination);
+  oscPress.connect(oscPressGain);
+  oscPressGain.connect(audioCtx.destination);
+
+  // Second square wave (click release - "out" sound)
+  const oscRelease = audioCtx.createOscillator();
+  oscRelease.type = "square";
+  oscRelease.frequency.setValueAtTime(3000, now + duration / 2); // Higher pitch for release
+
+  const oscReleaseGain = audioCtx.createGain();
+  oscReleaseGain.gain.setValueAtTime(0.3, now + duration / 2);
+  oscReleaseGain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+  oscRelease.connect(oscReleaseGain);
+  oscReleaseGain.connect(audioCtx.destination);
 
   noise.start(now);
   noise.stop(now + duration);
 
-  osc.start(now);
-  osc.stop(now + duration);
+  oscPress.start(now);
+  oscPress.stop(now + duration);
+
+  oscRelease.start(now + duration / 2);
+  oscRelease.stop(now + duration);
 }
 
 export function loadLoginScreen(container) {
@@ -198,7 +221,7 @@ export function loadLoginScreen(container) {
   });
 }
 
-// Typing animation
+// Typing animation function
 function typeText(el, text) {
   return new Promise((res) => {
     let i = 0;
@@ -212,11 +235,15 @@ function typeText(el, text) {
   });
 }
 
-// Haptic feedback
-function softHaptic() { if (navigator.vibrate) navigator.vibrate(10); }
-function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+// Haptic feedback function
+function softHaptic() {
+  if (navigator.vibrate) navigator.vibrate(10);
+}
+function wait(ms) {
+  return new Promise(r => setTimeout(r, ms));
+}
 
-// KB simulation + progress bar
+// KB simulation + progress bar function
 function animateKBWithBar(textEl, barEl, phrase) {
   return new Promise((res) => {
     const targetKB = Math.floor(100 + Math.random() * 900);
@@ -255,17 +282,21 @@ function injectLoginCSS() {
   const style = document.createElement('style');
   style.id = id;
   style.innerHTML = `
-    :root{
+    :root {
       --glass-bg: rgba(255,255,255,0.1);
       --input-border-color:#555;
       --text-color:#f2f2f7;
       --accent-color:#1E90FF;
-      --font-ui:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-      --font-agency:'Courier New',Courier,monospace;
+      --font-ui:-apple-system,BlinkMacSystemFont,“Segoe UI”,Roboto,Helvetica,Arial,sans-serif;
+      --font-agency:‘Courier New’,Courier,monospace;
       --login-bg-color: #000;
     }
 
-    html, body { touch-action: manipulation; -webkit-text-size-adjust: 100%; user-select: none; }
+    html, body {
+      touch-action: manipulation;
+      -webkit-text-size-adjust: 100%;
+      user-select: none;
+    }
 
     .stage-panel[aria-hidden="true"]{ display:none; }
     .stage-panel[aria-hidden="false"]{ display:flex; }
@@ -292,7 +323,7 @@ function injectLoginCSS() {
       background-size: 100% 100%, 100% 100%, 50px 86.6px;
       animation: hex-pan 45s linear infinite;
     }
-    
+
     @keyframes hex-pan {
       0% { background-position: 0 0, 0 0, 0 0; }
       100% { background-position: 0 100px, 0 100px, 0 866px; }
