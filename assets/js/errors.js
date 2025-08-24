@@ -40,7 +40,7 @@ export function initErrorSystem(container) {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.9);
+    background: rgba(0, 0, 0, 0.7); /* Darker overlay for better contrast */
     display: none;
     flex-direction: column;
     justify-content: center;
@@ -51,6 +51,7 @@ export function initErrorSystem(container) {
     overflow-y: auto;
     padding: 20px;
     box-sizing: border-box;
+    backdrop-filter: blur(8px); /* Apply blur to the overlay */
   `;
   document.body.appendChild(errorContainer);
 
@@ -121,17 +122,19 @@ export function displayError(message, component = 'Unknown', errorCode = 'ERR_UN
   errorElement.setAttribute('tabindex', '0');
   errorElement.innerHTML = `
     <div class="error-header">
-      <h3 class="error-title">System Error - ${component}</h3>
+      <h3 class="error-title">System Alert</h3>
       <button class="error-close-btn" aria-label="Close error">✖</button>
     </div>
     <div class="error-details">
-      <p><strong>File:</strong> ${errorEntry.file}</p>
-      <p><strong>Message:</strong> ${message}</p>
-      <p><strong>Code:</strong> ${errorCode}</p>
-      <p><strong>Time:</strong> ${new Date(timestamp).toLocaleString('en-GB', { timeZone: 'Europe/London' })}</p>
+      <p class="error-message-text">${message}</p>
+      <div class="error-meta">
+        <span class="error-meta-item"><strong>Component:</strong> ${component}</span>
+        <span class="error-meta-item"><strong>Code:</strong> ${errorCode}</span>
+        <span class="error-meta-item"><strong>Time:</strong> ${new Date(timestamp).toLocaleString('en-GB', { timeZone: 'Europe/London' })}</span>
+      </div>
     </div>
     <div class="error-actions">
-      <button class="error-copy-btn">Copy Error Details</button>
+      <button class="error-copy-btn">Copy</button>
       ${isCritical ? '<button class="error-retry-btn">Retry</button>' : ''}
     </div>
   `;
@@ -142,7 +145,7 @@ export function displayError(message, component = 'Unknown', errorCode = 'ERR_UN
   // Event handlers
   const closeBtn = errorElement.querySelector('.error-close-btn');
   closeBtn.addEventListener('click', () => {
-    errorElement.style.animation = 'slideOut 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+    errorElement.classList.add('hide');
     setTimeout(() => {
       errorElement.remove();
       if (!errorContainer.children.length) errorContainer.style.display = 'none';
@@ -154,17 +157,17 @@ export function displayError(message, component = 'Unknown', errorCode = 'ERR_UN
     const copyText = `Component: ${component}\nFile: ${errorEntry.file}\nMessage: ${message}\nCode: ${errorCode}\nTime: ${new Date(timestamp).toLocaleString('en-GB', { timeZone: 'Europe/London' })}`;
     navigator.clipboard.writeText(copyText).then(() => {
       copyBtn.textContent = 'Copied!';
-      copyBtn.style.backgroundColor = '#34c759';
+      copyBtn.classList.add('success');
       setTimeout(() => {
-        copyBtn.textContent = 'Copy Error Details';
-        copyBtn.style.backgroundColor = '#007bff';
+        copyBtn.textContent = 'Copy';
+        copyBtn.classList.remove('success');
       }, 2000);
     }).catch(() => {
-      copyBtn.textContent = 'Copy Failed';
-      copyBtn.style.backgroundColor = '#ff4b4b';
+      copyBtn.textContent = 'Failed';
+      copyBtn.classList.add('failed');
       setTimeout(() => {
-        copyBtn.textContent = 'Copy Error Details';
-        copyBtn.style.backgroundColor = '#007bff';
+        copyBtn.textContent = 'Copy';
+        copyBtn.classList.remove('failed');
       }, 2000);
     });
   });
@@ -177,11 +180,13 @@ export function displayError(message, component = 'Unknown', errorCode = 'ERR_UN
   // Auto-dismiss non-critical errors
   if (!isCritical) {
     setTimeout(() => {
-      errorElement.style.animation = 'slideOut 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
-      setTimeout(() => {
-        errorElement.remove();
-        if (!errorContainer.children.length) errorContainer.style.display = 'none';
-      }, 300);
+      if (errorElement.parentElement) {
+        errorElement.classList.add('hide');
+        setTimeout(() => {
+          errorElement.remove();
+          if (!errorContainer.children.length) errorContainer.style.display = 'none';
+        }, 300);
+      }
     }, 5000);
   }
 
@@ -199,26 +204,25 @@ function showFallbackError(message, component, errorCode) {
 function handleGlobalError(event) {
   const errorDetails = {
     message: event.message || 'Unknown error',
-    module: event.filename || 'Global',
-    code: 'ERR_GLOBAL',
+    component: event.filename || 'Global',
+    errorCode: 'ERR_GLOBAL',
     timestamp: new Date().toISOString(),
-    line: event.lineno || 'N/A',
-    column: event.colno || 'N/A'
+    file: event.filename || 'N/A'
   };
   errorLog.push(errorDetails);
-  displayError(errorDetails.message, errorDetails.module, errorDetails.code);
+  displayError(errorDetails.message, errorDetails.component, errorDetails.errorCode);
 }
 
 // Handle promise rejections
 function handlePromiseRejection(event) {
   const errorDetails = {
     message: event.reason?.message || 'Unhandled promise rejection',
-    module: 'Promise',
-    code: 'ERR_PROMISE',
+    component: 'Promise',
+    errorCode: 'ERR_PROMISE',
     timestamp: new Date().toISOString()
   };
   errorLog.push(errorDetails);
-  displayError(errorDetails.message, errorDetails.module, errorDetails.code);
+  displayError(errorDetails.message, errorDetails.component, errorDetails.errorCode);
 }
 
 // Check for critical boot files
@@ -264,83 +268,101 @@ function injectErrorCSS() {
   styleTag.id = styleId;
   styleTag.innerHTML = `
     .error-popup {
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 15px;
+      background: rgba(18, 22, 30, 0.4);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
       padding: 20px;
-      max-width: 380px; /* Optimized for iPhone 15 Pro Max */
+      max-width: 380px;
       width: 90%;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
       color: #f2f2f7;
-      font-family: var(--font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif);
       text-align: left;
-      animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .error-popup.hide {
+      opacity: 0;
+      transform: translateY(-20px);
     }
     .error-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 15px;
+      margin-bottom: 12px;
     }
     .error-title {
-      font-size: 1.4em; /* Adjusted for mobile */
-      font-weight: 700;
-      color: #ff4b4b;
+      font-size: 1.2em;
+      font-weight: 600;
+      color: #ff3b30;
       margin: 0;
+      letter-spacing: 0.5px;
     }
     .error-close-btn {
       background: none;
       border: none;
-      color: #ff4b4b;
+      color: #8e8e93;
       font-size: 1.2em;
       cursor: pointer;
       transition: color 0.3s;
     }
     .error-close-btn:hover, .error-close-btn:focus {
-      color: #ff6666;
+      color: #f2f2f7;
     }
     .error-details {
-      background: rgba(255, 255, 255, 0.05);
-      padding: 10px;
-      border-radius: 8px;
       margin-bottom: 15px;
     }
-    .error-details p {
-      margin: 5px 0;
-      font-size: 0.85em; /* Adjusted for mobile */
+    .error-message-text {
+      margin: 0 0 10px 0;
+      font-size: 1em;
+      line-height: 1.4;
     }
-    .error-details strong {
-      color: #34c759;
+    .error-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px 15px;
+      font-size: 0.75em;
+      color: #8e8e93;
+    }
+    .error-meta strong {
+      color: #f2f2f7;
+      font-weight: 500;
     }
     .error-actions {
-      text-align: center;
       display: flex;
       gap: 10px;
-      justify-content: center;
+      justify-content: flex-end;
     }
     .error-copy-btn, .error-retry-btn {
-      padding: 8px 16px; /* Adjusted for mobile */
-      background: #007bff;
-      border: none;
-      border-radius: 8px;
+      padding: 8px 16px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
       color: #f2f2f7;
-      font-size: 0.9em;
+      font-size: 0.85em;
+      font-weight: 500;
       cursor: pointer;
-      transition: background 0.3s;
+      transition: background 0.3s, border-color 0.3s;
     }
     .error-copy-btn:hover, .error-copy-btn:focus {
-      background: #0056b3;
+      background: rgba(255, 255, 255, 0.2);
     }
-    .error-retry-btn:hover, .error-retry-btn:focus {
-      background: #34c759;
+    .error-retry-btn {
+      background-color: #34c759;
+      border-color: #34c759;
     }
-    @keyframes slideIn {
-      from { transform: translateY(-20px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
+    .error-retry-btn:hover {
+      background-color: #2eaf51;
     }
-    @keyframes slideOut {
-      from { transform: translateY(0); opacity: 1; }
-      to { transform: translateY(-20px); opacity: 0; }
+    .error-copy-btn.success {
+      background-color: #34c759;
+      border-color: #34c759;
+    }
+    .error-copy-btn.failed {
+      background-color: #ff4b4b;
+      border-color: #ff4b4b;
     }
   `;
   document.head.appendChild(styleTag);
