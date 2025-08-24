@@ -6,7 +6,10 @@ workflows:
       node: "20.5.0"
       npm: "10.2.0"
     scripts:
-      - name: Install Capacitor CLI
+      - name: Install dependencies
+        script: |
+          npm install
+      - name: Install Capacitor CLI globally
         script: |
           npm install -g @capacitor/cli
       - name: Add iOS platform if missing
