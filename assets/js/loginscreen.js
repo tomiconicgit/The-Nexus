@@ -6,6 +6,10 @@ const BUILD_VERSION = "0.174";
 let usernameTyped = false;
 let passwordTyped = false;
 
+// preload mouse click sound
+const clickSound = new Audio("assets/sounds/mouseclicksingle.wav");
+clickSound.preload = "auto";
+
 export function loadLoginScreen(container) {
   return new Promise((resolve) => {
     try {
@@ -71,6 +75,7 @@ export function loadLoginScreen(container) {
 
       // Username typing
       usernameInput.addEventListener('click', async () => {
+        playClick();
         if (!usernameTyped) {
           usernameInput.value = '';
           await typeText(usernameInput, 'Agent 173');
@@ -81,6 +86,7 @@ export function loadLoginScreen(container) {
 
       // Password typing
       passwordInput.addEventListener('click', async () => {
+        playClick();
         if (usernameTyped && !passwordTyped) {
           passwordInput.value = '';
           await typeText(passwordInput, '••••••••');
@@ -91,6 +97,7 @@ export function loadLoginScreen(container) {
 
       // LOGIN sequence
       loginBtn.addEventListener('click', async () => {
+        playClick();
         if (!passwordTyped) return;
         softHaptic();
 
@@ -148,6 +155,18 @@ export function loadLoginScreen(container) {
       resolve();
     }
   });
+}
+
+// --- Helpers ---
+
+// play click sound safely
+function playClick() {
+  try {
+    clickSound.currentTime = 0; // rewind for instant replay
+    clickSound.play();
+  } catch (err) {
+    console.warn("Click sound error:", err);
+  }
 }
 
 // Typing animation
