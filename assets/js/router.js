@@ -12,34 +12,30 @@ export async function initApp(container) {
   }
 
   try {
-    // Load boot screen
-    await loadBootScreen(container);
+    // -----------------------------------------------------------------
+    // To skip the boot and login screens for development,
+    // comment out the following lines and uncomment the last one.
+    // -----------------------------------------------------------------
 
-    // Remove boot screen
-    const bootEl = container.querySelector('#splash-container');
-    if (bootEl) bootEl.remove();
-    else displayError('Boot screen container not found for removal.', 'Router', 'ERR_BOOT');
+    // Original flow:
+    // await loadBootScreen(container);
+    // const bootEl = container.querySelector('#splash-container');
+    // if (bootEl) bootEl.remove();
+    // else displayError('Boot screen container not found for removal.', 'Router', 'ERR_BOOT');
+    // await loadLoginScreen(container);
+    // const loginScreen = container.querySelector('#login-background');
+    // if (!loginScreen) {
+    //   displayError('Login screen element (#login-background) not found.', 'Router', 'ERR_LOGIN');
+    //   return;
+    // }
+    // loginScreen.style.transition = 'opacity 0.5s ease-in-out';
+    // loginScreen.style.opacity = '1';
+    // await new Promise(resolve => setTimeout(resolve, 2000));
+    // loginScreen.remove();
 
-    // Load login screen
-    await loadLoginScreen(container);
-
-    // Wait for login completion
-    const loginScreen = container.querySelector('#login-background');
-    if (!loginScreen) {
-      displayError('Login screen element (#login-background) not found.', 'Router', 'ERR_LOGIN');
-      return;
-    }
-    loginScreen.style.transition = 'opacity 0.5s ease-in-out';
-    loginScreen.style.opacity = '1';
-
-    // Simulate login completion (replace with actual login logic)
-    await new Promise(resolve => setTimeout(resolve, 2000)); // Mock login delay
-
-    // Remove login screen
-    loginScreen.remove();
-
-    // Load home screen
+    // Direct to Home Screen for development:
     await loadHomeScreen(container);
+
   } catch (err) {
     displayError(`Failed to initialize app: ${err.message}`, 'Router', 'ERR_APP');
   }
