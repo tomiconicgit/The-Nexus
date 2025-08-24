@@ -15,13 +15,11 @@ export function initNavigation(container) {
     // Preload audio files
     const clickAudio = new Audio('assets/sounds/mouseclicksingle.wav');
     clickAudio.preload = 'auto';
-    // Set the volume to 3% (0.03) for the single click sound
-    clickAudio.volume = 0.03; 
-    
+    clickAudio.volume = 0.03; // Set the volume to 3%
+
     const doubleClickAudio = new Audio('assets/sounds/mouseclickdouble.wav');
     doubleClickAudio.preload = 'auto';
-    // Set the volume to 3% (0.03) for the double click sound
-    doubleClickAudio.volume = 0.03; 
+    doubleClickAudio.volume = 0.03; // Set the volume to 3%
 
     container.innerHTML = `
       <div id="taskbar">
@@ -452,7 +450,8 @@ function initStartMenu(clickAudio, doubleClickAudio) {
     });
 
     // Play double click sound on Start menu tray options
-    [appListItems, recentItems, topControls].flat().forEach(item => {
+    // Use the spread operator to correctly iterate over the NodeLists
+    [...appListItems, ...recentItems, ...topControls].forEach(item => {
       item.addEventListener('click', (e) => {
         e.stopPropagation();
         try {
