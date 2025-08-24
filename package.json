@@ -1,0 +1,19 @@
+{
+  "name": "nexus-pwa",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",                   // run development server
+    "build": "vite build",            // build production files
+    "preview": "vite preview",        // preview the production build
+    "cap-sync": "npx cap sync ios"    // optional helper script for Capacitor
+  },
+  "dependencies": {
+    "@capacitor/core": "^5.0.0",
+    "@capacitor/ios": "^5.0.0",
+    "vue": "^3.3.0"                   // replace with react/angular if needed
+  },
+  "devDependencies": {
+    "vite": "^4.4.0"
+  }
+}
