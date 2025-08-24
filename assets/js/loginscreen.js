@@ -5,7 +5,7 @@
 // - Handles user input simulation (typing animation) and a covert-themed loading sequence without keyboard input.
 // - Integrates the Nexus seal logo (nexusseal.PNG) as the title.
 // - Optimized for PWA compliance and iOS Safari, targeting ~60fps.
-// - Step 14 Fix Notes: Replaced Web Audio keypress with assets/sounds/singlekey.wav for instant playback per character, introduced random typing speed (50-300ms) for human-like input.
+// - Step 15 Fix Notes: Removed singlekey.wav, implemented Web Audio for a quick click sound per character typed, retained 1.5s delay, blinking cursor, and random typing speed.
 
 import { loadHomeScreen } from './homescreen.js';
 import { updateCheck, displayError } from './errors.js';
@@ -17,8 +17,6 @@ let passwordTyped = false;
 let audioCtx;
 let clickAudio = new Audio('assets/sounds/mouseclicksingle.wav'); // Preload mouse click
 clickAudio.preload = 'auto';
-let keypressAudio = new Audio('assets/sounds/singlekey.wav'); // Preload key press
-keypressAudio.preload = 'auto';
 
 function playClick() {
   try {
@@ -31,13 +29,25 @@ function playClick() {
 }
 
 function playKeypress() {
-  try {
-    keypressAudio.currentTime = 0; // Reset to start for instant playback
-    keypressAudio.play();
-  } catch (err) {
-    console.warn('Failed to play key press audio, falling back to vibration:', err);
-    if (navigator.vibrate) navigator.vibrate(5);
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   }
+
+  const now = audioCtx.currentTime;
+  const duration = 0.02; // 20ms for a quick click
+
+  const osc = audioCtx.createOscillator();
+  osc.type = "square";
+  osc.frequency.setValueAtTime(1500, now); // High-frequency click
+
+  const gain = audioCtx.createGain();
+  gain.gain.setValueAtTime(0.3, now); // Initial gain
+  gain.gain.exponentialRampToValueAtTime(0.001, now + duration); // Quick decay
+
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start(now);
+  osc.stop(now + duration);
 }
 
 export function loadLoginScreen(container) {
@@ -199,7 +209,7 @@ export function loadLoginScreen(container) {
   });
 }
 
-// Typing animation function with random speed and keypress sound
+// Typing animation function with random speed and Web Audio keypress
 function typeText(el, text) {
   return new Promise((res) => {
     let i = 0;
@@ -207,7 +217,7 @@ function typeText(el, text) {
     (function typeChar() {
       if (i < text.length) {
         el.value += text.charAt(i);
-        playKeypress(); // Play preloaded keypress sound
+        playKeypress(); // Play synthesized click sound
         softHaptic();
         i++;
         const randomDelay = Math.floor(Math.random() * 251) + 50; // Random 50-300ms
