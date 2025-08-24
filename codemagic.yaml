@@ -3,10 +3,8 @@ workflows:
     name: iOS Capacitor Build
     environment:
       xcode: latest
-      node: "20.5.0"            # Node version as string
-      npm:
-        version: "10.2.0"       # Latest npm version as string
-        # authToken: ${{secrets.NPM_TOKEN}}  # Uncomment if you need npm auth
+      node: "20.5.0"  # Node version as string
+      npm: "10.2.0"   # npm version as string
     scripts:
       - name: Install dependencies
         script: |
