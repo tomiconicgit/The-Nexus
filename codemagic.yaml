@@ -3,12 +3,15 @@ workflows:
     name: iOS Capacitor Build
     environment:
       xcode: latest
-      node: "20.5.0"  # Node version as string
-      npm: "10.2.0"   # npm version as string
+      node: "20.5.0"
+      npm: "10.2.0"
     scripts:
       - name: Install dependencies
         script: |
           npm install
+      - name: Install Capacitor CLI
+        script: |
+          npm install -g @capacitor/cli
       - name: Build web app
         script: |
           npm run build
