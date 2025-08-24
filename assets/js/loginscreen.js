@@ -5,7 +5,7 @@
 // - Handles user input simulation (typing animation) and a covert-themed loading sequence without keyboard input.
 // - Integrates the Nexus seal logo (nexusseal.PNG) as the title.
 // - Optimized for PWA compliance and iOS Safari, targeting ~60fps.
-// - Step 7 Fix Notes: Enhanced Web Audio API in playClick() to simulate a more distinct mouse click in/out sound for username, password, and login button presses.
+// - Step 9 Fix Notes: Updated playClick() to use assets/sounds/mouseclicksingle.wav with instant playback on click for username, password, and login button.
 
 import { loadHomeScreen } from './homescreen.js';
 import { updateCheck, displayError } from './errors.js';
@@ -14,64 +14,19 @@ const BUILD_VERSION = "0.175";
 let usernameTyped = false;
 let passwordTyped = false;
 
-let audioCtx;
+let clickAudio = new Audio('assets/sounds/mouseclicksingle.wav'); // Preload audio
+clickAudio.preload = 'auto'; // Ensure preloading
+
 function playClick() {
-  if (!audioCtx) {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  try {
+    // Attempt to play the preloaded audio instantly
+    clickAudio.currentTime = 0; // Reset to start for repeated plays
+    clickAudio.play();
+  } catch (err) {
+    console.warn('Failed to play mouse click audio, falling back to vibration:', err);
+    // Fallback: Minimal vibration if audio fails
+    if (navigator.vibrate) navigator.vibrate(10);
   }
-
-  const duration = 0.08; // ~80ms
-  const now = audioCtx.currentTime;
-
-  // White noise burst (click press - "in" sound)
-  const bufferSize = audioCtx.sampleRate * duration;
-  const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-  const data = buffer.getChannelData(0);
-  for (let i = 0; i < bufferSize; i++) {
-    data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufferSize, 2); // Sharper attack
-  }
-  const noise = audioCtx.createBufferSource();
-  noise.buffer = buffer;
-
-  const noiseGain = audioCtx.createGain();
-  noiseGain.gain.setValueAtTime(0.6, now); // Increased gain for crisp press
-  noiseGain.gain.exponentialRampToValueAtTime(0.01, now + duration / 2); // Faster decay
-
-  noise.connect(noiseGain);
-  noiseGain.connect(audioCtx.destination);
-
-  // First square wave (click press reinforcement)
-  const oscPress = audioCtx.createOscillator();
-  oscPress.type = "square";
-  oscPress.frequency.setValueAtTime(1500, now); // Slightly lower for press feel
-
-  const oscPressGain = audioCtx.createGain();
-  oscPressGain.gain.setValueAtTime(0.4, now);
-  oscPressGain.gain.exponentialRampToValueAtTime(0.001, now + duration / 2);
-
-  oscPress.connect(oscPressGain);
-  oscPressGain.connect(audioCtx.destination);
-
-  // Second square wave (click release - "out" sound)
-  const oscRelease = audioCtx.createOscillator();
-  oscRelease.type = "square";
-  oscRelease.frequency.setValueAtTime(3000, now + duration / 2); // Higher pitch for release
-
-  const oscReleaseGain = audioCtx.createGain();
-  oscReleaseGain.gain.setValueAtTime(0.3, now + duration / 2);
-  oscReleaseGain.gain.exponentialRampToValueAtTime(0.001, now + duration);
-
-  oscRelease.connect(oscReleaseGain);
-  oscReleaseGain.connect(audioCtx.destination);
-
-  noise.start(now);
-  noise.stop(now + duration);
-
-  oscPress.start(now);
-  oscPress.stop(now + duration);
-
-  oscRelease.start(now + duration / 2);
-  oscRelease.stop(now + duration);
 }
 
 export function loadLoginScreen(container) {
