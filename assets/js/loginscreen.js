@@ -5,7 +5,7 @@
 // - Handles user input simulation (typing animation) and a covert-themed loading sequence without keyboard input.
 // - Integrates the Nexus seal logo (nexusseal.PNG) as the title.
 // - Optimized for PWA compliance and iOS Safari, targeting ~60fps.
-// - Step 9 Fix Notes: Updated playClick() to use assets/sounds/mouseclicksingle.wav with instant playback on click for username, password, and login button.
+// - Step 11 Fix Notes: Replaced keyboard press audio with Web Audio API synthesis for each character typed, retained 300ms typing delay.
 
 import { loadHomeScreen } from './homescreen.js';
 import { updateCheck, displayError } from './errors.js';
@@ -14,19 +14,42 @@ const BUILD_VERSION = "0.175";
 let usernameTyped = false;
 let passwordTyped = false;
 
-let clickAudio = new Audio('assets/sounds/mouseclicksingle.wav'); // Preload audio
-clickAudio.preload = 'auto'; // Ensure preloading
+let audioCtx;
+let clickAudio = new Audio('assets/sounds/mouseclicksingle.wav'); // Preload mouse click
+clickAudio.preload = 'audio';
 
 function playClick() {
   try {
-    // Attempt to play the preloaded audio instantly
     clickAudio.currentTime = 0; // Reset to start for repeated plays
     clickAudio.play();
   } catch (err) {
     console.warn('Failed to play mouse click audio, falling back to vibration:', err);
-    // Fallback: Minimal vibration if audio fails
     if (navigator.vibrate) navigator.vibrate(10);
   }
+}
+
+function playKeypress() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+
+  const duration = 0.04; // ~40ms for a quick key press
+  const now = audioCtx.currentTime;
+
+  // Square wave for keyboard click
+  const osc = audioCtx.createOscillator();
+  osc.type = "square";
+  osc.frequency.setValueAtTime(800, now); // Mid-range frequency for key click
+
+  const oscGain = audioCtx.createGain();
+  oscGain.gain.setValueAtTime(0.3, now); // Initial gain
+  oscGain.gain.exponentialRampToValueAtTime(0.001, now + duration); // Quick decay
+
+  osc.connect(oscGain);
+  oscGain.connect(audioCtx.destination);
+
+  osc.start(now);
+  osc.stop(now + duration);
 }
 
 export function loadLoginScreen(container) {
@@ -92,22 +115,24 @@ export function loadLoginScreen(container) {
       loginTitle.style.opacity = '1';
       formPanel.style.opacity = '1';
 
-      // Username typing
+      // Username typing with delay
       usernameInput.addEventListener('click', async () => {
         playClick();
         if (!usernameTyped) {
           usernameInput.value = '';
+          await new Promise(resolve => setTimeout(resolve, 300)); // 300ms delay
           await typeText(usernameInput, 'Agent 173');
           usernameTyped = true;
           passwordInput.removeAttribute('readonly');
         }
       });
 
-      // Password typing
+      // Password typing with delay
       passwordInput.addEventListener('click', async () => {
         playClick();
         if (usernameTyped && !passwordTyped) {
           passwordInput.value = '';
+          await new Promise(resolve => setTimeout(resolve, 300)); // 300ms delay
           await typeText(passwordInput, '••••••••');
           passwordTyped = true;
           loginBtn.removeAttribute('disabled');
@@ -176,14 +201,17 @@ export function loadLoginScreen(container) {
   });
 }
 
-// Typing animation function
+// Typing animation function with Web Audio keypress
 function typeText(el, text) {
   return new Promise((res) => {
     let i = 0;
+    el.value = ''; // Clear text before typing
     (function typeChar() {
       if (i < text.length) {
-        el.value += text.charAt(i++);
+        el.value += text.charAt(i);
+        playKeypress(); // Play synthesized keypress sound
         softHaptic();
+        i++;
         setTimeout(typeChar, 50 + Math.random() * 120);
       } else res();
     })();
