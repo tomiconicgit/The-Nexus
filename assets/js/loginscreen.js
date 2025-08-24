@@ -213,6 +213,7 @@ function injectLoginCSS() {
       --accent-color:#1E90FF;
       --font-ui:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
       --font-agency:'Courier New',Courier,monospace;
+      --login-bg-color: #000;
     }
 
     html, body { touch-action: manipulation; -webkit-text-size-adjust: 100%; user-select: none; }
@@ -224,11 +225,11 @@ function injectLoginCSS() {
       height:100vh;width:100vw;
       display:flex;flex-direction:column;justify-content:center;align-items:center;
       color:var(--text-color);font-family:var(--font-ui);position:relative;overflow:hidden;
-      transition:opacity .3s ease-in-out; background-color:#000;
+      transition:opacity .3s ease-in-out; background-color:var(--login-bg-color);
       z-index: 0;
     }
 
-    /* Hex Grid Animation */
+    /* Hex Grid Layer (Bottom) */
     #login-background::before {
       content: '';
       position: absolute;
@@ -241,6 +242,41 @@ function injectLoginCSS() {
       animation: hex-pan 30s linear infinite;
     }
 
+    /* Data Rain Layer (Middle) */
+    #login-background::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(to top, transparent 0, transparent 40px, rgba(30,144,255,.05) 41px),
+        repeating-linear-gradient(to right, transparent 0, transparent 40px, rgba(30,144,255,.05) 41px);
+      background-size: 100% 50px, 50px 100%;
+      background-position: 0 0, 0 0;
+      animation: data-rain 20s linear infinite;
+    }
+    
+    @keyframes data-rain {
+      from { background-position: 0 0, 0 0; }
+      to { background-position: 0 100px, 0 0; }
+    }
+    
+    /* Scanline Layer (Top) */
+    #login-background > .scanline-effect {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 1px;
+      background-color: rgba(255, 255, 255, 0.1);
+      z-index: 3;
+      animation: scanline 5s linear infinite;
+    }
+
+    @keyframes scanline {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(100vh); }
+    }
+    
     /* Animation for the hex grid */
     @keyframes hex-pan {
       0% {
