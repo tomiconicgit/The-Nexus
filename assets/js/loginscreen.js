@@ -228,6 +228,9 @@ function injectLoginCSS() {
       color:var(--text-color);font-family:var(--font-ui);position:relative;overflow:hidden;
       transition:opacity .3s ease-in-out; background-color:var(--login-bg-color);
       z-index: 0;
+      background-image:
+        linear-gradient(to top, var(--login-bg-color) 0%, transparent 40%),
+        linear-gradient(to bottom, var(--login-bg-color) 0%, transparent 40%);
     }
 
     /* Hex Grid Overlay (Bottom Layer) */
