@@ -4,22 +4,13 @@
 // Notes:
 // - Handles taskbar interactions with a desktop-like experience, including Start menu and tray panel.
 // - Optimized for PWA compliance and iOS Safari, targeting ~60fps.
-// - Step 18 Fix Notes: Added assets/sounds/mouseclicksingle.wav for Start button and screen taps, assets/sounds/mouseclickdouble.wav for Start menu tray options, with no delay.
+// - Step 18 Fix Notes: Added haptic feedback for all interactive elements.
 
 import { displayError } from './errors.js';
 
 export function initNavigation(container) {
   try {
     if (!container) throw new Error('Navigation container not provided.');
-
-    // Preload audio files
-    const clickAudio = new Audio('assets/sounds/mouseclicksingle.wav');
-    clickAudio.preload = 'auto';
-    clickAudio.volume = 0.03; // Set the volume to 3%
-
-    const doubleClickAudio = new Audio('assets/sounds/mouseclickdouble.wav');
-    doubleClickAudio.preload = 'auto';
-    doubleClickAudio.volume = 0.03; // Set the volume to 3%
 
     container.innerHTML = `
       <div id="taskbar">
@@ -95,7 +86,7 @@ export function initNavigation(container) {
 
     injectNavigationCSS();
     initClock();
-    initStartMenu(clickAudio, doubleClickAudio); // Pass audio instances
+    initStartMenu();
     initSystemTrayPanel();
   } catch (err) {
     displayError(`Failed to initialize navigation: ${err.message}`, 'Navigation', 'ERR_NAVIGATION_INIT', true);
@@ -201,9 +192,6 @@ function injectNavigationCSS() {
       0% { transform: scale(1); opacity: 1; }
       50% { transform: scale(1.2); opacity: 0.8; }
       100% { transform: scale(1); opacity: 1; }
-    }
-    #notifications {
-      position: relative;
     }
     #notifications.unread::before {
       content: '';
@@ -411,7 +399,7 @@ function initClock() {
   }
 }
 
-function initStartMenu(clickAudio, doubleClickAudio) {
+function initStartMenu() {
   try {
     const startButton = document.getElementById('start-button');
     const startMenu = document.getElementById('start-menu');
@@ -420,47 +408,28 @@ function initStartMenu(clickAudio, doubleClickAudio) {
     const topControls = document.querySelectorAll('.top-controls i');
     if (!startButton || !startMenu) throw new Error('Start button or menu not found.');
 
-    // Play single click sound on Start button press
     startButton.addEventListener('click', (e) => {
       e.stopPropagation();
-      try {
-        clickAudio.currentTime = 0; // Reset to start for instant playback
-        clickAudio.play();
-      } catch (err) {
-        console.warn('Failed to play single click audio:', err);
-        if (navigator.vibrate) navigator.vibrate(10);
-      }
+      // Vibrate on button press
+      if (navigator.vibrate) navigator.vibrate(10);
       startMenu.classList.toggle('show');
       startButton.classList.add('shine');
       setTimeout(() => startButton.classList.remove('shine'), 400);
     });
 
-    // Play single click sound on screen tap
     document.addEventListener('click', (e) => {
-      try {
-        clickAudio.currentTime = 0; // Reset to start for instant playback
-        clickAudio.play();
-      } catch (err) {
-        console.warn('Failed to play single click audio on tap:', err);
-        if (navigator.vibrate) navigator.vibrate(10);
-      }
+      // Vibrate on screen tap
+      if (navigator.vibrate) navigator.vibrate(10);
       if (!startButton.contains(e.target) && !startMenu.contains(e.target)) {
         startMenu.classList.remove('show');
       }
     });
 
-    // Play double click sound on Start menu tray options
-    // Use the spread operator to correctly iterate over the NodeLists
     [...appListItems, ...recentItems, ...topControls].forEach(item => {
       item.addEventListener('click', (e) => {
         e.stopPropagation();
-        try {
-          doubleClickAudio.currentTime = 0; // Reset to start for instant playback
-          doubleClickAudio.play();
-        } catch (err) {
-          console.warn('Failed to play double click audio:', err);
-          if (navigator.vibrate) navigator.vibrate(10);
-        }
+        // Vibrate on menu item click
+        if (navigator.vibrate) navigator.vibrate(10);
       });
     });
   } catch (err) {
@@ -477,6 +446,8 @@ function initSystemTrayPanel() {
     trayIcons.forEach(icon => {
       icon.addEventListener('click', (e) => {
         e.stopPropagation();
+        // Vibrate on tray icon click
+        if (navigator.vibrate) navigator.vibrate(10);
         trayPanel.classList.toggle('show');
       });
     });
