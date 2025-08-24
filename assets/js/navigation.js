@@ -4,9 +4,40 @@
 // Notes:
 // - Handles taskbar interactions with a desktop-like experience, including Start menu and tray panel.
 // - Optimized for PWA compliance and iOS Safari, targeting ~60fps.
-// - Step 18 Fix Notes: Added haptic feedback for all interactive elements.
+// - Step 18 Fix Notes: Implemented cross-browser haptic feedback for all interactive elements.
 
 import { displayError } from './errors.js';
+
+/**
+ * Triggers a short haptic feedback on devices that support it.
+ * This function handles both the standard Vibration API and the
+ * AudioContext workaround for iOS Safari.
+ */
+function triggerHapticFeedback() {
+  if (navigator.vibrate) {
+    // Standard API for most devices (e.g., Android)
+    navigator.vibrate(10);
+  } else if (typeof AudioContext !== 'undefined' || typeof webkitAudioContext !== 'undefined') {
+    // iOS Safari workaround using the Web Audio API
+    try {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+
+      oscillator.type = 'sine';
+      oscillator.frequency.value = 150; // A low frequency for a subtle feel
+      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.01); // Very short duration
+    } catch (err) {
+      console.warn('Failed to trigger haptic feedback via AudioContext:', err);
+    }
+  }
+}
 
 export function initNavigation(container) {
   try {
@@ -410,8 +441,7 @@ function initStartMenu() {
 
     startButton.addEventListener('click', (e) => {
       e.stopPropagation();
-      // Vibrate on button press
-      if (navigator.vibrate) navigator.vibrate(10);
+      triggerHapticFeedback();
       startMenu.classList.toggle('show');
       startButton.classList.add('shine');
       setTimeout(() => startButton.classList.remove('shine'), 400);
@@ -419,17 +449,16 @@ function initStartMenu() {
 
     document.addEventListener('click', (e) => {
       // Vibrate on screen tap
-      if (navigator.vibrate) navigator.vibrate(10);
       if (!startButton.contains(e.target) && !startMenu.contains(e.target)) {
         startMenu.classList.remove('show');
       }
+      triggerHapticFeedback();
     });
 
     [...appListItems, ...recentItems, ...topControls].forEach(item => {
       item.addEventListener('click', (e) => {
         e.stopPropagation();
-        // Vibrate on menu item click
-        if (navigator.vibrate) navigator.vibrate(10);
+        triggerHapticFeedback();
       });
     });
   } catch (err) {
@@ -446,8 +475,7 @@ function initSystemTrayPanel() {
     trayIcons.forEach(icon => {
       icon.addEventListener('click', (e) => {
         e.stopPropagation();
-        // Vibrate on tray icon click
-        if (navigator.vibrate) navigator.vibrate(10);
+        triggerHapticFeedback();
         trayPanel.classList.toggle('show');
       });
     });
