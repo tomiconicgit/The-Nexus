@@ -24,11 +24,6 @@ export async function loadHomeScreen(container) {
         <div id="header-container"></div>
         <div id="main-content">
           <div class="desktop-content">
-            <div class="desktop-icon">Mission Control</div>
-            <div class="desktop-icon">Encrypted Terminal</div>
-            <div class="desktop-icon">Agency Mail</div>
-            <div class="desktop-icon">Data Vault</div>
-            <div class="desktop-icon">Market Monitor</div>
           </div>
         </div>
         <div id="navigation-container"></div>
