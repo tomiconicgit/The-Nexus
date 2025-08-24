@@ -1,10 +1,22 @@
 // assets/js/navigation.js
+// Purpose: Manages the taskbar and navigation UI for TitanOS, including Start menu and system tray.
+// Dependencies: ./errors.js (for error handling and status updates).
+// Notes:
+// - Handles taskbar interactions with a desktop-like experience, including Start menu and tray panel.
+// - Optimized for PWA compliance and iOS Safari, targeting ~60fps.
+// - Step 18 Fix Notes: Added assets/sounds/mouseclicksingle.wav for Start button and screen taps, assets/sounds/mouseclickdouble.wav for Start menu tray options, with no delay.
 
 import { displayError } from './errors.js';
 
 export function initNavigation(container) {
   try {
     if (!container) throw new Error('Navigation container not provided.');
+
+    // Preload audio files
+    const clickAudio = new Audio('assets/sounds/mouseclicksingle.wav');
+    clickAudio.preload = 'auto';
+    const doubleClickAudio = new Audio('assets/sounds/mouseclickdouble.wav');
+    doubleClickAudio.preload = 'auto';
 
     container.innerHTML = `
       <div id="taskbar">
@@ -80,7 +92,7 @@ export function initNavigation(container) {
 
     injectNavigationCSS();
     initClock();
-    initStartMenu();
+    initStartMenu(clickAudio, doubleClickAudio); // Pass audio instances
     initSystemTrayPanel();
   } catch (err) {
     displayError(`Failed to initialize navigation: ${err.message}`, 'Navigation', 'ERR_NAVIGATION_INIT', true);
@@ -396,23 +408,56 @@ function initClock() {
   }
 }
 
-function initStartMenu() {
+function initStartMenu(clickAudio, doubleClickAudio) {
   try {
     const startButton = document.getElementById('start-button');
     const startMenu = document.getElementById('start-menu');
+    const appListItems = document.querySelectorAll('#start-menu-app-list li');
+    const recentItems = document.querySelectorAll('.recent-list li');
+    const topControls = document.querySelectorAll('.top-controls i');
     if (!startButton || !startMenu) throw new Error('Start button or menu not found.');
 
+    // Play single click sound on Start button press
     startButton.addEventListener('click', (e) => {
       e.stopPropagation();
+      try {
+        clickAudio.currentTime = 0; // Reset to start for instant playback
+        clickAudio.play();
+      } catch (err) {
+        console.warn('Failed to play single click audio:', err);
+        if (navigator.vibrate) navigator.vibrate(10);
+      }
       startMenu.classList.toggle('show');
       startButton.classList.add('shine');
       setTimeout(() => startButton.classList.remove('shine'), 400);
     });
 
+    // Play single click sound on screen tap
     document.addEventListener('click', (e) => {
+      try {
+        clickAudio.currentTime = 0; // Reset to start for instant playback
+        clickAudio.play();
+      } catch (err) {
+        console.warn('Failed to play single click audio on tap:', err);
+        if (navigator.vibrate) navigator.vibrate(10);
+      }
       if (!startButton.contains(e.target) && !startMenu.contains(e.target)) {
         startMenu.classList.remove('show');
       }
+    });
+
+    // Play double click sound on Start menu tray options
+    [appListItems, recentItems, topControls].flat().forEach(item => {
+      item.addEventListener('click', (e) => {
+        e.stopPropagation();
+        try {
+          doubleClickAudio.currentTime = 0; // Reset to start for instant playback
+          doubleClickAudio.play();
+        } catch (err) {
+          console.warn('Failed to play double click audio:', err);
+          if (navigator.vibrate) navigator.vibrate(10);
+        }
+      });
     });
   } catch (err) {
     displayError(`Failed to initialize start menu: ${err.message}`, 'Navigation', 'ERR_STARTMENU_INIT');
