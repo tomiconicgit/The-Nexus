@@ -9,6 +9,11 @@ workflows:
       - name: Install Capacitor CLI
         script: |
           npm install -g @capacitor/cli
+      - name: Add iOS platform if missing
+        script: |
+          if [ ! -d ios ]; then
+            npx cap add ios
+          fi
       - name: Sync Capacitor iOS
         script: |
           npx cap sync ios
