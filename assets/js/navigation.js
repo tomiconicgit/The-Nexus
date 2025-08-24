@@ -4,7 +4,7 @@
 // Notes:
 // - Handles taskbar interactions with a desktop-like experience, including Start menu and tray panel.
 // - Optimized for PWA compliance and iOS Safari, targeting ~60fps.
-// - Step 18 Fix Notes: Added assets/sounds/mouseclicksingle.wav for Start button and screen taps, assets/sounds/mouseclickdouble.wav for Start menu tray options, with no delay.
+// - Audio: assets/sounds/mouseclicksingle.wav (single click), assets/sounds/mouseclickdouble.wav (double click).
 
 import { displayError } from './errors.js';
 
@@ -15,8 +15,11 @@ export function initNavigation(container) {
     // Preload audio files
     const clickAudio = new Audio('assets/sounds/mouseclicksingle.wav');
     clickAudio.preload = 'auto';
+    clickAudio.volume = 0.15; // 15% volume
+
     const doubleClickAudio = new Audio('assets/sounds/mouseclickdouble.wav');
     doubleClickAudio.preload = 'auto';
+    doubleClickAudio.volume = 0.15; // 15% volume
 
     container.innerHTML = `
       <div id="taskbar">
@@ -93,7 +96,7 @@ export function initNavigation(container) {
     injectNavigationCSS();
     initClock();
     initStartMenu(clickAudio, doubleClickAudio); // Pass audio instances
-    initSystemTrayPanel();
+    initSystemTrayPanel(doubleClickAudio);       // Tray also uses double click sound
   } catch (err) {
     displayError(`Failed to initialize navigation: ${err.message}`, 'Navigation', 'ERR_NAVIGATION_INIT', true);
   }
@@ -144,6 +147,8 @@ function injectNavigationCSS() {
       cursor: pointer;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
       transition: all 0.2s ease-in-out;
+      position: relative;
+      overflow: hidden;
     }
     #start-button:hover {
       background: linear-gradient(to bottom, #3b8cff, #1f4dff);
@@ -189,15 +194,7 @@ function injectNavigationCSS() {
     }
     #clock {
       margin-left: 6px;
-    }
-    #network-status.transferring i {
-      color: #34c759;
-      animation: transferPulse 1.5s infinite;
-    }
-    @keyframes transferPulse {
-      0% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.2); opacity: 0.8; }
-      100% { transform: scale(1); opacity: 1; }
+      cursor: pointer;
     }
     #notifications {
       position: relative;
@@ -415,13 +412,14 @@ function initStartMenu(clickAudio, doubleClickAudio) {
     const appListItems = document.querySelectorAll('#start-menu-app-list li');
     const recentItems = document.querySelectorAll('.recent-list li');
     const topControls = document.querySelectorAll('.top-controls i');
+
     if (!startButton || !startMenu) throw new Error('Start button or menu not found.');
 
-    // Play single click sound on Start button press
+    // Start button → single click
     startButton.addEventListener('click', (e) => {
       e.stopPropagation();
       try {
-        clickAudio.currentTime = 0; // Reset to start for instant playback
+        clickAudio.currentTime = 0;
         clickAudio.play();
       } catch (err) {
         console.warn('Failed to play single click audio:', err);
@@ -432,10 +430,10 @@ function initStartMenu(clickAudio, doubleClickAudio) {
       setTimeout(() => startButton.classList.remove('shine'), 400);
     });
 
-    // Play single click sound on screen tap
+    // Screen taps → single click
     document.addEventListener('click', (e) => {
       try {
-        clickAudio.currentTime = 0; // Reset to start for instant playback
+        clickAudio.currentTime = 0;
         clickAudio.play();
       } catch (err) {
         console.warn('Failed to play single click audio on tap:', err);
@@ -446,12 +444,12 @@ function initStartMenu(clickAudio, doubleClickAudio) {
       }
     });
 
-    // Play double click sound on Start menu tray options
-    [appListItems, recentItems, topControls].flat().forEach(item => {
+    // Start menu items → double click
+    [...appListItems, ...recentItems, ...topControls].forEach(item => {
       item.addEventListener('click', (e) => {
         e.stopPropagation();
         try {
-          doubleClickAudio.currentTime = 0; // Reset to start for instant playback
+          doubleClickAudio.currentTime = 0;
           doubleClickAudio.play();
         } catch (err) {
           console.warn('Failed to play double click audio:', err);
@@ -464,7 +462,7 @@ function initStartMenu(clickAudio, doubleClickAudio) {
   }
 }
 
-function initSystemTrayPanel() {
+function initSystemTrayPanel(doubleClickAudio) {
   try {
     const trayIcons = document.querySelectorAll('#system-tray .tray-icon, #clock');
     const trayPanel = document.getElementById('system-tray-panel');
@@ -473,6 +471,13 @@ function initSystemTrayPanel() {
     trayIcons.forEach(icon => {
       icon.addEventListener('click', (e) => {
         e.stopPropagation();
+        try {
+          doubleClickAudio.currentTime = 0;
+          doubleClickAudio.play();
+        } catch (err) {
+          console.warn('Failed to play tray double click audio:', err);
+          if (navigator.vibrate) navigator.vibrate(10);
+        }
         trayPanel.classList.toggle('show');
       });
     });
